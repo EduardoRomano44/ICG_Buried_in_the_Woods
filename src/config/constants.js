@@ -33,6 +33,10 @@ export const FOG_FAR = 800;
 
 // Slime enemy
 export const SLIME_SCALE = 1.4;
+export const SLIME_IDLE_SPEED = 1.5;
+export const SLIME_IDLE_XZ_AMPLITUDE = 0.2;
+export const SLIME_IDLE_Y_AMPLITUDE  = 0.2;
+export const SLIME_IDLE_TRIGGER_DISTANCE = 4;
 
 // Lighting
 export const AMBIENT_LIGHT_COLOR = 0x505050;

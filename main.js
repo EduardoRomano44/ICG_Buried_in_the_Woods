@@ -18,6 +18,7 @@ import { createGrass } from './src/world/Grass.js';
 // UI
 import { createCrosshair } from './src/ui/Crosshair.js';
 import { animateFireflies } from './src/animations/fireflies.js';
+import { updateSlimeIdle } from './src/animations/slimeIdle.js';
 
 // Bootstrap
 createCrosshair();
@@ -36,6 +37,7 @@ function animate() {
 
   updatePlayer(delta);
   animateFireflies(elapsed);
+  updateSlimeIdle(elapsed);
   updateGrass(elapsed);
   updateWorld(camera);
 

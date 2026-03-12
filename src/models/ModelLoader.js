@@ -4,6 +4,7 @@ import { scene } from '../core/SceneManager.js';
 import { addCollider } from '../player/Player.js';
 import { enableShadows } from '../utils/helpers.js';
 import { createFireflies } from '../animations/fireflies.js';
+import { createSlimeIdle } from '../animations/slimeIdle.js';
 import {
   LAMP_SCALE,
   LAMP_LIGHT_COLOR,
@@ -26,10 +27,11 @@ function loadSlime(x, y, z) {
     const model = gltf.scene;
     model.position.set(x, y, z);
     model.scale.set(SLIME_SCALE, SLIME_SCALE, SLIME_SCALE);
-    
+
     enableShadows(model);
     scene.add(model);
     addCollider(model);
+    createSlimeIdle(model);
   });
 }
 
@@ -95,7 +97,7 @@ function loadTrees(list_positions=[]){
 
 // Load all
 function loadAllModels() {
-  loadSlimes([[-20, 0, 0]]);
+  loadSlimes([[-20, 0, 0], [-40, 0, 0]]);
   loadLamps([[0, 0, 0], [-10, 0, 0]]);
   loadTrees([[10, 0, 0]]);
 }
