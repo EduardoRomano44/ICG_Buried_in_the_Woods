@@ -1,0 +1,93 @@
+// Valores FIXOS do jogo. Não são alteráveis pelo jogador.
+
+// Player
+export const PLAYER_HEIGHT = 5;
+export const PLAYER_BASE_SPEED = 6;
+export const PLAYER_SPRINT_MULTIPLIER = 1.8;
+export const PLAYER_COLLISION_RADIUS = 0.5;
+
+// Physics
+export const GRAVITY = 20;
+
+// Head Bob
+export const HEAD_BOB_SPEED_WALK = 7;
+export const HEAD_BOB_SPEED_SPRINT = 12;
+export const HEAD_BOB_AMOUNT_WALK = 0.3;
+export const HEAD_BOB_AMOUNT_SPRINT = 0.6;
+
+// World
+export const GROUND_SIZE = 200;
+export const GROUND_COLOR = 0x008018;
+
+export const SKY_RADIUS = 1000;
+export const SKY_TOP_COLOR = 0x020111;
+export const SKY_BOTTOM_COLOR = 0x23046b;
+
+export const MOON_RADIUS = 10;
+export const MOON_COLOR = 0xffffdd;
+export const MOON_OFFSET = { x: 100, y: 50, z: -300 };
+
+export const FOG_COLOR = 0x050510;
+export const FOG_NEAR = 100;
+export const FOG_FAR = 800;
+
+// Slime enemy
+export const SLIME_SCALE = 1.4;
+
+// Lighting
+export const AMBIENT_LIGHT_COLOR = 0x505050;
+
+export const LAMP_SCALE = 0.6;
+export const LAMP_LIGHT_COLOR = 0xffcb33;
+export const LAMP_LIGHT_INTENSITY = 800;
+export const LAMP_LIGHT_DISTANCE = 50;
+export const LAMP_LIGHT_POSITION = { x: -0.008793, y: 14.0006, z: 0.00729 };
+export const LAMP_SHADOW_RADIUS = 8;
+export const LAMP_SHADOW_MAP_SIZE = 900;
+export const LAMP_SHADOW_BIAS = -0.01;
+export const LAMP_SHADOW_CAMERA_NEAR = 1.6;
+export const LAMP_SHADOW_CAMERA_FAR = 30;
+
+// Fireflies
+export const FIREFLY_COUNT = 4;
+export const FIREFLY_COLOUR = 0xffff66;
+export const FIREFLY_OPACITY = 0.8;
+
+// Road
+export const ROAD_WIDTH = 10;
+export const ROAD_SEGMENTS = 120;
+export const ROAD_Y_OFFSET = 0.02;
+export const ROAD_CURVE_POINTS = [
+  { x:   0, z: -100 },
+  { x:  30, z:  -60 },
+  { x: -20, z:  -10 },
+  { x:  25, z:   40 },
+  { x:   0, z:  100 },
+];
+
+// Grass
+export const GRASS_SEGMENTS = 3;
+export const GRASS_COUNT = 500;        // number of grass patches
+export const GRASS_PATCH_SIZE = 3;     // blades per patch
+export const GRASS_BLADE_WIDTH = 0.18; // base width of each blade
+export const GRASS_BLADE_HEIGHT = 0.7; // height of each blade
+export const GRASS_SPREAD = 0.4;       // random XZ spread within a patch
+export const GRASS_COLOR_BASE = 0x2d6a1f;
+export const GRASS_COLOR_TIP  = 0x7ec850;
+export const GRASS_EXCLUSION_RADIUS = 2.5; // min distance from other objects
+
+// Wind
+export const WIND_STRENGH = 7.0;
+export const WIND_SPEED = 2;
+
+// Dash (linha central segmentada)
+export const DASH_LENGTH = 3.5;
+export const DASH_GAP    = 3.5;
+export const DASH_WIDTH  = 0.22;
+export const DASH_COLOR  = 0xffffff;
+export const DASH_Y_OFFSET = 0.03;
+
+// Camera
+export const INITIAL_CAMERA_POSITION = { x: 0, y: 5, z: 10 };
+export const CAMERA_NEAR = 0.1;
+export const CAMERA_FAR = 1000;
