@@ -5,6 +5,11 @@ export const PLAYER_HEIGHT = 5;
 export const PLAYER_BASE_SPEED = 6;
 export const PLAYER_SPRINT_MULTIPLIER = 1.8;
 export const PLAYER_COLLISION_RADIUS = 0.5;
+export const PLAYER_MAX_HEALTH = 3;
+export const PLAYER_MAX_STAMINA = 100;
+export const PLAYER_STAMINA_DRAIN_PER_SEC = 30;
+export const PLAYER_STAMINA_RECOVERY_PER_SEC = 24;
+export const PLAYER_STAMINA_RECOVERY_DELAY = 1.2;
 
 // Physics
 export const GRAVITY = 20;
@@ -33,7 +38,7 @@ export const FOG_FAR = 800;
 
 // Slime enemy
 export const SLIME_SCALE = 1.4;
-export const SLIME_IDLE_SPEED = 1.5;
+export const SLIME_IDLE_SPEED = 2;
 export const SLIME_IDLE_XZ_AMPLITUDE = 0.2;
 export const SLIME_IDLE_Y_AMPLITUDE  = 0.2;
 export const SLIME_IDLE_TRIGGER_DISTANCE = 4;
