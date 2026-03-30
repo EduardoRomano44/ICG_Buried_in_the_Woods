@@ -1,8 +1,7 @@
 // Controla o jogador em first-person:
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { camera, renderer, scene, initialCameraPosition } from '../core/SceneManager.js';
+import { camera, renderer, initialCameraPosition } from '../core/SceneManager.js';
 import { showCrosshair, hideCrosshair } from '../ui/Crosshair.js';
 import settings from '../config/settings.js';
 import {
@@ -15,6 +14,9 @@ import {
   PLAYER_STAMINA_DRAIN_PER_SEC,
   PLAYER_STAMINA_RECOVERY_PER_SEC,
   PLAYER_STAMINA_RECOVERY_DELAY,
+  CAMERA_NORMAL_FOV,
+  CAMERA_SPRINT_FOV,
+  CAMERA_FOV_LERP_SPEED,
   GRAVITY,
   HEAD_BOB_SPEED_WALK,
   HEAD_BOB_SPEED_SPRINT,
@@ -35,18 +37,21 @@ let staminaRecoveryTimer = PLAYER_STAMINA_RECOVERY_DELAY;
 
 const move = { forward: false, backward: false, left: false, right: false };
 const direction = new THREE.Vector3();
+const playerBox = new THREE.Box3();
 
 // Controls
 const fpControls = new PointerLockControls(camera, document.body);
 fpControls.pointerSpeed = settings.cameraSensitivity;
 
-const orbitControls = new OrbitControls(camera, renderer.domElement);
-
 // Collision list
 const colliders = [];
 
-function addCollider(obj) {
-  colliders.push(obj);
+function addCollider(obj, options = {}) {
+  colliders.push({
+    obj,
+    dynamic: Boolean(options.dynamic),
+    box: null,
+  });
 }
 
 // Input
@@ -59,7 +64,6 @@ function onKeyDown(e) {
     case 'KeyA': move.left     = true; break;
     case 'KeyD': move.right    = true; break;
     case 'ShiftLeft': isSprinting = true; break;
-    case 'KeyP': toggleFPMode(); break;
   }
 }
 
@@ -93,7 +97,6 @@ function clearMovementInput() {
 function enterFirstPerson() {
   if (isFPMode) return;
 
-  orbitControls.enabled = false;
   fpControls.lock();
   camera.position.y = PLAYER_HEIGHT;
   showCrosshair();
@@ -113,26 +116,6 @@ function resumeFirstPersonControls() {
   showCrosshair();
 }
 
-function exitFirstPerson() {
-  if (!isFPMode) return;
-
-  clearMovementInput();
-  fpControls.unlock();
-  orbitControls.enabled = true;
-  camera.position.copy(initialCameraPosition);
-  camera.rotation.set(0, 0, 0);
-  hideCrosshair();
-  isFPMode = false;
-}
-
-function toggleFPMode() {
-  if (!isFPMode) {
-    enterFirstPerson();
-  } else {
-    exitFirstPerson();
-  }
-}
-
 function setInputEnabled(enabled) {
   inputEnabled = enabled;
   if (!enabled) clearMovementInput();
@@ -147,7 +130,7 @@ function resetPlayerState() {
   clearMovementInput();
   camera.position.copy(initialCameraPosition);
   camera.rotation.set(0, 0, 0);
-  camera.fov = settings.normalFOV;
+  camera.fov = CAMERA_NORMAL_FOV;
   camera.updateProjectionMatrix();
 }
 
@@ -188,6 +171,7 @@ function updatePlayer(delta) {
     staminaRecoveryTimer += delta;
     if (staminaRecoveryTimer >= PLAYER_STAMINA_RECOVERY_DELAY) {
       stamina = Math.min(PLAYER_MAX_STAMINA, stamina + PLAYER_STAMINA_RECOVERY_PER_SEC * delta);
+      staminaRecoveryTimer = PLAYER_STAMINA_RECOVERY_DELAY;
     }
   }
 
@@ -218,22 +202,25 @@ function updatePlayer(delta) {
 
   // Colisão
   const r = PLAYER_COLLISION_RADIUS;
-  const playerBox = new THREE.Box3(
-    new THREE.Vector3(camera.position.x - r, 0.1, camera.position.z - r),
-    new THREE.Vector3(camera.position.x + r, PLAYER_HEIGHT, camera.position.z + r)
-  );
+  playerBox.min.set(camera.position.x - r, 0.1, camera.position.z - r);
+  playerBox.max.set(camera.position.x + r, PLAYER_HEIGHT, camera.position.z + r);
 
-  for (const obj of colliders) {
-    const objBox = new THREE.Box3().setFromObject(obj);
-    if (playerBox.intersectsBox(objBox)) {
+  for (const collider of colliders) {
+    if (!collider.box || collider.dynamic) {
+      collider.obj.updateWorldMatrix(true, false);
+      if (!collider.box) collider.box = new THREE.Box3();
+      collider.box.setFromObject(collider.obj);
+    }
+
+    if (playerBox.intersectsBox(collider.box)) {
       fpControls.moveForward(-direction.z * currentSpeed * delta);
       fpControls.moveRight(-direction.x * currentSpeed * delta);
     }
   }
 
   // FOV suave
-  const targetFOV = isSprintActive ? settings.sprintFOV : settings.normalFOV;
-  camera.fov += (targetFOV - camera.fov) * delta * settings.fovLerpSpeed;
+  const targetFOV = isSprintActive ? CAMERA_SPRINT_FOV : CAMERA_NORMAL_FOV;
+  camera.fov += (targetFOV - camera.fov) * delta * CAMERA_FOV_LERP_SPEED;
   camera.updateProjectionMatrix();
 }
 
@@ -246,11 +233,9 @@ export {
   updatePlayer,
   addCollider,
   isFirstPerson,
-  toggleFPMode,
   enterFirstPerson,
   pauseFirstPersonControls,
   resumeFirstPersonControls,
-  exitFirstPerson,
   setInputEnabled,
   resetPlayerState,
   getPlayerVitals,

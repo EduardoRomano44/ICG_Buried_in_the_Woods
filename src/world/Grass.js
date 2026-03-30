@@ -159,6 +159,8 @@ function isFreePosition(x, z) {
 }
 
 let grassMaterial = null
+let grassMesh = null;
+let grassEnabled = true;
 
 export function createGrass() {
   const TOTAL_BLADES = GRASS_COUNT * GRASS_PATCH_SIZE;
@@ -220,13 +222,23 @@ export function createGrass() {
     new THREE.InstancedBufferAttribute(instanceRandom.slice(0, bladeIndex), 1)
   );
 
+  grassMesh = mesh;
+  grassMesh.visible = grassEnabled;
   scene.add(mesh);
   return mesh;
 }
 
 // Called every frame from the animation loop
 export function updateGrass(elapsed) {
+  if (!grassEnabled) return;
   if (grassMaterial && grassMaterial.userData.shader) {
     grassMaterial.userData.shader.uniforms.uTime.value = elapsed;
+  }
+}
+
+export function setGrassEnabled(enabled) {
+  grassEnabled = enabled;
+  if (grassMesh) {
+    grassMesh.visible = enabled;
   }
 }

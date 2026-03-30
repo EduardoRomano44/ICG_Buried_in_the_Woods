@@ -100,3 +100,6 @@ export const DASH_Y_OFFSET = 0.03;
 export const INITIAL_CAMERA_POSITION = { x: 0, y: 5, z: 10 };
 export const CAMERA_NEAR = 0.1;
 export const CAMERA_FAR = 1000;
+export const CAMERA_NORMAL_FOV = 75;
+export const CAMERA_SPRINT_FOV = 90;
+export const CAMERA_FOV_LERP_SPEED = 8;

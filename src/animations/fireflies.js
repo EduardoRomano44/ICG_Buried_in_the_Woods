@@ -7,6 +7,7 @@ import {
 } from '../config/constants.js';
 
 const fireflies = [];
+let firefliesEnabled = true;
 
 function createFireflies(parentModel, count = FIREFLY_COUNT) {
   for (let i = 0; i < count; i++) {
@@ -57,7 +58,7 @@ function createFireflies(parentModel, count = FIREFLY_COUNT) {
 }
 
 function animateFireflies(time) {
-  if (!time) return;
+  if (!time || !firefliesEnabled) return;
 
   fireflies.forEach((f) => {
     // Firefly movement made with assistance of AI
@@ -92,4 +93,11 @@ function animateFireflies(time) {
   });
 }
 
-export { createFireflies, animateFireflies, fireflies };
+function setFirefliesEnabled(enabled) {
+  firefliesEnabled = enabled;
+  for (const firefly of fireflies) {
+    firefly.mesh.visible = enabled;
+  }
+}
+
+export { createFireflies, animateFireflies, fireflies, setFirefliesEnabled };

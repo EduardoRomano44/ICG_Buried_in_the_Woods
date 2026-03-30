@@ -4,6 +4,7 @@ import {
   INITIAL_CAMERA_POSITION,
   CAMERA_NEAR,
   CAMERA_FAR,
+  CAMERA_NORMAL_FOV,
 } from '../config/constants.js';
 
 // Scene
@@ -11,7 +12,7 @@ const scene = new THREE.Scene();
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
-  settings.normalFOV,
+  CAMERA_NORMAL_FOV,
   window.innerWidth / window.innerHeight,
   CAMERA_NEAR,
   CAMERA_FAR
@@ -26,16 +27,26 @@ scene.add(camera);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: settings.antialias });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = settings.shadowsEnabled;
 // PCFSoftShadowMap foi descontinuado em versões recentes; usar PCFShadowMap
 renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.setClearColor(0x000000);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.domElement.style.display = 'none';
+renderer.domElement.addEventListener('webglcontextlost', (event) => {
+  event.preventDefault();
+});
+renderer.domElement.addEventListener('webglcontextrestored', () => {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 document.body.appendChild(renderer.domElement);
 
 // Resize
 window.addEventListener('resize', () => {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
