@@ -3,10 +3,12 @@ import { createHUD } from './components/hud/HUD.js';
 import { createScreenOverlay } from './components/overlay/ScreenOverlay.js';
 import { createSettingsPanel } from './components/settings/SettingsPanel.js';
 import { createStartPanel } from './components/start/StartPanel.js';
+import { createEyeCloseEffect } from './components/gameover/EyeCloseEffect.js';
+import { createGameOverPanel } from './components/gameover/GameOverPanel.js';
 import { applyBarsSizePreset } from './presets/barSizePresets.js';
 import { loadGameUIStyles } from './styles/loadGameUIStyles.js';
 
-function createGameUIController({ onResume, onReset, onSettingsChanged }) {
+function createGameUIController({ onResume, onReset, onSettingsChanged, onBackToMenu }) {
   loadGameUIStyles();
 
   const root = document.createElement('div');
@@ -17,6 +19,8 @@ function createGameUIController({ onResume, onReset, onSettingsChanged }) {
 
   let settingsPanel = null;
   let startPanel = null;
+  let gameOverPanel = null;
+  const eyeCloseEffect = createEyeCloseEffect();
 
   const syncSettingsControls = () => {
     if (startPanel) startPanel.syncControls();
@@ -49,7 +53,16 @@ function createGameUIController({ onResume, onReset, onSettingsChanged }) {
     applyBarsSizePreset,
   });
 
-  root.append(hud.element, overlay.element, startPanel.element, settingsPanel.element);
+  gameOverPanel = createGameOverPanel(onBackToMenu || onReset);
+
+  root.append(
+    hud.element,
+    overlay.element,
+    startPanel.element,
+    settingsPanel.element,
+    eyeCloseEffect.element,
+    gameOverPanel.element
+  );
   document.body.appendChild(root);
 
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
@@ -62,6 +75,10 @@ function createGameUIController({ onResume, onReset, onSettingsChanged }) {
     setGameStarted(started) {
       hud.setVisible(started);
       startPanel.setVisible(!started);
+      if (!started) {
+        gameOverPanel.setVisible(false);
+        eyeCloseEffect.reset();
+      }
     },
     setPaused(paused) {
       settingsPanel.setVisible(paused);
@@ -72,6 +89,12 @@ function createGameUIController({ onResume, onReset, onSettingsChanged }) {
     },
     isSettingsBusy() {
       return settingsPanel.isBusy();
+    },
+    async showGameOver() {
+      settingsPanel.setVisible(false);
+      overlay.setVisible(false);
+      await eyeCloseEffect.play(980);
+      gameOverPanel.setVisible(true);
     },
   };
 }

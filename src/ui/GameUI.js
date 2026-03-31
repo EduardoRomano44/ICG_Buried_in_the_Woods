@@ -31,6 +31,11 @@ function isSettingsBusy() {
   return controller.isSettingsBusy();
 }
 
+async function showGameOver() {
+  if (!controller) return;
+  await controller.showGameOver();
+}
+
 export {
   createGameUI,
   updateHUD,
@@ -39,4 +44,5 @@ export {
   applyBarsSizePreset,
   setStartLoading,
   isSettingsBusy,
+  showGameOver,
 };

@@ -112,12 +112,12 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 70;
-  background: radial-gradient(circle at center, rgba(255, 72, 72, 0.14) 0%, rgba(180, 14, 14, 0.24) 80%);
+  background: radial-gradient(circle at center, rgba(255, 72, 72, 0.2) 0%, rgba(180, 14, 14, 0.34) 80%);
   opacity: 0;
 }
 
 .player-damage-flash.active {
-  animation: player-damage-flash 180ms ease-out;
+  animation: player-damage-flash 320ms ease-out;
 }
 
 @keyframes player-damage-flash {
@@ -130,6 +130,78 @@ body {
   100% {
     opacity: 0;
   }
+}
+
+.eye-close-effect {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 75;
+  display: none;
+  overflow: hidden;
+  background: transparent;
+}
+
+.eye-close-effect.active {
+  display: block;
+}
+
+.eye-lid {
+  position: absolute;
+  left: -16vw;
+  width: 132vw;
+  height: 62vh;
+  background: #000;
+  transform: translateY(0);
+}
+
+.eye-lid-top {
+  top: -56vh;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 82% 87%, 62% 80%, 38% 80%, 18% 87%, 0 100%);
+  animation: eye-lid-top-close var(--eye-close-duration, 900ms) cubic-bezier(0.23, 0.78, 0.24, 1) forwards;
+}
+
+.eye-lid-bottom {
+  bottom: -56vh;
+  clip-path: polygon(0 0, 18% 13%, 38% 20%, 62% 20%, 82% 13%, 100% 0, 100% 100%, 0 100%);
+  animation: eye-lid-bottom-close var(--eye-close-duration, 900ms) cubic-bezier(0.23, 0.78, 0.24, 1) forwards;
+}
+
+@keyframes eye-lid-top-close {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(56vh);
+  }
+}
+
+@keyframes eye-lid-bottom-close {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-56vh);
+  }
+}
+
+.game-over-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  place-items: center;
+  gap: 16px;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.82);
+}
+
+.game-over-title {
+  margin: 0;
+  color: #f4f5f8;
+  font-size: clamp(34px, 7vw, 90px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .start-screen {

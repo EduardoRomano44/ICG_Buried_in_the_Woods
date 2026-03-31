@@ -268,7 +268,7 @@ function updatePlayer(delta) {
 
   if (damageShakeTimer > 0) {
     damageShakeTimer = Math.max(0, damageShakeTimer - delta);
-    const strength = (damageShakeTimer / PLAYER_DAMAGE_SHAKE_DURATION) * PLAYER_DAMAGE_SHAKE_INTENSITY;
+    const strength = PLAYER_DAMAGE_SHAKE_INTENSITY;
 
     previousShakeOffset.set(
       (Math.random() * 2 - 1) * strength,

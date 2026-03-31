@@ -34,6 +34,7 @@ import {
   applyBarsSizePreset,
   setStartLoading,
   isSettingsBusy,
+  showGameOver,
 } from './src/ui/GameUI.js';
 import { animateFireflies, setFirefliesEnabled } from './src/animations/fireflies.js';
 import { updateSlimeIdle } from './src/animations/slimeIdle.js';
@@ -49,6 +50,7 @@ let hasStarted = false;
 let isPaused = false;
 let modelsReady = false;
 let isLoadingWorld = false;
+let isGameOver = false;
 let ignorePointerUnlockUntil = 0;
 let ignoreEscapeUntil = 0;
 renderer.domElement.style.display = 'none';
@@ -92,6 +94,7 @@ async function startNewGame() {
 
   hasStarted = true;
   isPaused = false;
+  isGameOver = false;
   setStartLoading(false);
   resetPlayerState();
   setInputEnabled(true);
@@ -105,7 +108,7 @@ async function startNewGame() {
 }
 
 function pauseGame() {
-  if (!hasStarted || isPaused) return;
+  if (!hasStarted || isPaused || isGameOver) return;
   isPaused = true;
   setInputEnabled(false);
   setPaused(true);
@@ -113,7 +116,7 @@ function pauseGame() {
 }
 
 function resumeGame() {
-  if (!hasStarted || !isPaused) return;
+  if (!hasStarted || !isPaused || isGameOver) return;
   isPaused = false;
   setPaused(false);
   setInputEnabled(true);
@@ -130,10 +133,22 @@ function resetGame() {
   window.location.reload();
 }
 
+async function triggerGameOver() {
+  if (isGameOver) return;
+
+  isGameOver = true;
+  isPaused = true;
+  setInputEnabled(false);
+  pauseFirstPersonControls();
+  setPaused(false);
+  await showGameOver();
+}
+
 createGameUI({
   onResume: resumeGame,
   onReset: resetGame,
   onSettingsChanged: applyRuntimeSettings,
+  onBackToMenu: resetGame,
 });
 
 setGameStarted(false);
@@ -149,7 +164,7 @@ document.addEventListener('keydown', (event) => {
     return;
   }
 
-  if (event.code !== 'Escape' || !hasStarted) return;
+  if (event.code !== 'Escape' || !hasStarted || isGameOver) return;
   if (isPaused && isSettingsBusy()) return;
   if (performance.now() < ignoreEscapeUntil) return;
 
@@ -163,7 +178,7 @@ document.addEventListener('keydown', (event) => {
 });
 
 document.addEventListener('pointerlockchange', () => {
-  if (!hasStarted || isPaused) return;
+  if (!hasStarted || isPaused || isGameOver) return;
   if (performance.now() < ignorePointerUnlockUntil) return;
   if (document.pointerLockElement !== document.body) {
     pauseGame();
@@ -171,19 +186,19 @@ document.addEventListener('pointerlockchange', () => {
 });
 
 document.addEventListener('click', () => {
-  if (hasStarted && !isPaused && document.pointerLockElement !== document.body) {
+  if (hasStarted && !isPaused && !isGameOver && document.pointerLockElement !== document.body) {
     resumeFirstPersonControls();
   }
 });
 
 window.addEventListener('blur', () => {
-  if (hasStarted && !isPaused) {
+  if (hasStarted && !isPaused && !isGameOver) {
     pauseGame();
   }
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible' && hasStarted && !isPaused) {
+  if (document.visibilityState !== 'visible' && hasStarted && !isPaused && !isGameOver) {
     pauseGame();
   }
 });
@@ -198,7 +213,7 @@ function animate() {
 
   if (!hasStarted) return;
 
-  if (!isPaused) {
+  if (!isPaused && !isGameOver) {
     updatePlayer(delta);
     if (!settings.lowQuality) {
       animateFireflies(elapsed);
@@ -208,7 +223,13 @@ function animate() {
     updateWorld(camera);
   }
 
-  updateHUD(getPlayerVitals());
+  const vitals = getPlayerVitals();
+  updateHUD(vitals);
+
+  if (!isGameOver && vitals.health <= 0) {
+    triggerGameOver();
+  }
+
   renderer.render(scene, camera);
 }
 

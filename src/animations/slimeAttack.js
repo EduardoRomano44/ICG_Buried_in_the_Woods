@@ -7,21 +7,13 @@ import {
   SLIME_ATTACK_HITBOX_COLOR,
   SLIME_ATTACK_HITBOX_OPACITY,
   SLIME_ATTACK_DAMAGE,
-  SLIME_ATTACK_EYE_SQUINT_SCALE_Y,
+  SLIME_ATTACK_EYE_SQUINT_SCALE,
   SLIME_ATTACK_SCALE_MIN,
   SLIME_ATTACK_SCALE_MAX,
 } from '../config/constants.js';
 import { removeCollider, damagePlayer, intersectsPlayerHitboxSphere } from '../player/Player.js';
 
 const activeAttacks = new Map();
-
-function isEyeBig(name) {
-  return name === 'EyeBig' || name.includes('EyeBig');
-}
-
-function isEyeSmall(name) {
-  return name === 'EyeSmall' || name.includes('EyeSmall');
-}
 
 function createHitboxMesh() {
   const geometry = new THREE.SphereGeometry(SLIME_ATTACK_HITBOX_RADIUS, 24, 24);
@@ -44,9 +36,9 @@ function createEyeState(slimeMesh) {
   slimeMesh.traverse((obj) => {
     if (!obj.isMesh || !obj.name) return;
 
-    if (isEyeBig(obj.name)) {
+    if (obj.name === 'EyeBig') {
       eyeBig.push(obj);
-    } else if (isEyeSmall(obj.name)) {
+    } else if (obj.name === 'EyeSmall') {
       eyeSmall.push(obj);
     }
   });
@@ -62,9 +54,25 @@ function createEyeState(slimeMesh) {
   };
 }
 
-function setAttackVisualState(attackState, pulseFactor) {
-  const eyes = attackState.eyes;
-  const squintScaleY = 1 - pulseFactor * (1 - SLIME_ATTACK_EYE_SQUINT_SCALE_Y);
+function applyInitialEyeSquint(eyes) {
+  const squintScale = SLIME_ATTACK_EYE_SQUINT_SCALE;
+
+  const eyeBig = eyes.eyeBig[0];
+  const eyeBigBaseScale = eyes.eyeBigBaseScale[0];
+  if (eyeBig && eyeBigBaseScale) {
+    eyeBig.visible = true;
+    eyeBig.scale.set(eyeBigBaseScale.x, eyeBigBaseScale.y, eyeBigBaseScale.z * squintScale);
+  }
+
+  const eyeSmall = eyes.eyeSmall[0];
+  const eyeSmallBaseScale = eyes.eyeSmallBaseScale[0];
+  if (eyeSmall && eyeSmallBaseScale) {
+    eyeSmall.visible = true;
+    eyeSmall.scale.set(eyeSmallBaseScale.x, eyeSmallBaseScale.y * squintScale, eyeSmallBaseScale.z);
+  }
+}
+
+function setAttackScalePulse(attackState, pulseFactor) {
   const scaleMul = SLIME_ATTACK_SCALE_MIN + pulseFactor * (SLIME_ATTACK_SCALE_MAX - SLIME_ATTACK_SCALE_MIN);
 
   attackState.slimeMesh.scale.set(
@@ -72,24 +80,6 @@ function setAttackVisualState(attackState, pulseFactor) {
     attackState.baseScale.y * scaleMul,
     attackState.baseScale.z * scaleMul
   );
-
-  for (let i = 0; i < eyes.eyeBig.length; i += 1) {
-    const eye = eyes.eyeBig[i];
-    const baseScale = eyes.eyeBigBaseScale[i];
-    if (!baseScale) continue;
-
-    eye.visible = true;
-    eye.scale.set(baseScale.x, baseScale.y * squintScaleY, baseScale.z);
-  }
-
-  for (let i = 0; i < eyes.eyeSmall.length; i += 1) {
-    const eye = eyes.eyeSmall[i];
-    const baseScale = eyes.eyeSmallBaseScale[i];
-    if (!baseScale) continue;
-
-    eye.visible = true;
-    eye.scale.set(baseScale.x, baseScale.y * squintScaleY, baseScale.z);
-  }
 }
 
 function getHitboxCenter(slimeMesh) {
@@ -117,15 +107,14 @@ function startSlimeAttack(slimeMesh, onExplode) {
     exploded: false,
   };
 
+  applyInitialEyeSquint(eyes);
+
   activeAttacks.set(slimeMesh.uuid, attackState);
 }
 
 function explodeSlime(attackState) {
   if (attackState.exploded) return;
   attackState.exploded = true;
-
-  // Reset visual distortion before despawn so debug respawn starts from clean pose.
-  setAttackVisualState(attackState, 0);
 
   const center = getHitboxCenter(attackState.slimeMesh);
   if (intersectsPlayerHitboxSphere(center, SLIME_ATTACK_HITBOX_RADIUS)) {
@@ -162,7 +151,7 @@ function updateSlimeAttacks(elapsed) {
     attackState.hitboxMesh.position.copy(center);
 
     const pulseFactor = (Math.sin(elapsed * SLIME_ATTACK_BLINK_SPEED) + 1) * 0.5;
-    setAttackVisualState(attackState, pulseFactor);
+    setAttackScalePulse(attackState, pulseFactor);
 
     const attackElapsed = elapsed - attackState.startTime;
     if (attackElapsed >= SLIME_ATTACK_DURATION) {
