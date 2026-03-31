@@ -42,17 +42,23 @@ body {
 }
 
 .health-bar {
+  position: relative;
   width: var(--health-width);
   height: var(--health-height);
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(93, 11, 13, 0.75);
+  background: rgba(34, 8, 10, 0.78);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3) inset;
   transition: opacity 160ms ease;
+  overflow: hidden;
 }
 
-.health-bar.filled {
+.health-fill {
+  height: 100%;
+  width: 100%;
   background: linear-gradient(90deg, #bb1e28, #f05a66);
+  transform-origin: left center;
+  transition: width 420ms ease;
 }
 
 .stamina-box {
@@ -99,6 +105,31 @@ body {
   background: rgba(8, 10, 14, 0.58);
   display: none;
   pointer-events: auto;
+}
+
+.player-damage-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 70;
+  background: radial-gradient(circle at center, rgba(255, 72, 72, 0.14) 0%, rgba(180, 14, 14, 0.24) 80%);
+  opacity: 0;
+}
+
+.player-damage-flash.active {
+  animation: player-damage-flash 180ms ease-out;
+}
+
+@keyframes player-damage-flash {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .start-screen {

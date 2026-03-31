@@ -10,6 +10,8 @@ export const PLAYER_MAX_STAMINA = 100;
 export const PLAYER_STAMINA_DRAIN_PER_SEC = 30;
 export const PLAYER_STAMINA_RECOVERY_PER_SEC = 24;
 export const PLAYER_STAMINA_RECOVERY_DELAY = 1.2;
+export const PLAYER_DAMAGE_SHAKE_DURATION = 0.14;
+export const PLAYER_DAMAGE_SHAKE_INTENSITY = 0.04;
 
 // Physics
 export const GRAVITY = 20;
@@ -41,7 +43,20 @@ export const SLIME_SCALE = 1.4;
 export const SLIME_IDLE_SPEED = 2;
 export const SLIME_IDLE_XZ_AMPLITUDE = 0.2;
 export const SLIME_IDLE_Y_AMPLITUDE  = 0.2;
-export const SLIME_IDLE_TRIGGER_DISTANCE = 4;
+export const SLIME_IDLE_TRIGGER_DISTANCE = 4.5;
+export const SLIME_ATTACK_DURATION = 1.5;
+export const SLIME_ATTACK_BLINK_SPEED = 5;
+export const SLIME_ATTACK_HITBOX_RADIUS = 6;
+export const SLIME_ATTACK_HITBOX_COLOR = 0xff3030;
+export const SLIME_ATTACK_HITBOX_OPACITY = 0.1;
+export const SLIME_ATTACK_DAMAGE = 1;
+export const SLIME_ATTACK_EYE_SQUINT_SCALE_Y = 0.3;
+export const SLIME_ATTACK_SCALE_MIN = 0.925;
+export const SLIME_ATTACK_SCALE_MAX = 1.075;
+
+// Debug
+export const DEBUG_SLIME_RESPAWN_ENABLED = true;
+export const DEBUG_SLIME_RESPAWN_DELAY = 5;
 
 // Lighting
 export const AMBIENT_LIGHT_COLOR = 0x505050;

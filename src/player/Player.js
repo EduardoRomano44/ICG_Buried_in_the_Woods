@@ -4,6 +4,7 @@ import { PointerLockControls } from 'three/addons/controls/PointerLockControls.j
 import { camera, renderer, initialCameraPosition } from '../core/SceneManager.js';
 import { showCrosshair, hideCrosshair } from '../ui/Crosshair.js';
 import settings from '../config/settings.js';
+import { triggerPlayerDamageFlash } from '../ui/gameUI/effects/PlayerDamageFeedback.js';
 import {
   PLAYER_HEIGHT,
   PLAYER_BASE_SPEED,
@@ -14,6 +15,8 @@ import {
   PLAYER_STAMINA_DRAIN_PER_SEC,
   PLAYER_STAMINA_RECOVERY_PER_SEC,
   PLAYER_STAMINA_RECOVERY_DELAY,
+  PLAYER_DAMAGE_SHAKE_DURATION,
+  PLAYER_DAMAGE_SHAKE_INTENSITY,
   CAMERA_NORMAL_FOV,
   CAMERA_SPRINT_FOV,
   CAMERA_FOV_LERP_SPEED,
@@ -34,10 +37,12 @@ let bobTime = 0;
 let health = PLAYER_MAX_HEALTH;
 let stamina = PLAYER_MAX_STAMINA;
 let staminaRecoveryTimer = PLAYER_STAMINA_RECOVERY_DELAY;
+let damageShakeTimer = 0;
 
 const move = { forward: false, backward: false, left: false, right: false };
 const direction = new THREE.Vector3();
 const playerBox = new THREE.Box3();
+const previousShakeOffset = new THREE.Vector3();
 
 // Controls
 const fpControls = new PointerLockControls(camera, document.body);
@@ -52,6 +57,36 @@ function addCollider(obj, options = {}) {
     dynamic: Boolean(options.dynamic),
     box: null,
   });
+}
+
+function removeCollider(obj) {
+  const index = colliders.findIndex((collider) => collider.obj === obj);
+  if (index >= 0) {
+    colliders.splice(index, 1);
+  }
+}
+
+function damagePlayer(amount = 1) {
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
+  if (safeAmount <= 0 || health <= 0) return;
+
+  const nextHealth = Math.max(0, health - safeAmount);
+  if (nextHealth < health) {
+    triggerPlayerDamageFlash();
+    damageShakeTimer = PLAYER_DAMAGE_SHAKE_DURATION;
+  }
+
+  health = nextHealth;
+}
+
+function intersectsPlayerHitboxSphere(center, radius) {
+  const r = PLAYER_COLLISION_RADIUS;
+  const hitbox = new THREE.Box3(
+    new THREE.Vector3(camera.position.x - r, 0.1, camera.position.z - r),
+    new THREE.Vector3(camera.position.x + r, PLAYER_HEIGHT, camera.position.z + r)
+  );
+
+  return hitbox.distanceToPoint(center) <= radius;
 }
 
 // Input
@@ -122,9 +157,13 @@ function setInputEnabled(enabled) {
 }
 
 function resetPlayerState() {
+  camera.position.sub(previousShakeOffset);
+  previousShakeOffset.set(0, 0, 0);
+
   health = PLAYER_MAX_HEALTH;
   stamina = PLAYER_MAX_STAMINA;
   staminaRecoveryTimer = PLAYER_STAMINA_RECOVERY_DELAY;
+  damageShakeTimer = 0;
   velocityY = 0;
   bobTime = 0;
   clearMovementInput();
@@ -147,6 +186,10 @@ function getPlayerVitals() {
 // Update
 function updatePlayer(delta) {
   if (!isFPMode) return;
+
+  // Remove previous frame's shake offset so movement/collision uses true camera position.
+  camera.position.sub(previousShakeOffset);
+  previousShakeOffset.set(0, 0, 0);
 
   fpControls.pointerSpeed = settings.cameraSensitivity;
 
@@ -222,6 +265,19 @@ function updatePlayer(delta) {
   const targetFOV = isSprintActive ? CAMERA_SPRINT_FOV : CAMERA_NORMAL_FOV;
   camera.fov += (targetFOV - camera.fov) * delta * CAMERA_FOV_LERP_SPEED;
   camera.updateProjectionMatrix();
+
+  if (damageShakeTimer > 0) {
+    damageShakeTimer = Math.max(0, damageShakeTimer - delta);
+    const strength = (damageShakeTimer / PLAYER_DAMAGE_SHAKE_DURATION) * PLAYER_DAMAGE_SHAKE_INTENSITY;
+
+    previousShakeOffset.set(
+      (Math.random() * 2 - 1) * strength,
+      (Math.random() * 2 - 1) * strength * 0.6,
+      (Math.random() * 2 - 1) * strength
+    );
+
+    camera.position.add(previousShakeOffset);
+  }
 }
 
 function isFirstPerson() {
@@ -232,6 +288,9 @@ export {
   initInput,
   updatePlayer,
   addCollider,
+  removeCollider,
+  damagePlayer,
+  intersectsPlayerHitboxSphere,
   isFirstPerson,
   enterFirstPerson,
   pauseFirstPersonControls,

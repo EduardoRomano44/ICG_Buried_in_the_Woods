@@ -5,6 +5,7 @@ import {
   SLIME_IDLE_Y_AMPLITUDE,
   SLIME_IDLE_TRIGGER_DISTANCE,
 } from '../config/constants.js';
+import { startSlimeAttack, updateSlimeAttacks } from './slimeAttack.js';
 
 const slimes = [];
 
@@ -14,6 +15,7 @@ function createSlimeIdle(model) {
     baseScale: model.scale.x,
     phase: Math.random() * Math.PI * 2,
     active: true,
+    isDead: false,
   });
 }
 
@@ -21,7 +23,7 @@ function updateSlimeIdle(elapsed) {
   const playerPos = camera.position;
 
   for (const slime of slimes) {
-    if (!slime.active) continue;
+    if (slime.isDead || !slime.active) continue;
 
     // Squish trough plan x and z
     const dx = slime.mesh.position.x - playerPos.x;
@@ -32,6 +34,9 @@ function updateSlimeIdle(elapsed) {
       slime.active = false;
       // Player is close, stop to attack
       slime.mesh.scale.set(slime.baseScale, slime.baseScale, slime.baseScale);
+      startSlimeAttack(slime.mesh, () => {
+        slime.isDead = true;
+      });
       continue;
     }
 
@@ -43,6 +48,8 @@ function updateSlimeIdle(elapsed) {
 
     slime.mesh.scale.set(scaleXZ, scaleY, scaleXZ);
   }
+
+  updateSlimeAttacks(elapsed);
 }
 
 export { createSlimeIdle, updateSlimeIdle };

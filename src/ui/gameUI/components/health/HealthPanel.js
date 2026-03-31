@@ -10,7 +10,9 @@ function createHealthPanel() {
     element.innerHTML = '';
     bars.length = 0;
     for (let i = 0; i < maxHealth; i += 1) {
-      const bar = createElementFromHTML('<div class="health-bar"></div>');
+      const bar = createElementFromHTML(
+        '<div class="health-bar"><div class="health-fill"></div></div>'
+      );
       bars.push(bar);
       element.appendChild(bar);
     }
@@ -24,8 +26,12 @@ function createHealthPanel() {
     if (lastHealth === health && lastMaxHealth === maxHealth) return;
 
     for (let i = 0; i < bars.length; i += 1) {
-      bars[i].classList.toggle('filled', i < health);
-      bars[i].style.opacity = i < health ? '1' : '0.34';
+      const fill = bars[i].querySelector('.health-fill');
+      if (!fill) continue;
+
+      const ratio = Math.max(0, Math.min(1, health - i));
+      fill.style.width = `${ratio * 100}%`;
+      bars[i].style.opacity = ratio > 0 ? '1' : '0.34';
     }
 
     lastHealth = health;

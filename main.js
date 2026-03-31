@@ -38,10 +38,12 @@ import {
 import { animateFireflies, setFirefliesEnabled } from './src/animations/fireflies.js';
 import { updateSlimeIdle } from './src/animations/slimeIdle.js';
 import settings from './src/config/settings.js';
+import { initSlimeRespawnDebug } from './src/debug/slimeRespawnDebug.js';
 
 // Bootstrap
 createCrosshair();
 initInput();
+initSlimeRespawnDebug();
 
 let hasStarted = false;
 let isPaused = false;
