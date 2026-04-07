@@ -6,6 +6,7 @@ import {
   SLIME_IDLE_TRIGGER_DISTANCE,
 } from '../config/constants.js';
 import { startSlimeAttack, updateSlimeAttacks } from './slimeAttack.js';
+import { setSlimeIdleAudioActive, setSlimeIdleAudioDistance } from '../audio/GameAudio.js';
 
 const slimes = [];
 
@@ -21,14 +22,21 @@ function createSlimeIdle(model) {
 
 function updateSlimeIdle(elapsed) {
   const playerPos = camera.position;
+  let activeIdleSlimes = 0;
+  let nearestDistSq = Infinity;
 
   for (const slime of slimes) {
     if (slime.isDead || !slime.active) continue;
+
+    activeIdleSlimes += 1;
 
     // Squish trough plan x and z
     const dx = slime.mesh.position.x - playerPos.x;
     const dz = slime.mesh.position.z - playerPos.z;
     const distSq = dx * dx + dz * dz;
+    if (distSq < nearestDistSq) {
+      nearestDistSq = distSq;
+    }
 
     if (distSq < SLIME_IDLE_TRIGGER_DISTANCE * SLIME_IDLE_TRIGGER_DISTANCE) {
       slime.active = false;
@@ -49,6 +57,8 @@ function updateSlimeIdle(elapsed) {
     slime.mesh.scale.set(scaleXZ, scaleY, scaleXZ);
   }
 
+  setSlimeIdleAudioActive(activeIdleSlimes > 0);
+  setSlimeIdleAudioDistance(Number.isFinite(nearestDistSq) ? Math.sqrt(nearestDistSq) : Infinity);
   updateSlimeAttacks(elapsed);
 }
 

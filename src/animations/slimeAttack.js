@@ -12,11 +12,20 @@ import {
   SLIME_ATTACK_SCALE_MAX,
 } from '../config/constants.js';
 import { removeCollider, damagePlayer, intersectsPlayerHitboxSphere } from '../player/Player.js';
+import { playSlimeExplodeAudio } from '../audio/GameAudio.js';
 
 const activeAttacks = new Map();
 
 function createHitboxMesh() {
-  const geometry = new THREE.SphereGeometry(SLIME_ATTACK_HITBOX_RADIUS, 24, 24);
+  const geometry = new THREE.SphereGeometry(
+    SLIME_ATTACK_HITBOX_RADIUS,
+    24,
+    16,
+    0,
+    Math.PI * 2,
+    0,
+    Math.PI * 0.5
+  );
   const material = new THREE.MeshBasicMaterial({
     color: SLIME_ATTACK_HITBOX_COLOR,
     transparent: true,
@@ -124,6 +133,7 @@ function explodeSlime(attackState) {
   scene.remove(attackState.hitboxMesh);
   attackState.hitboxMesh.geometry.dispose();
   attackState.hitboxMesh.material.dispose();
+  playSlimeExplodeAudio(center.distanceTo(camera.position));
 
   removeCollider(attackState.slimeMesh);
   scene.remove(attackState.slimeMesh);

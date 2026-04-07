@@ -40,6 +40,12 @@ import { animateFireflies, setFirefliesEnabled } from './src/animations/fireflie
 import { updateSlimeIdle } from './src/animations/slimeIdle.js';
 import settings from './src/config/settings.js';
 import { initSlimeRespawnDebug } from './src/debug/slimeRespawnDebug.js';
+import {
+  setGlobalAudioVolume,
+  setTitleCardAudioActive,
+  setForestAudioActive,
+  unlockGameAudioPlayback,
+} from './src/audio/GameAudio.js';
 
 // Bootstrap
 createCrosshair();
@@ -63,6 +69,7 @@ async function applyRuntimeSettings() {
   setFirefliesEnabled(!settings.lowQuality);
   refreshCrosshair();
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
+  setGlobalAudioVolume(settings.audioVolume ?? 0.8);
 
   if (shadowsChanged && hasStarted) {
     await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -100,6 +107,9 @@ async function startNewGame() {
   setInputEnabled(true);
   setGameStarted(true);
   setPaused(false);
+  setTitleCardAudioActive(false);
+  setForestAudioActive(true);
+  unlockGameAudioPlayback();
   await applyRuntimeSettings();
   renderer.compile(scene, camera);
   renderer.render(scene, camera);
@@ -140,6 +150,7 @@ async function triggerGameOver() {
   isPaused = true;
   setInputEnabled(false);
   pauseFirstPersonControls();
+  setForestAudioActive(false);
   setPaused(false);
   await showGameOver();
 }

@@ -55,6 +55,7 @@ function addCollider(obj, options = {}) {
   colliders.push({
     obj,
     dynamic: Boolean(options.dynamic),
+    boundsScale: Number.isFinite(options.boundsScale) ? Math.max(0.1, options.boundsScale) : 1,
     box: null,
   });
 }
@@ -253,6 +254,12 @@ function updatePlayer(delta) {
       collider.obj.updateWorldMatrix(true, false);
       if (!collider.box) collider.box = new THREE.Box3();
       collider.box.setFromObject(collider.obj);
+
+      if (collider.boundsScale !== 1) {
+        const center = collider.box.getCenter(new THREE.Vector3());
+        const size = collider.box.getSize(new THREE.Vector3()).multiplyScalar(collider.boundsScale);
+        collider.box.setFromCenterAndSize(center, size);
+      }
     }
 
     if (playerBox.intersectsBox(collider.box)) {

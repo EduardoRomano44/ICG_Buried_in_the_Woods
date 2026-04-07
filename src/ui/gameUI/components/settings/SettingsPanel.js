@@ -93,6 +93,18 @@ function createSettingsPanel({
     format: (value) => `${Math.round(Number(value))}px`,
   }, onSettingsChanged);
 
+  const audioRow = createRangeSettingRow({
+    label: 'Sound volume',
+    min: '0',
+    max: '100',
+    step: '1',
+    value: String(Math.round((settings.audioVolume ?? 0.8) * 100)),
+    apply: (value) => {
+      settings.audioVolume = Number(value) / 100;
+    },
+    format: (value) => `${Math.round(Number(value))}%`,
+  }, onSettingsChanged);
+
   const shadowsRow = createElementFromHTML(`
     <div class="setting-row">
       <label>Shadows</label>
@@ -172,7 +184,7 @@ function createSettingsPanel({
   hudSizeCards.push(hudSmall, hudMedium, hudLarge);
   hudSizeGrid.append(hudSmall, hudMedium, hudLarge);
 
-  grid.append(sensitivityRow, crosshairRow, shadowsRow, qualityRow, hudSizeRow);
+  grid.append(sensitivityRow, crosshairRow, audioRow, shadowsRow, qualityRow, hudSizeRow);
 
   function setVisible(visible) {
     element.style.display = visible ? 'block' : 'none';

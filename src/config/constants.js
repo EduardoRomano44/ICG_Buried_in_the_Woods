@@ -61,6 +61,7 @@ export const DEBUG_SLIME_RESPAWN_DELAY = 5;
 // Lighting
 export const AMBIENT_LIGHT_COLOR = 0x505050;
 
+// Lamp
 export const LAMP_SCALE = 0.6;
 export const LAMP_LIGHT_COLOR = 0xffcb33;
 export const LAMP_LIGHT_INTENSITY = 800;
@@ -71,6 +72,23 @@ export const LAMP_SHADOW_MAP_SIZE = 900;
 export const LAMP_SHADOW_BIAS = -0.01;
 export const LAMP_SHADOW_CAMERA_NEAR = 1.6;
 export const LAMP_SHADOW_CAMERA_FAR = 30;
+
+// Flashlight
+export const FLASHLIGHT_SCALE = 0.2;
+export const FLASHLIGHT_COLOR = 0xffffff;
+export const FLASHLIGHT_INTENSITY = 110;
+export const FLASHLIGHT_SPOT_DISTANCE = 140;
+export const FLASHLIGHT_SPOT_POSITION = { x: 0, y: 1, z: -2.5 };
+export const FLASHLIGHT_SPOT_ROTATION = { x: 0, y: 0, z: 0 };
+export const FLASHLIGHT_SPOT_SCALE_Z = 0.583;
+export const FLASHLIGHT_SPOT_RADIUS = 0.2;
+export const FLASHLIGHT_SPOT_ROTATION_X = 90;
+export const FLASHLIGHT_SPOT_BEAM_RADIUS = 33;
+export const FLASHLIGHT_SPOT_BEAM_BLEND = 0.7;
+export const FLASHLIGHT_INTERNAL_COLOR = 0xffffff;
+export const FLASHLIGHT_INTERNAL_INTENSITY = 5;
+export const FLASHLIGHT_INTERNAL_DISTANCE = 0.24;
+export const FLASHLIGHT_INTERNAL_POSITION = { x: 0, y: 1, z: 0 };
 
 // Fireflies
 export const FIREFLY_COUNT = 4;
@@ -104,7 +122,7 @@ export const GRASS_EXCLUSION_RADIUS = 2.5; // min distance from other objects
 export const WIND_STRENGH = 7.0;
 export const WIND_SPEED = 2;
 
-// Dash (linha central segmentada)
+// Dash
 export const DASH_LENGTH = 3.5;
 export const DASH_GAP    = 3.5;
 export const DASH_WIDTH  = 0.22;
@@ -118,3 +136,16 @@ export const CAMERA_FAR = 1000;
 export const CAMERA_NORMAL_FOV = 75;
 export const CAMERA_SPRINT_FOV = 90;
 export const CAMERA_FOV_LERP_SPEED = 8;
+
+// Bench
+export const BENCH_SCALE = 1.2;
+
+// Audio
+export const TITLE_CARD_AUDIO_VOLUME = 0.65;
+export const SLIME_EXPLODE_AUDIO_VOLUME = 0.7;
+export const SLIME_IDLE_AUDIO_VOLUME = 0.4;
+export const SLIME_IDLE_AUDIO_REF_DISTANCE = 6;
+export const SLIME_IDLE_AUDIO_MAX_DISTANCE = 45;
+export const SLIME_EXPLODE_AUDIO_REF_DISTANCE = 6;
+export const SLIME_EXPLODE_AUDIO_MAX_DISTANCE = 45;
+export const FOREST_AUDIO_VOLUME = 1;

@@ -2,11 +2,12 @@ import settings from '../../config/settings.js';
 import { createHUD } from './components/hud/HUD.js';
 import { createScreenOverlay } from './components/overlay/ScreenOverlay.js';
 import { createSettingsPanel } from './components/settings/SettingsPanel.js';
-import { createStartPanel } from './components/start/StartPanel.js';
+import { createTitleCardPanel } from './components/titlecard/TitleCardPanel.js';
 import { createEyeCloseEffect } from './components/gameover/EyeCloseEffect.js';
 import { createGameOverPanel } from './components/gameover/GameOverPanel.js';
 import { applyBarsSizePreset } from './presets/barSizePresets.js';
 import { loadGameUIStyles } from './styles/loadGameUIStyles.js';
+import { setTitleCardAudioActive } from '../../audio/GameAudio.js';
 
 function createGameUIController({ onResume, onReset, onSettingsChanged, onBackToMenu }) {
   loadGameUIStyles();
@@ -18,12 +19,12 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
   const hud = createHUD();
 
   let settingsPanel = null;
-  let startPanel = null;
+  let titleCardPanel = null;
   let gameOverPanel = null;
   const eyeCloseEffect = createEyeCloseEffect();
 
   const syncSettingsControls = () => {
-    if (startPanel) startPanel.syncControls();
+    if (titleCardPanel) titleCardPanel.syncControls();
     if (settingsPanel) settingsPanel.syncControls();
   };
 
@@ -42,7 +43,7 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
     }
   };
 
-  startPanel = createStartPanel(onSettingsChanged, syncSettingsControls);
+  titleCardPanel = createTitleCardPanel(onSettingsChanged, syncSettingsControls);
 
   settingsPanel = createSettingsPanel({
     onResume,
@@ -54,11 +55,12 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
   });
 
   gameOverPanel = createGameOverPanel(onBackToMenu || onReset);
+  setTitleCardAudioActive(true);
 
   root.append(
     hud.element,
     overlay.element,
-    startPanel.element,
+    titleCardPanel.element,
     settingsPanel.element,
     eyeCloseEffect.element,
     gameOverPanel.element
@@ -74,7 +76,8 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
     },
     setGameStarted(started) {
       hud.setVisible(started);
-      startPanel.setVisible(!started);
+      titleCardPanel.setVisible(!started);
+      setTitleCardAudioActive(!started);
       if (!started) {
         gameOverPanel.setVisible(false);
         eyeCloseEffect.reset();
@@ -85,7 +88,7 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
       overlay.setVisible(paused);
     },
     setStartLoading(visible, label = 'Loading...') {
-      startPanel.setLoading(visible, label);
+      titleCardPanel.setLoading(visible, label);
     },
     isSettingsBusy() {
       return settingsPanel.isBusy();

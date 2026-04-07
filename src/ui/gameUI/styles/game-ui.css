@@ -1,5 +1,6 @@
 :root {
   --ui-font: 'Trebuchet MS', 'Verdana', sans-serif;
+  --game-font: 'Finger Paint', var(--ui-font);
   --panel-bg: rgba(18, 20, 27, 0.78);
   --panel-border: rgba(255, 255, 255, 0.25);
   --panel-text: #f6f7fb;
@@ -15,7 +16,13 @@
 
 body {
   overflow: hidden;
-  font-family: var(--ui-font);
+  font-family: var(--game-font);
+}
+button,
+input,
+select,
+textarea {
+  font-family: var(--game-font);
 }
 
 .game-ui {
@@ -204,30 +211,16 @@ body {
   text-transform: uppercase;
 }
 
-.start-screen {
+.title-card {
   position: absolute;
   inset: 0;
   pointer-events: auto;
   display: none;
-  background: #0d1116;
+  background: #0d1116 url('../../../../imgs/TitleCard.png') center center / cover no-repeat;
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.start-title {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  color: #f6f7fb;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-size: clamp(18px, 2.8vw, 34px);
-  text-align: center;
-  user-select: none;
-}
-
-.start-prompt {
+.title-card-prompt {
   position: absolute;
   left: 50%;
   bottom: 24px;
@@ -240,7 +233,7 @@ body {
   user-select: none;
 }
 
-.start-loading {
+.title-card-loading {
   position: absolute;
   left: 16px;
   bottom: 14px;
@@ -252,7 +245,7 @@ body {
   user-select: none;
 }
 
-.start-toggles {
+.title-card-toggles {
   position: absolute;
   right: 16px;
   bottom: 16px;
@@ -261,7 +254,7 @@ body {
   pointer-events: auto;
 }
 
-.start-toggle {
+.title-card-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -309,6 +302,7 @@ body {
   transition: transform 120ms ease, opacity 120ms ease, filter 120ms ease;
   background: rgba(255, 255, 255, 0.08);
   color: #eef1f8;
+  font-family: var(--game-font);
 }
 
 .panel-actions .ui-button {
@@ -403,6 +397,7 @@ body {
   cursor: pointer;
   user-select: none;
   transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+  font-family: var(--game-font);
 }
 
 .choice-card.active {
@@ -443,11 +438,7 @@ body {
     padding: 14px;
   }
 
-  .start-title {
-    top: 14px;
-  }
-
-  .start-prompt {
+  .title-card-prompt {
     bottom: 18px;
   }
 

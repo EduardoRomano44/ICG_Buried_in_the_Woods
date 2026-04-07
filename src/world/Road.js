@@ -111,7 +111,12 @@ function createRoad() {
   );
 
   // Textura de asfalto — tentar alguns caminhos e atualizar material quando carregar
-  const initialMat = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.9 });
+  const initialMat = new THREE.MeshPhongMaterial({
+    color: 0x222222,
+    emissive: 0x050505,
+    emissiveIntensity: 0.18,
+    shininess: 6,
+  });
   initialMat.side = THREE.DoubleSide;
   initialMat.polygonOffset = true;
   initialMat.polygonOffsetFactor = -1;
@@ -124,7 +129,12 @@ function createRoad() {
   scene.add(road);
 
   const texLoader = new THREE.TextureLoader();
-  const tryUrls = ['/imgs/asphalt.jpg', './imgs/asphalt.jpg', 'imgs/asphalt.jpg'];
+  const tryUrls = [
+    new URL('../../imgs/asphalt.jpg', import.meta.url).href,
+    '/imgs/asphalt.jpg',
+    './imgs/asphalt.jpg',
+    'imgs/asphalt.jpg',
+  ];
 
   function tryLoad(i = 0) {
     if (i >= tryUrls.length) {
@@ -135,11 +145,18 @@ function createRoad() {
     texLoader.load(url,
       (tex) => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.encoding = THREE.sRGBEncoding;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
         tex.repeat.set(1, Math.max(1, Math.round(curve.getLength() / ROAD_WIDTH)));
         console.log('Road texture loaded:', url);
         // apply texture safely: create new material to avoid share issues
-        const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9 });
+        const mat = new THREE.MeshPhongMaterial({
+          map: tex,
+          color: 0xffffff,
+          emissive: 0x050505,
+          emissiveIntensity: 0.15,
+          shininess: 6,
+        });
         mat.side = THREE.DoubleSide;
         mat.polygonOffset = true;
         mat.polygonOffsetFactor = -1;

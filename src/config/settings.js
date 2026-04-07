@@ -14,6 +14,9 @@ const settings = {
   crosshairColor: "white",   // Cor do crosshair
   crosshairSize: 6,   // Tamanho do crosshair em px
   uiBarsSize: 'medium',   // small | medium | large
+
+  // Audio
+  audioVolume: 0.8,   // 0..1 volume global
 };
 
 export default settings;

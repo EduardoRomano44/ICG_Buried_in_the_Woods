@@ -1,21 +1,20 @@
 import settings from '../../../../config/settings.js';
 import { createElementFromHTML } from '../../utils/dom.js';
 
-function createStartPanel(onSettingsChanged, syncSettingsControls) {
+function createTitleCardPanel(onSettingsChanged, syncSettingsControls) {
   const element = createElementFromHTML(`
-    <section class="start-screen" style="display:block;">
-      <h1 class="start-title">Buried In The Woods</h1>
-      <p class="start-prompt">Press ENTER to Start</p>
-      <p class="start-loading">Loading...</p>
-      <div class="start-toggles">
-        <label class="start-toggle">High Quality <input type="checkbox" data-ui="quality" /></label>
-        <label class="start-toggle">Shadows <input type="checkbox" data-ui="shadows" /></label>
+    <section class="title-card" style="display:block;">
+      <p class="title-card-prompt">Press ENTER to Start</p>
+      <p class="title-card-loading">Loading...</p>
+      <div class="title-card-toggles">
+        <label class="title-card-toggle">High Quality <input type="checkbox" data-ui="quality" /></label>
+        <label class="title-card-toggle">Shadows <input type="checkbox" data-ui="shadows" /></label>
       </div>
     </section>
   `);
 
-  const prompt = element.querySelector('.start-prompt');
-  const loading = element.querySelector('.start-loading');
+  const prompt = element.querySelector('.title-card-prompt');
+  const loading = element.querySelector('.title-card-loading');
   const qualityInput = element.querySelector('[data-ui="quality"]');
   const shadowInput = element.querySelector('[data-ui="shadows"]');
 
@@ -57,4 +56,4 @@ function createStartPanel(onSettingsChanged, syncSettingsControls) {
   };
 }
 
-export { createStartPanel };
+export { createTitleCardPanel };
