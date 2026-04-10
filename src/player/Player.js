@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { camera, renderer, initialCameraPosition } from '../core/SceneManager.js';
-import { showCrosshair, hideCrosshair } from '../ui/Crosshair.js';
+import { showCrosshair, hideCrosshair, setInteractionPrompt } from '../ui/Crosshair.js';
 import settings from '../config/settings.js';
 import { triggerPlayerDamageFlash } from '../ui/gameUI/effects/PlayerDamageFeedback.js';
 import {
@@ -25,6 +25,7 @@ import {
   HEAD_BOB_SPEED_SPRINT,
   HEAD_BOB_AMOUNT_WALK,
   HEAD_BOB_AMOUNT_SPRINT,
+  INTERACT_MAX_DISTANCE,
 } from '../config/constants.js';
 
 // State
@@ -43,6 +44,8 @@ const move = { forward: false, backward: false, left: false, right: false };
 const direction = new THREE.Vector3();
 const playerBox = new THREE.Box3();
 const previousShakeOffset = new THREE.Vector3();
+const interactionRaycaster = new THREE.Raycaster();
+const interactionCenter = new THREE.Vector2(0, 0);
 
 // Controls
 const fpControls = new PointerLockControls(camera, document.body);
@@ -50,6 +53,8 @@ fpControls.pointerSpeed = settings.cameraSensitivity;
 
 // Collision list
 const colliders = [];
+const interactables = [];
+let currentInteractable = null;
 
 function addCollider(obj, options = {}) {
   colliders.push({
@@ -65,6 +70,69 @@ function removeCollider(obj) {
   if (index >= 0) {
     colliders.splice(index, 1);
   }
+}
+
+function registerInteractable(obj, options = {}) {
+  if (!obj) return;
+
+  interactables.push({
+    obj,
+    actionText: (options.actionText || 'USE').toUpperCase(),
+    onInteract: typeof options.onInteract === 'function' ? options.onInteract : null,
+  });
+}
+
+function unregisterInteractable(obj) {
+  const index = interactables.findIndex((interactable) => interactable.obj === obj);
+  if (index >= 0) {
+    interactables.splice(index, 1);
+  }
+  if (currentInteractable && currentInteractable.obj === obj) {
+    currentInteractable = null;
+    setInteractionPrompt(null);
+  }
+}
+
+function findInteractableEntryForObject(object) {
+  let current = object;
+  while (current) {
+    const found = interactables.find((entry) => entry.obj === current);
+    if (found) return found;
+    current = current.parent;
+  }
+  return null;
+}
+
+function updateInteractionTarget() {
+  for (let i = interactables.length - 1; i >= 0; i--) {
+    if (!interactables[i].obj || !interactables[i].obj.parent) {
+      interactables.splice(i, 1);
+    }
+  }
+
+  if (!interactables.length) {
+    currentInteractable = null;
+    setInteractionPrompt(null);
+    return;
+  }
+
+  interactionRaycaster.setFromCamera(interactionCenter, camera);
+  const hits = interactionRaycaster.intersectObjects(interactables.map((entry) => entry.obj), true);
+
+  let candidate = null;
+  for (const hit of hits) {
+    if (hit.distance > INTERACT_MAX_DISTANCE) continue;
+    candidate = findInteractableEntryForObject(hit.object);
+    if (candidate) break;
+  }
+
+  currentInteractable = candidate;
+  setInteractionPrompt(candidate ? candidate.actionText : null);
+}
+
+function tryInteractCurrentTarget() {
+  if (!currentInteractable || typeof currentInteractable.onInteract !== 'function') return;
+  currentInteractable.onInteract();
 }
 
 function damagePlayer(amount = 1) {
@@ -100,6 +168,9 @@ function onKeyDown(e) {
     case 'KeyA': move.left     = true; break;
     case 'KeyD': move.right    = true; break;
     case 'ShiftLeft': isSprinting = true; break;
+    case 'KeyE':
+      tryInteractCurrentTarget();
+      break;
   }
 }
 
@@ -285,6 +356,8 @@ function updatePlayer(delta) {
 
     camera.position.add(previousShakeOffset);
   }
+
+  updateInteractionTarget();
 }
 
 function isFirstPerson() {
@@ -296,6 +369,8 @@ export {
   updatePlayer,
   addCollider,
   removeCollider,
+  registerInteractable,
+  unregisterInteractable,
   damagePlayer,
   intersectsPlayerHitboxSphere,
   isFirstPerson,
