@@ -1,11 +1,17 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { scene } from '../core/SceneManager.js';
-import { addCollider } from '../player/Player.js';
+import { addCollider, registerInteractable } from '../player/Player.js';
 import { enableShadows } from '../utils/helpers.js';
 import { createFireflies } from '../animations/fireflies.js';
 import { createSlimeIdle } from '../animations/slimeIdle.js';
+import { registerGrassBlocker } from '../world/Grass.js';
 import {
+  ROAD_MODEL_PATH,
+  ROAD_POSITION,
+  ROAD_SCALE,
+  ROAD_ROTATION,
+  ROAD_ALIGN_TO_GROUND,
   LAMP_SCALE,
   LAMP_LIGHT_COLOR,
   LAMP_LIGHT_INTENSITY,
@@ -42,6 +48,34 @@ function placeModelOnGround(model, x, z, groundY = 0) {
   const bounds = new THREE.Box3().setFromObject(model);
   const offsetY = Number.isFinite(bounds.min.y) ? (groundY - bounds.min.y) : groundY;
   model.position.y += offsetY;
+}
+
+// Road
+function loadRoad() {
+  return new Promise((resolve, reject) => {
+    loader.load(
+      ROAD_MODEL_PATH,
+      (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(ROAD_SCALE.x, ROAD_SCALE.y, ROAD_SCALE.z);
+        model.rotation.set(ROAD_ROTATION.x, ROAD_ROTATION.y, ROAD_ROTATION.z);
+
+        if (ROAD_ALIGN_TO_GROUND) {
+          placeModelOnGround(model, ROAD_POSITION.x, ROAD_POSITION.z, ROAD_POSITION.y);
+        } else {
+          model.position.set(ROAD_POSITION.x, ROAD_POSITION.y, ROAD_POSITION.z);
+        }
+
+        // Road is not collidable
+        enableShadows(model);
+        scene.add(model);
+        registerGrassBlocker(model);
+        resolve(model);
+      },
+      undefined,
+      reject
+    );
+  });
 }
 
 // Slime
@@ -202,6 +236,11 @@ function loadFlashlight(x, y, z) {
         model.add(spotLight.target);
         model.add(internalLight);
         scene.add(model);
+
+        registerInteractable(model, {
+          actionText: 'GRAB',
+        });
+
         resolve(model);
       },
       undefined,
@@ -245,6 +284,7 @@ function loadFlashlights(list_positions = []) {
 // Load all
 function loadAllModels() {
   return Promise.all([
+    loadRoad(),
     loadSlimes([[-20, 0, 0], [-40, 0, 0]]),
     loadLamps([[0, 0, 0], [-10, 0, 0]]),
     loadTrees([[10, 0, 0]]),
@@ -254,6 +294,7 @@ function loadAllModels() {
 }
 
 export {
+  loadRoad,
   loadSlime,
   loadLamp,
   loadTree,

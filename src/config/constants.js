@@ -60,11 +60,18 @@ export const DEBUG_SLIME_RESPAWN_DELAY = 5;
 
 // Lighting
 export const AMBIENT_LIGHT_COLOR = 0x505050;
+export const AMBIENT_LIGHT_INTENSITY = 0.12;
+
+// Interaction
+export const INTERACT_MAX_DISTANCE = 5.5;
+export const INTERACT_PROMPT_OFFSET_Y = 100;
+export const INTERACT_PROMPT_FONT_SIZE = 20;
+export const INTERACT_PROMPT_COLOR = '#ffffff';
 
 // Lamp
 export const LAMP_SCALE = 0.6;
-export const LAMP_LIGHT_COLOR = 0xffcb33;
-export const LAMP_LIGHT_INTENSITY = 800;
+export const LAMP_LIGHT_COLOR = '#f7da63';
+export const LAMP_LIGHT_INTENSITY = 600;
 export const LAMP_LIGHT_DISTANCE = 50;
 export const LAMP_LIGHT_POSITION = { x: -0.008793, y: 14.0006, z: 0.00729 };
 export const LAMP_SHADOW_RADIUS = 8;
@@ -96,16 +103,11 @@ export const FIREFLY_COLOUR = 0xffff66;
 export const FIREFLY_OPACITY = 0.8;
 
 // Road
-export const ROAD_WIDTH = 10;
-export const ROAD_SEGMENTS = 120;
-export const ROAD_Y_OFFSET = 0.02;
-export const ROAD_CURVE_POINTS = [
-  { x:   0, z: -100 },
-  { x:  30, z:  -60 },
-  { x: -20, z:  -10 },
-  { x:  25, z:   40 },
-  { x:   0, z:  100 },
-];
+export const ROAD_MODEL_PATH = './models/Road.glb';
+export const ROAD_POSITION = { x: 0, y: 0.001, z: 0 };
+export const ROAD_SCALE = { x: 4, y: 1, z: 4 };
+export const ROAD_ROTATION = { x: 0, y: 0, z: 0 };
+export const ROAD_ALIGN_TO_GROUND = true;
 
 // Grass
 export const GRASS_SEGMENTS = 3;
@@ -117,17 +119,11 @@ export const GRASS_SPREAD = 0.4;       // random XZ spread within a patch
 export const GRASS_COLOR_BASE = 0x2d6a1f;
 export const GRASS_COLOR_TIP  = 0x7ec850;
 export const GRASS_EXCLUSION_RADIUS = 2.5; // min distance from other objects
+export const GRASS_BLOCKER_RAY_HEIGHT = 150;
 
 // Wind
 export const WIND_STRENGH = 7.0;
 export const WIND_SPEED = 2;
-
-// Dash
-export const DASH_LENGTH = 3.5;
-export const DASH_GAP    = 3.5;
-export const DASH_WIDTH  = 0.22;
-export const DASH_COLOR  = 0xffffff;
-export const DASH_Y_OFFSET = 0.03;
 
 // Camera
 export const INITIAL_CAMERA_POSITION = { x: 0, y: 5, z: 10 };

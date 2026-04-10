@@ -23,6 +23,7 @@ import {
   GRASS_COLOR_BASE,
   GRASS_COLOR_TIP,
   GRASS_EXCLUSION_RADIUS,
+  GRASS_BLOCKER_RAY_HEIGHT,
   WIND_STRENGH,
   WIND_SPEED,
 } from '../config/constants.js';
@@ -144,9 +145,33 @@ transformed.z += wave * 0.3;`
 }
 
 const occupiedPositions = [];
+const grassBlockers = [];
+const grassRaycaster = new THREE.Raycaster();
+const grassRayOrigin = new THREE.Vector3();
+const grassRayDirection = new THREE.Vector3(0, -1, 0);
 
 export function registerOccupied(x, z) {
   occupiedPositions.push(new THREE.Vector2(x, z));
+}
+
+export function registerGrassBlocker(object3D) {
+  if (!object3D) return;
+  grassBlockers.push(object3D);
+}
+
+function intersectsGrassBlocker(x, z) {
+  if (!grassBlockers.length) return false;
+
+  grassRayOrigin.set(x, GRASS_BLOCKER_RAY_HEIGHT, z);
+  grassRaycaster.set(grassRayOrigin, grassRayDirection);
+  grassRaycaster.far = GRASS_BLOCKER_RAY_HEIGHT * 2;
+
+  for (const blocker of grassBlockers) {
+    const hits = grassRaycaster.intersectObject(blocker, true);
+    if (hits.length > 0) return true;
+  }
+
+  return false;
 }
 
 function isFreePosition(x, z) {
@@ -155,6 +180,7 @@ function isFreePosition(x, z) {
     const dz = op.y - z;
     if (dx * dx + dz * dz < GRASS_EXCLUSION_RADIUS * GRASS_EXCLUSION_RADIUS) return false;
   }
+  if (intersectsGrassBlocker(x, z)) return false;
   return true;
 }
 

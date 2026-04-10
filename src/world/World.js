@@ -1,13 +1,12 @@
 import * as THREE from 'three';
 import { scene } from '../core/SceneManager.js';
-import { createRoad } from './Road.js';
-import { createGrass, updateGrass } from './Grass.js';
+import { updateGrass } from './Grass.js';
 import {
   GROUND_SIZE, GROUND_COLOR,
   SKY_RADIUS, SKY_TOP_COLOR, SKY_BOTTOM_COLOR,
   MOON_RADIUS, MOON_COLOR, MOON_OFFSET,
   FOG_COLOR, FOG_NEAR, FOG_FAR,
-  AMBIENT_LIGHT_COLOR,
+  AMBIENT_LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY,
 } from '../config/constants.js';
 
 // Chão
@@ -58,11 +57,8 @@ scene.add(moon);
 scene.fog = new THREE.Fog(FOG_COLOR, FOG_NEAR, FOG_FAR);
 
 // Luz ambiente
-const ambientLight = new THREE.AmbientLight(AMBIENT_LIGHT_COLOR);
+const ambientLight = new THREE.AmbientLight(AMBIENT_LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY);
 scene.add(ambientLight);
-
-// Rua (curva, com passeios e linha tracejada)
-createRoad();
 
 // Update (seguir câmara)
 function updateWorld(camera) {
