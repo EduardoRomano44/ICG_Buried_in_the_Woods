@@ -23,12 +23,12 @@ export const HEAD_BOB_AMOUNT_WALK = 0.3;
 export const HEAD_BOB_AMOUNT_SPRINT = 0.6;
 
 // World
-export const GROUND_SIZE = 200;
+export const GROUND_SIZE = 350;
 export const GROUND_COLOR = 0x008018;
 
 export const SKY_RADIUS = 1000;
-export const SKY_TOP_COLOR = 0x020111;
-export const SKY_BOTTOM_COLOR = 0x23046b;
+export const SKY_TOP_COLOR = '#1a1e41';
+export const SKY_BOTTOM_COLOR = '#212754';
 
 export const MOON_RADIUS = 10;
 export const MOON_COLOR = 0xffffdd;
@@ -37,6 +37,11 @@ export const MOON_OFFSET = { x: 100, y: 50, z: -300 };
 export const FOG_COLOR = 0x050510;
 export const FOG_NEAR = 100;
 export const FOG_FAR = 800;
+export const WORLD_BARRIER_INSET = 32;
+export const WORLD_BARRIER_HEIGHT = 20;
+export const WORLD_BARRIER_THICKNESS = 3;
+export const WORLD_EXTENDED_GROUND_SCALE = 1.35;
+export const WORLD_EXTENDED_GROUND_Y_OFFSET = -0.03;
 
 // Slime enemy
 export const SLIME_SCALE = 1.4;
@@ -46,7 +51,7 @@ export const SLIME_IDLE_Y_AMPLITUDE  = 0.2;
 export const SLIME_IDLE_TRIGGER_DISTANCE = 4.5;
 export const SLIME_ATTACK_DURATION = 1.5;
 export const SLIME_ATTACK_BLINK_SPEED = 5;
-export const SLIME_ATTACK_HITBOX_RADIUS = 6;
+export const SLIME_ATTACK_HITBOX_RADIUS = 8;
 export const SLIME_ATTACK_HITBOX_COLOR = 0xff3030;
 export const SLIME_ATTACK_HITBOX_OPACITY = 0.1;
 export const SLIME_ATTACK_DAMAGE = 1;
@@ -72,7 +77,7 @@ export const INTERACT_PROMPT_COLOR = '#ffffff';
 export const LAMP_SCALE = 0.6;
 export const LAMP_LIGHT_COLOR = '#f7da63';
 export const LAMP_LIGHT_INTENSITY = 600;
-export const LAMP_LIGHT_DISTANCE = 50;
+export const LAMP_LIGHT_DISTANCE = 80;
 export const LAMP_LIGHT_POSITION = { x: -0.008793, y: 14.0006, z: 0.00729 };
 export const LAMP_SHADOW_RADIUS = 8;
 export const LAMP_SHADOW_MAP_SIZE = 900;
@@ -104,14 +109,14 @@ export const FIREFLY_OPACITY = 0.8;
 
 // Road
 export const ROAD_MODEL_PATH = './models/Road.glb';
-export const ROAD_POSITION = { x: 0, y: 0.001, z: 0 };
+export const ROAD_POSITION = { x: 105, y: 0.005, z: 5 };
 export const ROAD_SCALE = { x: 4, y: 1, z: 4 };
-export const ROAD_ROTATION = { x: 0, y: 0, z: 0 };
+export const ROAD_ROTATION = { x: 0, y: -1.1, z: 0 };
 export const ROAD_ALIGN_TO_GROUND = true;
 
 // Grass
 export const GRASS_SEGMENTS = 3;
-export const GRASS_COUNT = 500;        // number of grass patches
+export const GRASS_COUNT = 1500;        // number of grass patches
 export const GRASS_PATCH_SIZE = 3;     // blades per patch
 export const GRASS_BLADE_WIDTH = 0.18; // base width of each blade
 export const GRASS_BLADE_HEIGHT = 0.7; // height of each blade
@@ -126,7 +131,8 @@ export const WIND_STRENGH = 7.0;
 export const WIND_SPEED = 2;
 
 // Camera
-export const INITIAL_CAMERA_POSITION = { x: 0, y: 5, z: 10 };
+export const INITIAL_CAMERA_POSITION = { x: 120, y: 5, z: 25 };
+export const INITIAL_CAMERA_ROTATION_Y = Math.PI / 2;
 export const CAMERA_NEAR = 0.1;
 export const CAMERA_FAR = 1000;
 export const CAMERA_NORMAL_FOV = 75;
@@ -135,6 +141,12 @@ export const CAMERA_FOV_LERP_SPEED = 8;
 
 // Bench
 export const BENCH_SCALE = 1.2;
+
+// Trees
+export const TREE_COUNT = 150;
+export const TREE_PLACEMENT_ATTEMPTS = 30;
+export const TREE_WORLD_MARGIN = 2;
+export const TREE_EXCLUSION_RADIUS = 10;
 
 // Audio
 export const TITLE_CARD_AUDIO_VOLUME = 0.65;
