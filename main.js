@@ -10,6 +10,7 @@ import { updateWorld, updateGrass } from './src/world/World.js';
 import {
   initInput,
   updatePlayer,
+  requestPointerLock,
   enterFirstPerson,
   pauseFirstPersonControls,
   resumeFirstPersonControls,
@@ -41,6 +42,11 @@ import { updateSlimeIdle } from './src/animations/slimeIdle.js';
 import settings from './src/config/settings.js';
 import { initSlimeRespawnDebug } from './src/debug/slimeRespawnDebug.js';
 import {
+  initShadowOptimizer,
+  updateShadowOptimization,
+  forceShadowRefresh,
+} from './src/core/ShadowOptimizer.js';
+import {
   setGlobalAudioVolume,
   setTitleCardAudioActive,
   setForestAudioActive,
@@ -51,15 +57,18 @@ import {
 createCrosshair();
 initInput();
 initSlimeRespawnDebug();
+initShadowOptimizer(renderer);
 
 let hasStarted = false;
 let isPaused = false;
 let modelsReady = false;
 let isLoadingWorld = false;
 let isGameOver = false;
+let worldPreloadPromise = null;
 let ignorePointerUnlockUntil = 0;
 let ignoreEscapeUntil = 0;
 renderer.domElement.style.display = 'none';
+setInputEnabled(false);
 
 async function applyRuntimeSettings() {
   const shadowsChanged = renderer.shadowMap.enabled !== settings.shadowsEnabled;
@@ -71,50 +80,90 @@ async function applyRuntimeSettings() {
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
   setGlobalAudioVolume(settings.audioVolume ?? 0.8);
 
+  if (settings.shadowsEnabled) {
+    forceShadowRefresh(true);
+  }
+
   if (shadowsChanged && hasStarted) {
     await new Promise((resolve) => requestAnimationFrame(resolve));
     renderer.compile(scene, camera);
+    forceShadowRefresh(true);
     await new Promise((resolve) => requestAnimationFrame(resolve));
   }
 }
 
-async function startNewGame() {
-  if (hasStarted || isLoadingWorld) return;
+async function preloadWorldAssets() {
+  if (modelsReady) return true;
+  if (isLoadingWorld && worldPreloadPromise) return worldPreloadPromise;
 
-  if (!modelsReady) {
-    isLoadingWorld = true;
-    setStartLoading(true, 'Loading...');
+  isLoadingWorld = true;
+  setStartLoading(true, 'Loading...');
 
+  worldPreloadPromise = (async () => {
     try {
       await loadAllModels();
       createGrass();
       modelsReady = true;
+      return true;
     } catch (error) {
       console.error('Falha no carregamento inicial do mundo:', error);
-      setStartLoading(true, 'Loading failed');
+      setStartLoading(true, 'Loading failed - Press ENTER to retry');
+      return false;
+    } finally {
       isLoadingWorld = false;
+    }
+  })();
+
+  return worldPreloadPromise;
+}
+
+function beginStartFromTitle() {
+  if (hasStarted || isLoadingWorld) return;
+
+  // Capture pointer lock while still in a user gesture, so no extra click is needed later.
+  requestPointerLock();
+
+  preloadWorldAssets().then((ok) => {
+    if (ok && !hasStarted) {
+      startNewGame();
       return;
     }
 
-    isLoadingWorld = false;
-  }
+    if (!ok && !hasStarted && document.pointerLockElement === document.body) {
+      document.exitPointerLock?.();
+    }
+  });
+}
+
+function startNewGame() {
+  if (hasStarted || isLoadingWorld || !modelsReady) return;
 
   hasStarted = true;
   isPaused = false;
   isGameOver = false;
+
   setStartLoading(false);
   resetPlayerState();
-  setInputEnabled(true);
   setGameStarted(true);
   setPaused(false);
   setTitleCardAudioActive(false);
   setForestAudioActive(true);
   unlockGameAudioPlayback();
-  await applyRuntimeSettings();
-  renderer.compile(scene, camera);
-  renderer.render(scene, camera);
   renderer.domElement.style.display = 'block';
+
+  // Lock immediately in the Enter key gesture path to avoid requiring an extra click.
   enterFirstPerson();
+  setInputEnabled(true);
+
+  applyRuntimeSettings()
+    .then(() => {
+      renderer.compile(scene, camera);
+      forceShadowRefresh(true);
+      renderer.render(scene, camera);
+    })
+    .catch((error) => {
+      console.error('Falha ao aplicar settings iniciais:', error);
+    });
 }
 
 function pauseGame() {
@@ -171,7 +220,7 @@ document.addEventListener('keydown', (event) => {
 
   if (!hasStarted && event.code === 'Enter') {
     event.preventDefault();
-    startNewGame();
+    beginStartFromTitle();
     return;
   }
 
@@ -241,6 +290,7 @@ function animate() {
     triggerGameOver();
   }
 
+  updateShadowOptimization(camera);
   renderer.render(scene, camera);
 }
 

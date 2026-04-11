@@ -33,6 +33,12 @@ export const SKY_BOTTOM_COLOR = '#212754';
 export const MOON_RADIUS = 10;
 export const MOON_COLOR = 0xffffdd;
 export const MOON_OFFSET = { x: 100, y: 50, z: -300 };
+export const MOONLIGHT_COLOR = 0x7aa8ff;
+export const MOONLIGHT_INTENSITY = 0.2;
+export const MOONLIGHT_WORLD_DISTANCE = 520;
+export const MOONLIGHT_SHADOW_MAP_SIZE = 2048;
+export const MOONLIGHT_SHADOW_CAMERA_MARGIN = 48;
+export const MOONLIGHT_SHADOW_BIAS = -0.00045;
 
 export const FOG_COLOR = 0x050510;
 export const FOG_NEAR = 100;
@@ -81,9 +87,26 @@ export const LAMP_LIGHT_DISTANCE = 80;
 export const LAMP_LIGHT_POSITION = { x: -0.008793, y: 14.0006, z: 0.00729 };
 export const LAMP_SHADOW_RADIUS = 8;
 export const LAMP_SHADOW_MAP_SIZE = 900;
-export const LAMP_SHADOW_BIAS = -0.01;
+export const LAMP_SHADOW_BIAS = -0.012;
 export const LAMP_SHADOW_CAMERA_NEAR = 1.6;
-export const LAMP_SHADOW_CAMERA_FAR = 30;
+export const LAMP_SHADOW_CAMERA_FAR = LAMP_LIGHT_DISTANCE;
+
+// Shadow optimization
+export const SHADOW_UPDATE_INTERVAL_FRAMES = 3;
+
+export const SHADOW_LIGHT_NEAR_DISTANCE = 60;
+export const SHADOW_LIGHT_FAR_DISTANCE = 170;
+export const SHADOW_LIGHT_MAP_SCALE_NEAR = 1;
+export const SHADOW_LIGHT_MAP_SCALE_MEDIUM = 0.65;
+export const SHADOW_LIGHT_MAP_SCALE_FAR = 0.38;
+export const SHADOW_LIGHT_RADIUS_SCALE_NEAR = 1;
+export const SHADOW_LIGHT_RADIUS_SCALE_MEDIUM = 1.35;
+export const SHADOW_LIGHT_RADIUS_SCALE_FAR = 1.85;
+
+export const SHADOW_OBJECT_NEAR_DISTANCE = 70;
+export const SHADOW_OBJECT_FAR_DISTANCE = 180;
+export const SHADOW_OBJECT_SIMPLIFIED_MESH_THRESHOLD = 0.42;
+export const SHADOW_DYNAMIC_POSITION_EPSILON = 0.025;
 
 // Flashlight
 export const FLASHLIGHT_SCALE = 0.2;

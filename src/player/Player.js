@@ -202,6 +202,10 @@ function clearMovementInput() {
   isSprintActive = false;
 }
 
+function requestPointerLock() {
+  fpControls.lock();
+}
+
 function enterFirstPerson() {
   if (isFPMode) return;
 
@@ -375,6 +379,7 @@ export {
   damagePlayer,
   intersectsPlayerHitboxSphere,
   isFirstPerson,
+  requestPointerLock,
   enterFirstPerson,
   pauseFirstPersonControls,
   resumeFirstPersonControls,
