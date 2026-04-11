@@ -5,8 +5,9 @@ import { addCollider, registerInteractable } from '../player/Player.js';
 import { enableShadows } from '../utils/helpers.js';
 import { createFireflies } from '../animations/fireflies.js';
 import { createSlimeIdle } from '../animations/slimeIdle.js';
-import { registerGrassBlocker } from '../world/Grass.js';
+import { registerGrassBlocker, registerOccupied, isPlacementFreeWithRadius } from '../world/Grass.js';
 import {
+  GROUND_SIZE,
   ROAD_MODEL_PATH,
   ROAD_POSITION,
   ROAD_SCALE,
@@ -36,10 +37,15 @@ import {
   FLASHLIGHT_INTERNAL_DISTANCE,
   FLASHLIGHT_INTERNAL_POSITION,
   BENCH_SCALE,
-  FLASHLIGHT_SPOT_SCALE_Z
+  FLASHLIGHT_SPOT_SCALE_Z,
+  TREE_COUNT,
+  TREE_PLACEMENT_ATTEMPTS,
+  TREE_WORLD_MARGIN,
+  TREE_EXCLUSION_RADIUS,
 } from '../config/constants.js';
 
 const loader = new GLTFLoader();
+let treeTemplatePromise = null;
 
 function placeModelOnGround(model, x, z, groundY = 0) {
   model.position.set(x, 0, z);
@@ -79,7 +85,7 @@ function loadRoad() {
 }
 
 // Slime
-function loadSlime(x, y, z) {
+function loadSlime(x, y, z, rotationY = 0) {
   return new Promise((resolve, reject) => {
     loader.load(
       './models/Slime.glb',
@@ -87,10 +93,12 @@ function loadSlime(x, y, z) {
         const model = gltf.scene;
         model.position.set(x, y, z);
         model.scale.set(SLIME_SCALE, SLIME_SCALE, SLIME_SCALE);
+        model.rotation.y = rotationY * (Math.PI / 180);
 
         enableShadows(model);
         scene.add(model);
         addCollider(model, { dynamic: true });
+        registerOccupied(x, z);
         createSlimeIdle(model);
         resolve(model);
       },
@@ -101,7 +109,7 @@ function loadSlime(x, y, z) {
 }
 
 // Lamp
-function loadLamp(x, y, z) {
+function loadLamp(x, y, z, rotationY = 0) {
   return new Promise((resolve, reject) => {
     loader.load(
       './models/Lamp.glb',
@@ -109,6 +117,7 @@ function loadLamp(x, y, z) {
         const model = gltf.scene;
         model.position.set(x, y, z);
         model.scale.set(LAMP_SCALE, LAMP_SCALE, LAMP_SCALE);
+        model.rotation.y = rotationY * (Math.PI / 180);
 
         const light = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
         light.position.set(LAMP_LIGHT_POSITION.x, LAMP_LIGHT_POSITION.y, LAMP_LIGHT_POSITION.z);
@@ -125,6 +134,7 @@ function loadLamp(x, y, z) {
         enableShadows(model);
         scene.add(model);
         addCollider(model, { boundsScale: 0.72 });
+        registerOccupied(x, z);
         resolve(model);
       },
       undefined,
@@ -134,30 +144,45 @@ function loadLamp(x, y, z) {
 }
 
 // Tree
-function loadTree(x, y, z) {
-  return new Promise((resolve, reject) => {
+function loadTreeTemplate() {
+  if (treeTemplatePromise) return treeTemplatePromise;
+
+  treeTemplatePromise = new Promise((resolve, reject) => {
     loader.load(
       './models/Tree.glb',
-      (gltf) => {
-        const model = gltf.scene;
+      (gltf) => resolve(gltf.scene),
+      undefined,
+      reject
+    );
+  });
+
+  return treeTemplatePromise;
+}
+
+function loadTree(x, y, z, rotationY = 0) {
+  return new Promise((resolve, reject) => {
+    loadTreeTemplate()
+      .then((template) => {
+        const model = template.clone(true);
         model.position.set(x, y, z);
+        model.rotation.y = rotationY * (Math.PI / 180);
+
         enableShadows(model);
         model.traverse((obj) => {
           if (obj.isMesh && obj.name === 'Cylinder') {
             addCollider(obj);
           }
         });
+
         scene.add(model);
         resolve(model);
-      },
-      undefined,
-      reject
-    );
+      })
+      .catch(reject);
   });
 }
 
 // Bench
-function loadBench(x, y, z) {
+function loadBench(x, y, z, rotationY = 0) {
   return new Promise((resolve, reject) => {
     loader.load(
       './models/Bench.glb',
@@ -165,10 +190,12 @@ function loadBench(x, y, z) {
         const model = gltf.scene;
         model.scale.set(BENCH_SCALE, BENCH_SCALE, BENCH_SCALE);
         placeModelOnGround(model, x, z, y);
+        model.rotation.y = rotationY * (Math.PI / 180);
 
         enableShadows(model);
         scene.add(model);
         addCollider(model);
+        registerOccupied(x, z);
         resolve(model);
       },
       undefined,
@@ -178,7 +205,7 @@ function loadBench(x, y, z) {
 }
 
 // Flashlight
-function loadFlashlight(x, y, z) {
+function loadFlashlight(x, y, z, rotationY = 0) {
   return new Promise((resolve, reject) => {
     loader.load(
       './models/Flashlight.glb',
@@ -186,6 +213,7 @@ function loadFlashlight(x, y, z) {
         const model = gltf.scene;
         model.scale.set(FLASHLIGHT_SCALE, FLASHLIGHT_SCALE, FLASHLIGHT_SCALE);
         placeModelOnGround(model, x, z, y);
+        model.rotation.y = rotationY * (Math.PI / 180);
 
         const spotLight = new THREE.SpotLight(
           FLASHLIGHT_COLOR,
@@ -236,6 +264,7 @@ function loadFlashlight(x, y, z) {
         model.add(spotLight.target);
         model.add(internalLight);
         scene.add(model);
+        registerOccupied(x, z);
 
         registerInteractable(model, {
           actionText: 'GRAB',
@@ -250,47 +279,85 @@ function loadFlashlight(x, y, z) {
 }
 
 // Loader Helpers
-// Position is a list of 3 variables (x, y, z)
+// Position format: [x, y, z] or [x, y, z, rotationY(degrees)]
 function loadSlimes(list_positions = []) {
   return Promise.all(
-    list_positions.map((position) => loadSlime(position[0], position[1], position[2]))
+    list_positions.map((position) => loadSlime(position[0], position[1], position[2], position[3] || 0))
   );
 }
 
 function loadLamps(list_positions = []) {
   return Promise.all(
-    list_positions.map((position) => loadLamp(position[0], position[1], position[2]))
+    list_positions.map((position) => loadLamp(position[0], position[1], position[2], position[3] || 0))
   );
 }
 
 function loadTrees(list_positions = []) {
+  const isManualList = list_positions.length > 0;
+  const positions = isManualList ? list_positions : generateTreePlacements(TREE_COUNT, 0);
+
+  if (isManualList) {
+    for (const position of positions) {
+      registerOccupied(position[0], position[2]);
+    }
+  }
+
   return Promise.all(
-    list_positions.map((position) => loadTree(position[0], position[1], position[2]))
+    positions.map((position) => loadTree(position[0], position[1], position[2], position[3] || 0))
   );
+}
+
+function generateTreePlacements(count, groundY = 0) {
+  const placements = [];
+  const half = (GROUND_SIZE * 0.5) - TREE_WORLD_MARGIN;
+
+  for (let i = 0; i < count; i++) {
+    let px = 0;
+    let pz = 0;
+    let attempts = 0;
+
+    do {
+      px = (Math.random() * 2 - 1) * half;
+      pz = (Math.random() * 2 - 1) * half;
+      attempts++;
+    } while (!isPlacementFreeWithRadius(px, pz, TREE_EXCLUSION_RADIUS) && attempts < TREE_PLACEMENT_ATTEMPTS);
+
+    if (!isPlacementFreeWithRadius(px, pz, TREE_EXCLUSION_RADIUS)) continue;
+
+    const rotY = Math.random() * Math.PI * 2;
+    placements.push([px, groundY, pz, rotY]);
+    registerOccupied(px, pz);
+  }
+
+  return placements;
 }
 
 function loadBenches(list_positions = []) {
   return Promise.all(
-    list_positions.map((position) => loadBench(position[0], position[1], position[2]))
+    list_positions.map((position) => loadBench(position[0], position[1], position[2], position[3] || 0))
   );
 }
 
 function loadFlashlights(list_positions = []) {
   return Promise.all(
-    list_positions.map((position) => loadFlashlight(position[0], position[1], position[2]))
+    list_positions.map((position) => loadFlashlight(position[0], position[1], position[2], position[3] || 0))
   );
 }
 
 // Load all
-function loadAllModels() {
-  return Promise.all([
-    loadRoad(),
-    loadSlimes([[-20, 0, 0], [-40, 0, 0]]),
-    loadLamps([[0, 0, 0], [-10, 0, 0]]),
-    loadTrees([[10, 0, 0]]),
-    loadBenches([[15, 0, 8], [-22, 0, 12]]),
-    loadFlashlights([[8, 0, -14], [-16, 0, -6]]),
+async function loadAllModels() {
+  // Road first so tree placement can respect grass blocker ray checks.
+  await loadRoad();
+
+  const [slimes, lamps, benches, flashlights] = await Promise.all([
+    loadSlimes([[-100, 0, -50, 90], [-120, 0, -50, -90]]),
+    loadLamps([[95, 0, 20], [102, 0, 120], [102, 0, -70], [-90, 0, -60], [-10, 0, 0]]),
+    loadBenches([[93, 0, 30, -97], [-22, 0, 12, 45]]),
+    loadFlashlights([[-23, 1, 13]]),
   ]);
+
+  const trees = await loadTrees();
+  return [slimes, lamps, trees, benches, flashlights];
 }
 
 export {

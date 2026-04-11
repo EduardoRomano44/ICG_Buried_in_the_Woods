@@ -20,6 +20,7 @@ import {
   CAMERA_NORMAL_FOV,
   CAMERA_SPRINT_FOV,
   CAMERA_FOV_LERP_SPEED,
+  INITIAL_CAMERA_ROTATION_Y,
   GRAVITY,
   HEAD_BOB_SPEED_WALK,
   HEAD_BOB_SPEED_SPRINT,
@@ -240,7 +241,7 @@ function resetPlayerState() {
   bobTime = 0;
   clearMovementInput();
   camera.position.copy(initialCameraPosition);
-  camera.rotation.set(0, 0, 0);
+  camera.rotation.set(0, INITIAL_CAMERA_ROTATION_Y, 0);
   camera.fov = CAMERA_NORMAL_FOV;
   camera.updateProjectionMatrix();
 }

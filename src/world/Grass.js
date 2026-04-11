@@ -159,7 +159,15 @@ export function registerGrassBlocker(object3D) {
   grassBlockers.push(object3D);
 }
 
-function intersectsGrassBlocker(x, z) {
+export function isPlacementFree(x, z) {
+  return isFreePosition(x, z, GRASS_EXCLUSION_RADIUS);
+}
+
+export function isPlacementFreeWithRadius(x, z, exclusionRadius = GRASS_EXCLUSION_RADIUS) {
+  return isFreePosition(x, z, exclusionRadius);
+}
+
+function intersectsGrassBlockerAt(x, z) {
   if (!grassBlockers.length) return false;
 
   grassRayOrigin.set(x, GRASS_BLOCKER_RAY_HEIGHT, z);
@@ -174,13 +182,40 @@ function intersectsGrassBlocker(x, z) {
   return false;
 }
 
-function isFreePosition(x, z) {
+function intersectsGrassBlocker(x, z, exclusionRadius = 0) {
+  if (intersectsGrassBlockerAt(x, z)) return true;
+  if (exclusionRadius <= 0) return false;
+
+  // Sample around the candidate point to enforce a clearance margin from blockers.
+  const radius = Math.max(0, exclusionRadius);
+  const diagonal = radius * 0.7071;
+  const samples = [
+    [radius, 0],
+    [-radius, 0],
+    [0, radius],
+    [0, -radius],
+    [diagonal, diagonal],
+    [-diagonal, diagonal],
+    [diagonal, -diagonal],
+    [-diagonal, -diagonal],
+  ];
+
+  for (const [dx, dz] of samples) {
+    if (intersectsGrassBlockerAt(x + dx, z + dz)) return true;
+  }
+
+  return false;
+}
+
+function isFreePosition(x, z, exclusionRadius = GRASS_EXCLUSION_RADIUS) {
+  const radiusSq = exclusionRadius * exclusionRadius;
+
   for (const op of occupiedPositions) {
     const dx = op.x - x;
     const dz = op.y - z;
-    if (dx * dx + dz * dz < GRASS_EXCLUSION_RADIUS * GRASS_EXCLUSION_RADIUS) return false;
+    if (dx * dx + dz * dz < radiusSq) return false;
   }
-  if (intersectsGrassBlocker(x, z)) return false;
+  if (intersectsGrassBlocker(x, z, exclusionRadius)) return false;
   return true;
 }
 
