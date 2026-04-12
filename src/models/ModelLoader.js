@@ -136,6 +136,23 @@ function placeModelOnGround(model, x, z, groundY = 0) {
   model.position.y += offsetY;
 }
 
+function configureShadowCastingLight(light) {
+  light.castShadow = true;
+  light.shadow.radius = SHADOW_RADIUS;
+  light.shadow.mapSize.width = SHADOW_MAP_SIZE;
+  light.shadow.mapSize.height = SHADOW_MAP_SIZE;
+  light.shadow.bias = SHADOW_BIAS;
+  light.shadow.normalBias = SHADOW_NORMAL_BIAS;
+  light.shadow.camera.near = SHADOW_CAMERA_NEAR;
+  light.shadow.camera.far = SHADOW_CAMERA_FAR;
+}
+
+function setupModelShadows(model, staticObject = true) {
+  tagShadowObject(model, staticObject);
+  enableShadows(model);
+  registerShadowObject(model, { staticObject });
+}
+
 // Road
 function loadRoad() {
   return cloneModelTemplate(ROAD_MODEL_PATH).then((model) => {
@@ -149,9 +166,7 @@ function loadRoad() {
     }
 
     // Road is static in gameplay and should use static shadow policy.
-    tagShadowObject(model, true);
-    enableShadows(model);
-    registerShadowObject(model, { staticObject: true });
+    setupModelShadows(model, true);
 
     scene.add(model);
     registerGrassBlocker(model);
@@ -167,9 +182,7 @@ function loadSlime(x, y, z, rotationY = 0) {
     model.rotation.y = rotationY * (Math.PI / 180);
 
     // Slime is dynamic in gameplay and should keep dynamic shadow invalidation.
-    tagShadowObject(model, false);
-    enableShadows(model);
-    registerShadowObject(model, { staticObject: false });
+    setupModelShadows(model, false);
 
     scene.add(model);
     addCollider(model, { dynamic: true });
@@ -188,14 +201,7 @@ function loadLamp(x, y, z, rotationY = 0) {
 
     const light = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
     light.position.set(LAMP_LIGHT_POSITION.x, LAMP_LIGHT_POSITION.y, LAMP_LIGHT_POSITION.z);
-    light.castShadow = true;
-    light.shadow.radius = SHADOW_RADIUS;
-    light.shadow.mapSize.width = SHADOW_MAP_SIZE;
-    light.shadow.mapSize.height = SHADOW_MAP_SIZE;
-    light.shadow.bias = SHADOW_BIAS;
-    light.shadow.normalBias = SHADOW_NORMAL_BIAS
-    light.shadow.camera.near = SHADOW_CAMERA_NEAR;
-    light.shadow.camera.far = SHADOW_CAMERA_FAR;
+    configureShadowCastingLight(light);
 
     tagShadowLight(light, true);
     registerShadowLight(light, { staticLight: true });
@@ -203,9 +209,7 @@ function loadLamp(x, y, z, rotationY = 0) {
     createFireflies(model);
     model.add(light);
 
-    tagShadowObject(model, true);
-    enableShadows(model);
-    registerShadowObject(model, { staticObject: true });
+    setupModelShadows(model, true);
 
     scene.add(model);
     addCollider(model, { boundsScale: 0.72 });
@@ -225,9 +229,7 @@ function loadTree(x, y, z, rotationY = 0) {
     placeModelOnGround(model, x, z, y);
     model.rotation.y = rotationY * (Math.PI / 180);
 
-    tagShadowObject(model, true);
-    enableShadows(model);
-    registerShadowObject(model, { staticObject: true });
+    setupModelShadows(model, true);
 
     model.traverse((obj) => {
       if (obj.isMesh && obj.name === 'Cylinder') {
@@ -247,9 +249,7 @@ function loadBench(x, y, z, rotationY = 0) {
     placeModelOnGround(model, x, z, y);
     model.rotation.y = rotationY * (Math.PI / 180);
 
-    tagShadowObject(model, true);
-    enableShadows(model);
-    registerShadowObject(model, { staticObject: true });
+    setupModelShadows(model, true);
 
     scene.add(model);
     addCollider(model);
@@ -290,14 +290,7 @@ function loadFlashlight(x, y, z, rotationY = 0) {
       spotOrigin.clone().addScaledVector(spotDirection, targetDistance)
     );
 
-    spotLight.castShadow = true;
-    spotLight.shadow.radius = SHADOW_RADIUS;
-    spotLight.shadow.mapSize.width = SHADOW_MAP_SIZE;
-    spotLight.shadow.mapSize.height = SHADOW_MAP_SIZE;
-    spotLight.shadow.bias = SHADOW_BIAS;
-    spotLight.shadow.normalBias = SHADOW_NORMAL_BIAS;
-    spotLight.shadow.camera.near = SHADOW_CAMERA_NEAR;
-    spotLight.shadow.camera.far = SHADOW_CAMERA_FAR;
+    configureShadowCastingLight(spotLight);
 
     // Flashlight lights are marked dynamic by design.
     tagShadowLight(spotLight, false);
@@ -316,9 +309,7 @@ function loadFlashlight(x, y, z, rotationY = 0) {
     tagShadowLight(internalLight, false);
     registerShadowLight(internalLight, { staticLight: false });
 
-    tagShadowObject(model, true);
-    enableShadows(model);
-    registerShadowObject(model, { staticObject: true });
+    setupModelShadows(model, true);
 
     model.add(spotLight);
     model.add(spotLight.target);

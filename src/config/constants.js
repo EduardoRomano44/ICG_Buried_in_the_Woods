@@ -56,14 +56,23 @@ export const SLIME_IDLE_XZ_AMPLITUDE = 0.2;
 export const SLIME_IDLE_Y_AMPLITUDE  = 0.2;
 export const SLIME_IDLE_TRIGGER_DISTANCE = 4.5;
 export const SLIME_ATTACK_DURATION = 1.5;
-export const SLIME_ATTACK_BLINK_SPEED = 5;
+export const SLIME_ATTACK_BLINK_SPEED = 10;
 export const SLIME_ATTACK_HITBOX_RADIUS = 8;
 export const SLIME_ATTACK_HITBOX_COLOR = 0xff3030;
 export const SLIME_ATTACK_HITBOX_OPACITY = 0.1;
 export const SLIME_ATTACK_DAMAGE = 1;
 export const SLIME_ATTACK_EYE_SQUINT_SCALE = 0.7;
-export const SLIME_ATTACK_SCALE_MIN = 0.925;
-export const SLIME_ATTACK_SCALE_MAX = 1.075;
+export const SLIME_ATTACK_SCALE_MIN = 0.7;
+export const SLIME_ATTACK_SCALE_MAX = 1.3;
+export const SLIME_EXPLODE_PARTICLE_COUNT = 28;
+export const SLIME_EXPLODE_PARTICLE_COLOR = '#fa05fa';
+export const SLIME_EXPLODE_PARTICLE_SIZE = 0.25;
+export const SLIME_EXPLODE_PARTICLE_OPACITY = 0.95;
+export const SLIME_EXPLODE_PARTICLE_SPEED_MIN = 4;
+export const SLIME_EXPLODE_PARTICLE_SPEED_MAX = 15;
+export const SLIME_EXPLODE_PARTICLE_LIFETIME = 1.65;
+export const SLIME_EXPLODE_PARTICLE_GRAVITY = 10;
+export const SLIME_EXPLODE_PARTICLE_DRAG = 0.05;
 
 // Debug
 export const DEBUG_SLIME_RESPAWN_ENABLED = true;
@@ -142,7 +151,7 @@ export const ROAD_ALIGN_TO_GROUND = true;
 
 // Grass
 export const GRASS_SEGMENTS = 3;
-export const GRASS_COUNT = 1500;        // number of grass patches
+export const GRASS_COUNT = 2000;        // number of grass patches
 export const GRASS_PATCH_SIZE = 3;     // blades per patch
 export const GRASS_BLADE_WIDTH = 0.18; // base width of each blade
 export const GRASS_BLADE_HEIGHT = 0.7; // height of each blade

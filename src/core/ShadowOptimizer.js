@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import {
-  SHADOW_UPDATE_INTERVAL_FRAMES,
   SHADOW_LIGHT_NEAR_DISTANCE,
   SHADOW_LIGHT_FAR_DISTANCE,
   SHADOW_LIGHT_MAP_SCALE_NEAR,
@@ -19,9 +18,9 @@ const shadowLights = [];
 const shadowObjects = [];
 
 const tmpVecA = new THREE.Vector3();
+const SHADOW_LOD_HYSTERESIS = 4;
 
 let rendererRef = null;
-let frameCounter = 0;
 let hasInitialRefresh = false;
 let pendingShadowRefresh = true;
 
@@ -35,9 +34,24 @@ function tagShadowObject(object3D, staticObject = true) {
   object3D.userData.staticObject = Boolean(staticObject);
 }
 
-function getDistanceLodLevel(distance, nearDistance, farDistance) {
-  if (distance <= nearDistance) return 0;
-  if (distance <= farDistance) return 1;
+function getDistanceLodLevel(distance, nearDistance, farDistance, previousLod = -1) {
+  if (previousLod < 0) {
+    if (distance <= nearDistance) return 0;
+    if (distance <= farDistance) return 1;
+    return 2;
+  }
+
+  if (previousLod === 0) {
+    return distance > (nearDistance + SHADOW_LOD_HYSTERESIS) ? 1 : 0;
+  }
+
+  if (previousLod === 1) {
+    if (distance < (nearDistance - SHADOW_LOD_HYSTERESIS)) return 0;
+    if (distance > (farDistance + SHADOW_LOD_HYSTERESIS)) return 2;
+    return 1;
+  }
+
+  if (distance < (farDistance - SHADOW_LOD_HYSTERESIS)) return 1;
   return 2;
 }
 
@@ -85,7 +99,12 @@ function updateObjectShadowLod(entry, camera) {
 
   entry.object3D.getWorldPosition(tmpVecA);
   const distance = tmpVecA.distanceTo(camera.position);
-  const lodLevel = getDistanceLodLevel(distance, SHADOW_OBJECT_NEAR_DISTANCE, SHADOW_OBJECT_FAR_DISTANCE);
+  const lodLevel = getDistanceLodLevel(
+    distance,
+    SHADOW_OBJECT_NEAR_DISTANCE,
+    SHADOW_OBJECT_FAR_DISTANCE,
+    entry.lodLevel
+  );
 
   if (lodLevel === entry.lodLevel) return false;
   entry.lodLevel = lodLevel;
@@ -118,9 +137,18 @@ function updateLightShadowLod(entry, camera) {
   const light = entry.light;
   if (!light || !light.shadow || !light.castShadow) return false;
 
+  // Point-light cubemap shadow reallocations can cause visible one-frame flicker/pop.
+  // Keep their shadow settings stable and only optimize other light types.
+  if (light.isPointLight) return false;
+
   light.getWorldPosition(tmpVecA);
   const distance = tmpVecA.distanceTo(camera.position);
-  const lodLevel = getDistanceLodLevel(distance, SHADOW_LIGHT_NEAR_DISTANCE, SHADOW_LIGHT_FAR_DISTANCE);
+  const lodLevel = getDistanceLodLevel(
+    distance,
+    SHADOW_LIGHT_NEAR_DISTANCE,
+    SHADOW_LIGHT_FAR_DISTANCE,
+    entry.lodLevel
+  );
 
   if (lodLevel === entry.lodLevel) return false;
   entry.lodLevel = lodLevel;
@@ -137,11 +165,6 @@ function updateLightShadowLod(entry, camera) {
 
   light.shadow.mapSize.set(nextWidth, nextHeight);
   light.shadow.radius = nextRadius;
-
-  if (light.shadow.map) {
-    light.shadow.map.dispose();
-    light.shadow.map = null;
-  }
 
   return true;
 }
@@ -230,7 +253,6 @@ function registerShadowObject(object3D, options = {}) {
 
 function initShadowOptimizer(renderer) {
   rendererRef = renderer;
-  frameCounter = 0;
   hasInitialRefresh = false;
   pendingShadowRefresh = true;
 
@@ -282,9 +304,7 @@ function updateShadowOptimization(camera) {
     pendingShadowRefresh = true;
   }
 
-  frameCounter += 1;
   if (!pendingShadowRefresh) return false;
-  if (frameCounter % SHADOW_UPDATE_INTERVAL_FRAMES !== 0) return false;
 
   rendererRef.shadowMap.needsUpdate = true;
   hasInitialRefresh = true;

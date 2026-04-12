@@ -47,6 +47,15 @@ const playerBox = new THREE.Box3();
 const previousShakeOffset = new THREE.Vector3();
 const interactionRaycaster = new THREE.Raycaster();
 const interactionCenter = new THREE.Vector2(0, 0);
+const pressedKeys = new Set();
+
+const KEY_BINDINGS = {
+  forward: ['KeyW', 'ArrowUp'],
+  backward: ['KeyS', 'ArrowDown'],
+  left: ['KeyA', 'ArrowLeft'],
+  right: ['KeyD', 'ArrowRight'],
+  sprint: ['ShiftLeft', 'ShiftRight'],
+};
 
 // Controls
 const fpControls = new PointerLockControls(camera, document.body);
@@ -56,6 +65,25 @@ fpControls.pointerSpeed = settings.cameraSensitivity;
 const colliders = [];
 const interactables = [];
 let currentInteractable = null;
+
+function setGameplayCursorHidden(hidden) {
+  const cursorValue = hidden ? 'none' : 'auto';
+  document.body.style.cursor = cursorValue;
+  document.documentElement.style.cursor = cursorValue;
+  renderer.domElement.style.cursor = cursorValue;
+}
+
+function isAnyKeyPressed(keyCodes) {
+  return keyCodes.some((keyCode) => pressedKeys.has(keyCode));
+}
+
+function syncMoveStateFromPressedKeys() {
+  move.forward = isAnyKeyPressed(KEY_BINDINGS.forward);
+  move.backward = isAnyKeyPressed(KEY_BINDINGS.backward);
+  move.left = isAnyKeyPressed(KEY_BINDINGS.left);
+  move.right = isAnyKeyPressed(KEY_BINDINGS.right);
+  isSprinting = isAnyKeyPressed(KEY_BINDINGS.sprint);
+}
 
 function addCollider(obj, options = {}) {
   colliders.push({
@@ -161,30 +189,21 @@ function intersectsPlayerHitboxSphere(center, radius) {
 
 // Input
 function onKeyDown(e) {
+  pressedKeys.add(e.code);
+
   if (!inputEnabled) return;
 
-  switch (e.code) {
-    case 'KeyW': move.forward  = true; break;
-    case 'KeyS': move.backward = true; break;
-    case 'KeyA': move.left     = true; break;
-    case 'KeyD': move.right    = true; break;
-    case 'ShiftLeft': isSprinting = true; break;
-    case 'KeyE':
-      tryInteractCurrentTarget();
-      break;
+  if (e.code === 'KeyE') {
+    tryInteractCurrentTarget();
+    return;
   }
+
+  syncMoveStateFromPressedKeys();
 }
 
 function onKeyUp(e) {
-  if (!inputEnabled) return;
-
-  switch (e.code) {
-    case 'KeyW': move.forward  = false; break;
-    case 'KeyS': move.backward = false; break;
-    case 'KeyA': move.left     = false; break;
-    case 'KeyD': move.right    = false; break;
-    case 'ShiftLeft': isSprinting = false; break;
-  }
+  pressedKeys.delete(e.code);
+  syncMoveStateFromPressedKeys();
 }
 
 function initInput() {
@@ -198,6 +217,7 @@ function clearMovementInput() {
   move.backward = false;
   move.left = false;
   move.right = false;
+  pressedKeys.clear();
   isSprinting = false;
   isSprintActive = false;
 }
@@ -212,6 +232,7 @@ function enterFirstPerson() {
   fpControls.lock();
   camera.position.y = PLAYER_HEIGHT;
   showCrosshair();
+  setGameplayCursorHidden(true);
   isFPMode = true;
 }
 
@@ -220,12 +241,14 @@ function pauseFirstPersonControls() {
   clearMovementInput();
   fpControls.unlock();
   hideCrosshair();
+  setGameplayCursorHidden(false);
 }
 
 function resumeFirstPersonControls() {
   if (!isFPMode) return;
   fpControls.lock();
   showCrosshair();
+  setGameplayCursorHidden(true);
 }
 
 function setInputEnabled(enabled) {
