@@ -85,11 +85,14 @@ export const LAMP_LIGHT_COLOR = '#f7da63';
 export const LAMP_LIGHT_INTENSITY = 600;
 export const LAMP_LIGHT_DISTANCE = 80;
 export const LAMP_LIGHT_POSITION = { x: -0.008793, y: 14.0006, z: 0.00729 };
-export const LAMP_SHADOW_RADIUS = 8;
-export const LAMP_SHADOW_MAP_SIZE = 900;
-export const LAMP_SHADOW_BIAS = -0.012;
-export const LAMP_SHADOW_CAMERA_NEAR = 1.6;
-export const LAMP_SHADOW_CAMERA_FAR = LAMP_LIGHT_DISTANCE;
+
+// Shadows
+export const SHADOW_RADIUS = 2;
+export const SHADOW_MAP_SIZE = 2048;
+export const SHADOW_BIAS = -0.0005;
+export const SHADOW_NORMAL_BIAS = 0.015;
+export const SHADOW_CAMERA_NEAR = 1.7;
+export const SHADOW_CAMERA_FAR = LAMP_LIGHT_DISTANCE;
 
 // Shadow optimization
 export const SHADOW_UPDATE_INTERVAL_FRAMES = 3;

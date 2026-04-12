@@ -24,11 +24,12 @@ import {
   LAMP_LIGHT_INTENSITY,
   LAMP_LIGHT_DISTANCE,
   LAMP_LIGHT_POSITION,
-  LAMP_SHADOW_RADIUS,
-  LAMP_SHADOW_MAP_SIZE,
-  LAMP_SHADOW_BIAS,
-  LAMP_SHADOW_CAMERA_NEAR,
-  LAMP_SHADOW_CAMERA_FAR,
+  SHADOW_RADIUS,
+  SHADOW_MAP_SIZE,
+  SHADOW_BIAS,
+  SHADOW_NORMAL_BIAS,
+  SHADOW_CAMERA_NEAR,
+  SHADOW_CAMERA_FAR,
   SLIME_SCALE,
   FLASHLIGHT_SCALE,
   FLASHLIGHT_COLOR,
@@ -188,12 +189,13 @@ function loadLamp(x, y, z, rotationY = 0) {
     const light = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
     light.position.set(LAMP_LIGHT_POSITION.x, LAMP_LIGHT_POSITION.y, LAMP_LIGHT_POSITION.z);
     light.castShadow = true;
-    light.shadow.radius = LAMP_SHADOW_RADIUS;
-    light.shadow.mapSize.width = LAMP_SHADOW_MAP_SIZE;
-    light.shadow.mapSize.height = LAMP_SHADOW_MAP_SIZE;
-    light.shadow.bias = LAMP_SHADOW_BIAS;
-    light.shadow.camera.near = LAMP_SHADOW_CAMERA_NEAR;
-    light.shadow.camera.far = LAMP_SHADOW_CAMERA_FAR;
+    light.shadow.radius = SHADOW_RADIUS;
+    light.shadow.mapSize.width = SHADOW_MAP_SIZE;
+    light.shadow.mapSize.height = SHADOW_MAP_SIZE;
+    light.shadow.bias = SHADOW_BIAS;
+    light.shadow.normalBias = SHADOW_NORMAL_BIAS
+    light.shadow.camera.near = SHADOW_CAMERA_NEAR;
+    light.shadow.camera.far = SHADOW_CAMERA_FAR;
 
     tagShadowLight(light, true);
     registerShadowLight(light, { staticLight: true });
@@ -289,12 +291,13 @@ function loadFlashlight(x, y, z, rotationY = 0) {
     );
 
     spotLight.castShadow = true;
-    spotLight.shadow.radius = LAMP_SHADOW_RADIUS;
-    spotLight.shadow.mapSize.width = LAMP_SHADOW_MAP_SIZE;
-    spotLight.shadow.mapSize.height = LAMP_SHADOW_MAP_SIZE;
-    spotLight.shadow.bias = LAMP_SHADOW_BIAS;
-    spotLight.shadow.camera.near = LAMP_SHADOW_CAMERA_NEAR;
-    spotLight.shadow.camera.far = LAMP_SHADOW_CAMERA_FAR;
+    spotLight.shadow.radius = SHADOW_RADIUS;
+    spotLight.shadow.mapSize.width = SHADOW_MAP_SIZE;
+    spotLight.shadow.mapSize.height = SHADOW_MAP_SIZE;
+    spotLight.shadow.bias = SHADOW_BIAS;
+    spotLight.shadow.normalBias = SHADOW_NORMAL_BIAS;
+    spotLight.shadow.camera.near = SHADOW_CAMERA_NEAR;
+    spotLight.shadow.camera.far = SHADOW_CAMERA_FAR;
 
     // Flashlight lights are marked dynamic by design.
     tagShadowLight(spotLight, false);

@@ -20,26 +20,13 @@ import {
   AMBIENT_LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY,
 } from '../config/constants.js';
 
-// Ground continuation beyond the playable area, so fog can hide map limits naturally.
-const extendedGroundGeometry = new THREE.PlaneGeometry(
+// Chão
+const planeGeometry = new THREE.PlaneGeometry(
   GROUND_SIZE * WORLD_EXTENDED_GROUND_SCALE,
   GROUND_SIZE * WORLD_EXTENDED_GROUND_SCALE
 );
-const extendedGroundMaterial = new THREE.MeshStandardMaterial({
-  color: GROUND_COLOR,
-  roughness: 1,
-  metalness: 0,
-});
-const extendedGround = new THREE.Mesh(extendedGroundGeometry, extendedGroundMaterial);
-extendedGround.rotation.x = -Math.PI / 2;
-extendedGround.position.y = WORLD_EXTENDED_GROUND_Y_OFFSET;
-extendedGround.receiveShadow = true;
-tagShadowObject(extendedGround, true);
-scene.add(extendedGround);
-
-// Chão
-const planeGeometry = new THREE.PlaneGeometry(GROUND_SIZE, GROUND_SIZE);
-const planeMaterial = new THREE.MeshStandardMaterial({ color: GROUND_COLOR });
+const planeMaterial = new THREE.MeshLambertMaterial({ color: GROUND_COLOR });
+planeMaterial.side = THREE.DoubleSide;
 const ground = new THREE.Mesh(planeGeometry, planeMaterial);
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
