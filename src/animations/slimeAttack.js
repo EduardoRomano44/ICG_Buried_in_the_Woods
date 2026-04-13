@@ -24,12 +24,17 @@ import settings from '../config/settings.js';
 import { removeCollider, damagePlayer, intersectsPlayerHitboxSphere } from '../player/Player.js';
 import { playSlimeExplodeAudio } from '../audio/GameAudio.js';
 
+/* 
+  Responsible for managing slime attack animation
+  Animation: Slime "Blinks" (increases and decreases size, charging the attack) -> Slime Expands (Slime implodes, increasing size to attack hitbox) -> Particles (Slime dissapears, damaging the player and releasing particle effects) 
+*/
 const activeAttacks = new Map();
 const activeExplodeBursts = [];
 const ATTACK_EXPANSION_DURATION = 0.5;
 let lastParticleUpdateTime = null;
 let roundParticleTexture = null;
 
+// Particle Effect
 function getRoundParticleTexture() {
   if (roundParticleTexture) return roundParticleTexture;
 
@@ -78,6 +83,7 @@ function clearExplodeBursts() {
 }
 
 function spawnSlimeExplodeParticles(center) {
+  // Function made by copilot
   if (settings.lowQuality || SLIME_EXPLODE_PARTICLE_COUNT <= 0) return;
 
   const count = Math.max(1, Math.floor(SLIME_EXPLODE_PARTICLE_COUNT));
@@ -137,6 +143,7 @@ function spawnSlimeExplodeParticles(center) {
 }
 
 function updateSlimeExplodeParticles(elapsed) {
+  // Function made by copilot
   if (settings.lowQuality) {
     clearExplodeBursts();
     lastParticleUpdateTime = elapsed;
@@ -181,6 +188,7 @@ function updateSlimeExplodeParticles(elapsed) {
 }
 
 function createHitboxMesh() {
+  // Location where player takes damage when the attack completes
   const geometry = new THREE.SphereGeometry(
     SLIME_ATTACK_HITBOX_RADIUS,
     24,
@@ -228,6 +236,7 @@ function createEyeState(slimeMesh) {
 }
 
 function applyInitialEyeSquint(eyes) {
+  // Eyes squint when attacking
   const squintScale = SLIME_ATTACK_EYE_SQUINT_SCALE;
 
   const eyeBig = eyes.eyeBig[0];
@@ -246,6 +255,7 @@ function applyInitialEyeSquint(eyes) {
 }
 
 function setAttackScalePulse(attackState, pulseFactor) {
+  // Slime pulsates as it is charging the attack
   const scaleMul = SLIME_ATTACK_SCALE_MIN + pulseFactor * (SLIME_ATTACK_SCALE_MAX - SLIME_ATTACK_SCALE_MIN);
 
   setAttackScaleMul(attackState, scaleMul);
@@ -271,7 +281,7 @@ function getSlimeFinalExpansionRadius(slimeMesh) {
 }
 
 function createAttackState(slimeMesh, onExplode) {
-  const eyes = createEyeState(slimeMesh);
+  const eyes = createEyeState(slimeMesh); // Eyes are not reset, but because slimes don't respawn (only when debuging) this isn't an issue
   const hitboxMesh = createHitboxMesh();
   scene.add(hitboxMesh);
 

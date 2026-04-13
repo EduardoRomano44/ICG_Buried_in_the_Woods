@@ -6,6 +6,8 @@ import {
   DEBUG_SLIME_RESPAWN_DELAY,
 } from '../config/constants.js';
 
+// For testing purpuses, slime will respawwn after attacking
+
 function scheduleSlimeRespawnDebug(slimeMesh, baseScale) {
   if (!DEBUG_SLIME_RESPAWN_ENABLED || !slimeMesh) return;
 

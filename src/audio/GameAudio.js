@@ -10,6 +10,12 @@ import {
   FOREST_AUDIO_VOLUME,
 } from '../config/constants.js';
 
+/*
+  Manages audio for the game
+  Made with Copilot
+  It is off the course's scope, but makes the game more imersive
+*/
+
 const tracks = {
   titleCard: createTrack('titleCard.mp3', TITLE_CARD_AUDIO_VOLUME, true),
   slimeExplode: createTrack('slimeExplode.mp3', SLIME_EXPLODE_AUDIO_VOLUME, false),

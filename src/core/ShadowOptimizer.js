@@ -14,6 +14,15 @@ import {
   SHADOW_DYNAMIC_POSITION_EPSILON,
 } from '../config/constants.js';
 
+/*
+  File made by copilot, with tought process by the author
+  Problem: The game had too many shadows being processed at the same time, which severely harmed performance
+  Solutions: - Decrease shadow quality when player is far away;
+             - Seperate shadows into two types: + Static (from objects that dont move and made by Lamps, Moon, etc.)
+                                                + Dynamic (from object that move and are made by the Flashlight)
+                Static shadows are not updated after creation; Dynamic shadows are updated every X frames.
+*/
+
 const shadowLights = [];
 const shadowObjects = [];
 

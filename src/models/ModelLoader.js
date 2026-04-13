@@ -61,6 +61,8 @@ const BENCH_MODEL_PATH = './models/Bench.glb';
 const FLASHLIGHT_MODEL_PATH = './models/Flashlight.glb';
 
 function loadModelTemplate(modelPath) {
+  // Add models to templates after creation, for faster loading
+
   if (modelTemplatePromises.has(modelPath)) {
     return modelTemplatePromises.get(modelPath);
   }
@@ -83,6 +85,7 @@ function cloneModelTemplate(modelPath) {
 }
 
 function createPlacementHash(cellSize) {
+  // Made by copilot, exclude placements that are too close to other objects
   const safeCellSize = Math.max(0.001, cellSize);
   const buckets = new Map();
 
@@ -148,6 +151,7 @@ function configureShadowCastingLight(light) {
 }
 
 function setupModelShadows(model, staticObject = true) {
+  // For shadow optimization
   tagShadowObject(model, staticObject);
   enableShadows(model);
   registerShadowObject(model, { staticObject });
@@ -265,6 +269,7 @@ function loadFlashlight(x, y, z, rotationY = 0) {
     placeModelOnGround(model, x, z, y);
     model.rotation.y = rotationY * (Math.PI / 180);
 
+    // Lighting: Flashlight has to lights: Spotlight (to reflect on other objects) and Internal Light(For the Flashlight to appear ON)
     const spotLight = new THREE.SpotLight(
       FLASHLIGHT_COLOR,
       FLASHLIGHT_INTENSITY,
@@ -355,6 +360,7 @@ function loadTrees(list_positions = []) {
 }
 
 function generateTreePlacements(count, groundY = 0) {
+  // Made by copilot, place trees randomly around the map
   const placements = [];
   const half = (GROUND_SIZE * 0.5) - TREE_WORLD_MARGIN;
   const placementHash = createPlacementHash(TREE_EXCLUSION_RADIUS);

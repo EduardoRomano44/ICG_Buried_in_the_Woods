@@ -8,6 +8,11 @@ import {
 import { startSlimeAttack, updateSlimeAttacks } from './slimeAttack.js';
 import { setSlimeIdleAudioActive, setSlimeIdleAudioDistance } from '../audio/GameAudio.js';
 
+/* 
+  Responsible for managing slime idle animation
+  Animation: Slime Scales Up Horizontaly, Down Verticaly <-> Slime Scales Down Horizontaly, Up Verticaly and Moves(Todo)
+*/
+
 const slimes = [];
 
 function createSlimeIdle(model) {

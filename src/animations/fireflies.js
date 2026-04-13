@@ -58,6 +58,7 @@ function createFireflies(parentModel, count = FIREFLY_COUNT) {
 }
 
 function animateFireflies(time) {
+  // Movement Logic made with the help of copilot
   if (!time || !firefliesEnabled) return;
 
   fireflies.forEach((f) => {

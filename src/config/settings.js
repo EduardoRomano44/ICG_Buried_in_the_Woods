@@ -1,22 +1,22 @@
-// Valores MODIFICÁVEIS pelo jogador.
+// Values that can be modified by the player
 
 const settings = {
 
   // Camera / Controls
-  cameraSensitivity: 2.0, // Sensibilidade do rato 
+  cameraSensitivity: 2.0,
 
   // Rendering
-  antialias: true,   // Anti-aliasing
-  shadowsEnabled: true,   // Sombras ativas
-  lowQuality: false,   // true desativa relva e fireflies
+  antialias: true,
+  shadowsEnabled: true,
+  lowQuality: false,
 
   // UI
-  crosshairColor: "white",   // Cor do crosshair
-  crosshairSize: 6,   // Tamanho do crosshair em px
+  crosshairColor: "white",
+  crosshairSize: 6,
   uiBarsSize: 'medium',   // small | medium | large
 
   // Audio
-  audioVolume: 0.8,   // 0..1 volume global
+  audioVolume: 0.8,
 };
 
 export default settings;
