@@ -20,7 +20,7 @@ import {
   AMBIENT_LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY,
 } from '../config/constants.js';
 
-// Chão
+// Ground
 const planeGeometry = new THREE.PlaneGeometry(
   GROUND_SIZE * WORLD_EXTENDED_GROUND_SCALE,
   GROUND_SIZE * WORLD_EXTENDED_GROUND_SCALE
@@ -54,9 +54,9 @@ createBarrier(playableHalf * 2 + WORLD_BARRIER_THICKNESS * 2, WORLD_BARRIER_THIC
 createBarrier(WORLD_BARRIER_THICKNESS, playableHalf * 2 + WORLD_BARRIER_THICKNESS * 2, playableHalf, 0);
 createBarrier(WORLD_BARRIER_THICKNESS, playableHalf * 2 + WORLD_BARRIER_THICKNESS * 2, -playableHalf, 0);
 
-// Céu noturno (gradiente shader)
+// Sky
 const skyGeo = new THREE.SphereGeometry(SKY_RADIUS, 64, 64);
-const skyMat = new THREE.ShaderMaterial({
+const skyMat = new THREE.ShaderMaterial({ // Gradient Material
   side: THREE.BackSide,
   depthWrite: false,
   uniforms: {
@@ -84,7 +84,7 @@ const skyMat = new THREE.ShaderMaterial({
 const sky = new THREE.Mesh(skyGeo, skyMat);
 scene.add(sky);
 
-// Lua
+// Moon
 const moonGeo = new THREE.SphereGeometry(MOON_RADIUS, 32, 32);
 const moonMat = new THREE.MeshBasicMaterial({ color: MOON_COLOR });
 const moon = new THREE.Mesh(moonGeo, moonMat);
@@ -92,6 +92,7 @@ scene.add(moon);
 
 const moonOffset = new THREE.Vector3(MOON_OFFSET.x, MOON_OFFSET.y, MOON_OFFSET.z);
 const moonDirection = moonOffset.clone().normalize();
+// Moonlight
 const moonLight = new THREE.DirectionalLight(MOONLIGHT_COLOR, MOONLIGHT_INTENSITY);
 moonLight.castShadow = true;
 
@@ -117,16 +118,16 @@ scene.add(moonLight.target);
 moonLight.updateMatrixWorld(true);
 moonLight.target.updateMatrixWorld(true);
 
-// Nevoeiro
+// Fog
 scene.fog = new THREE.Fog(FOG_COLOR, FOG_NEAR, FOG_FAR);
 
-// Luz ambiente
+// Ambient Light
 const ambientLight = new THREE.AmbientLight(AMBIENT_LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY);
 tagShadowLight(ambientLight, true);
 registerShadowLight(ambientLight, { staticLight: true });
 scene.add(ambientLight);
 
-// Update (seguir câmara)
+// Sky follows camera
 function updateWorld(camera) {
   sky.position.copy(camera.position);
 

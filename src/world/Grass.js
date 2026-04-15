@@ -8,6 +8,8 @@
  * thickness and reads as a small 3-D bush — fitting the artstyle.
  *
  * Wind: a single ShaderMaterial uniform drives all blades in the same direction.
+ * 
+ * File made by copilot
  */
 
 import * as THREE from 'three';

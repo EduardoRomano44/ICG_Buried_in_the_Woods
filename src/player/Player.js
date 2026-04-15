@@ -29,6 +29,9 @@ import {
   INTERACT_MAX_DISTANCE,
 } from '../config/constants.js';
 
+// Responsible for controlling the camera (player) and registering resources (health and stamina)
+// File made with assistance of copilot to construct code based on game development patterns
+
 // State
 let isFPMode = false;
 let isSprinting = false;
@@ -50,6 +53,7 @@ const interactionCenter = new THREE.Vector2(0, 0);
 const pressedKeys = new Set();
 
 const KEY_BINDINGS = {
+  // Multiple bindings support
   forward: ['KeyW', 'ArrowUp'],
   backward: ['KeyS', 'ArrowDown'],
   left: ['KeyA', 'ArrowLeft'],
@@ -66,6 +70,7 @@ const colliders = [];
 const interactables = [];
 let currentInteractable = null;
 
+// Movement
 function setGameplayCursorHidden(hidden) {
   const cursorValue = hidden ? 'none' : 'auto';
   document.body.style.cursor = cursorValue;
@@ -85,6 +90,7 @@ function syncMoveStateFromPressedKeys() {
   isSprinting = isAnyKeyPressed(KEY_BINDINGS.sprint);
 }
 
+// Colision
 function addCollider(obj, options = {}) {
   colliders.push({
     obj,
@@ -101,6 +107,7 @@ function removeCollider(obj) {
   }
 }
 
+// Interactable objects
 function registerInteractable(obj, options = {}) {
   if (!obj) return;
 
@@ -133,6 +140,7 @@ function findInteractableEntryForObject(object) {
 }
 
 function updateInteractionTarget() {
+  // Display prompt if looking at an object
   for (let i = interactables.length - 1; i >= 0; i--) {
     if (!interactables[i].obj || !interactables[i].obj.parent) {
       interactables.splice(i, 1);
@@ -293,7 +301,7 @@ function updatePlayer(delta) {
 
   fpControls.pointerSpeed = settings.cameraSensitivity;
 
-  // Direção
+  // Direction
   direction.z = Number(move.forward)  - Number(move.backward);
   direction.x = Number(move.right)    - Number(move.left);
   direction.normalize();
@@ -320,7 +328,7 @@ function updatePlayer(delta) {
 
   const currentSpeed = PLAYER_BASE_SPEED * (isSprintActive ? PLAYER_SPRINT_MULTIPLIER : 1);
 
-  // Movimento
+  // Movement
   if (isMoving) {
     fpControls.moveForward(direction.z * currentSpeed * delta);
     fpControls.moveRight(direction.x * currentSpeed * delta);
@@ -335,7 +343,7 @@ function updatePlayer(delta) {
     camera.position.y = PLAYER_HEIGHT;
   }
 
-  // Gravidade
+  // Gravity
   velocityY -= GRAVITY * delta;
   camera.position.y += velocityY * delta;
   if (camera.position.y < PLAYER_HEIGHT) {
@@ -343,7 +351,7 @@ function updatePlayer(delta) {
     camera.position.y = PLAYER_HEIGHT;
   }
 
-  // Colisão
+  // Colision
   const r = PLAYER_COLLISION_RADIUS;
   playerBox.min.set(camera.position.x - r, 0.1, camera.position.z - r);
   playerBox.max.set(camera.position.x + r, PLAYER_HEIGHT, camera.position.z + r);
@@ -367,7 +375,7 @@ function updatePlayer(delta) {
     }
   }
 
-  // FOV suave
+  // soft FOV
   const targetFOV = isSprintActive ? CAMERA_SPRINT_FOV : CAMERA_NORMAL_FOV;
   camera.fov += (targetFOV - camera.fov) * delta * CAMERA_FOV_LERP_SPEED;
   camera.updateProjectionMatrix();

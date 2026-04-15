@@ -120,7 +120,7 @@ async function preloadWorldAssets() {
 function beginStartFromTitle() {
   if (hasStarted || isLoadingWorld) return;
 
-  // Capture pointer lock while still in a user gesture, so no extra click is needed later.
+  // Lock pointer while still in main menu
   requestPointerLock();
 
   preloadWorldAssets().then((ok) => {

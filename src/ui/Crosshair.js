@@ -15,6 +15,7 @@ function createCrosshair() {
   s.top = '50%';
   s.left = '50%';
   s.borderRadius = '50%';
+  s.opacity = '80%';
   s.transform = 'translate(-50%, -50%)';
   s.pointerEvents = 'none';
   s.display = 'none';
