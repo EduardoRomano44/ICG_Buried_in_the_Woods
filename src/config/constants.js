@@ -93,7 +93,7 @@ export const DEBUG_SLIME_RESPAWN_DELAY = 5;
 
 // Ambient Light
 export const AMBIENT_LIGHT_COLOR = 0x505050;
-export const AMBIENT_LIGHT_INTENSITY = 10.12;
+export const AMBIENT_LIGHT_INTENSITY = 0.12;
 
 // Object Interaction
 export const INTERACT_MAX_DISTANCE = 5.5;
