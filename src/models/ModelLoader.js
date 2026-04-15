@@ -53,12 +53,47 @@ import {
 
 const loader = new GLTFLoader();
 const modelTemplatePromises = new Map();
+let lastTreePlacements = [];
 
 const SLIME_MODEL_PATH = './models/Slime.glb';
 const LAMP_MODEL_PATH = './models/Lamp.glb';
 const TREE_MODEL_PATH = './models/Tree.glb';
 const BENCH_MODEL_PATH = './models/Bench.glb';
 const FLASHLIGHT_MODEL_PATH = './models/Flashlight.glb';
+
+function normalizeTreePlacementEntry(entry) {
+  // Using previously generated positions
+  if (Array.isArray(entry)) {
+    return [
+      Number.isFinite(entry[0]) ? entry[0] : 0,
+      Number.isFinite(entry[1]) ? entry[1] : 0,
+      Number.isFinite(entry[2]) ? entry[2] : 0,
+      Number.isFinite(entry[3]) ? entry[3] : 0,
+    ];
+  }
+
+  if (!entry || typeof entry !== 'object') return null;
+
+  return [
+    Number.isFinite(entry.x) ? entry.x : 0,
+    Number.isFinite(entry.y) ? entry.y : 0,
+    Number.isFinite(entry.z) ? entry.z : 0,
+    Number.isFinite(entry.rotationY) ? entry.rotationY : 0,
+  ];
+}
+
+function normalizeTreePlacementList(list) {
+  if (!Array.isArray(list)) return [];
+
+  const normalized = [];
+  for (const entry of list) {
+    const parsed = normalizeTreePlacementEntry(entry);
+    if (!parsed) continue;
+    normalized.push(parsed);
+  }
+
+  return normalized;
+}
 
 function loadModelTemplate(modelPath) {
   // Add models to templates after creation, for faster loading
@@ -345,8 +380,9 @@ function loadLamps(list_positions = []) {
 }
 
 function loadTrees(list_positions = []) {
-  const isManualList = list_positions.length > 0;
-  const positions = isManualList ? list_positions : generateTreePlacements(TREE_COUNT, 0);
+  const normalizedList = normalizeTreePlacementList(list_positions);
+  const isManualList = normalizedList.length > 0;
+  const positions = isManualList ? normalizedList : generateTreePlacements(TREE_COUNT, 0);
 
   if (isManualList) {
     for (const position of positions) {
@@ -354,9 +390,20 @@ function loadTrees(list_positions = []) {
     }
   }
 
+  lastTreePlacements = positions.map((position) => [
+    position[0],
+    position[1],
+    position[2],
+    position[3] || 0,
+  ]);
+
   return Promise.all(
     positions.map((position) => loadTree(position[0], position[1], position[2], position[3] || 0))
   );
+}
+
+function getTreePlacements() {
+  return lastTreePlacements.map((position) => [...position]);
 }
 
 function generateTreePlacements(count, groundY = 0) {
@@ -423,11 +470,13 @@ function preloadModelTemplates() {
 }
 
 // Load all
-async function loadAllModels() {
+async function loadAllModels(options = {}) {
   await preloadModelTemplates();
 
   // Road first so tree placement can respect grass blocker ray checks.
   await loadRoad();
+
+  const importedTreePlacements = normalizeTreePlacementList(options.treePlacements);
 
   const [slimes, lamps, benches, flashlights] = await Promise.all([
     loadSlimes([[-60, 0, -30, 90], [-80, 0, -30, -90]]),
@@ -436,8 +485,15 @@ async function loadAllModels() {
     loadFlashlights([[-23, 1, 13]]),
   ]);
 
-  const trees = await loadTrees();
-  return [slimes, lamps, trees, benches, flashlights];
+  const trees = await loadTrees(importedTreePlacements);
+  return {
+    slimes,
+    lamps,
+    trees,
+    benches,
+    flashlights,
+    treePlacements: getTreePlacements(),
+  };
 }
 
 export {
@@ -447,5 +503,6 @@ export {
   loadTree,
   loadBench,
   loadFlashlight,
+  getTreePlacements,
   loadAllModels,
 };

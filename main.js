@@ -23,7 +23,12 @@ import {
 import { loadAllModels } from './src/models/ModelLoader.js';
 
 // Grass (created after models register their occupied positions)
-import { createGrass, setGrassEnabled } from './src/world/Grass.js';
+import { createGrass, getGrassPatchPlacements, setGrassEnabled } from './src/world/Grass.js';
+import {
+  loadSavedWorldPositions,
+  createWorldPositionsPayload,
+  downloadGeneratedWorldPositions,
+} from './src/world/PlacementPersistence.js';
 
 // UI
 import { createCrosshair, refreshCrosshair } from './src/ui/Crosshair.js';
@@ -101,8 +106,24 @@ async function preloadWorldAssets() {
 
   worldPreloadPromise = (async () => {
     try {
-      await loadAllModels();
-      createGrass();
+      const savedPositions = await loadSavedWorldPositions();
+
+      const loadedModels = await loadAllModels({
+        treePlacements: savedPositions?.trees,
+      });
+
+      createGrass({
+        patchPlacements: savedPositions?.grassPatches,
+      });
+
+      if (!savedPositions) {
+        const generatedPayload = createWorldPositionsPayload({
+          trees: loadedModels.treePlacements,
+          grassPatches: getGrassPatchPlacements(),
+        });
+        await downloadGeneratedWorldPositions(generatedPayload);
+      }
+
       modelsReady = true;
       return true;
     } catch (error) {

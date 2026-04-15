@@ -151,6 +151,48 @@ const grassBlockers = [];
 const grassRaycaster = new THREE.Raycaster();
 const grassRayOrigin = new THREE.Vector3();
 const grassRayDirection = new THREE.Vector3(0, -1, 0);
+let lastGrassPatchPlacements = [];
+
+function createSeededRandom(seed) {
+  let state = seed >>> 0;
+
+  return () => {
+    state += 0x6D2B79F5;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function normalizeGrassPatchEntry(entry) {
+  if (Array.isArray(entry)) {
+    const x = Number.isFinite(entry[0]) ? entry[0] : 0;
+    const z = Number.isFinite(entry[1]) ? entry[1] : 0;
+    const seed = (Number.isFinite(entry[2]) ? entry[2] : Math.random() * 0xFFFFFFFF) >>> 0;
+    return [x, z, seed];
+  }
+
+  if (!entry || typeof entry !== 'object') return null;
+
+  const x = Number.isFinite(entry.x) ? entry.x : 0;
+  const z = Number.isFinite(entry.z) ? entry.z : 0;
+  const seed = (Number.isFinite(entry.seed) ? entry.seed : Math.random() * 0xFFFFFFFF) >>> 0;
+  return [x, z, seed];
+}
+
+function normalizeGrassPatchList(list) {
+  if (!Array.isArray(list)) return [];
+
+  const normalized = [];
+  for (const entry of list) {
+    const parsed = normalizeGrassPatchEntry(entry);
+    if (!parsed) continue;
+    normalized.push(parsed);
+  }
+
+  return normalized;
+}
 
 export function registerOccupied(x, z) {
   occupiedPositions.push(new THREE.Vector2(x, z));
@@ -225,8 +267,19 @@ let grassMaterial = null
 let grassMesh = null;
 let grassEnabled = true;
 
-export function createGrass() {
-  const TOTAL_BLADES = GRASS_COUNT * GRASS_PATCH_SIZE;
+export function createGrass(options = {}) {
+  const importedPatchPlacements = normalizeGrassPatchList(options.patchPlacements);
+  const hasImportedPatches = importedPatchPlacements.length > 0;
+  const targetPatchCount = hasImportedPatches ? importedPatchPlacements.length : GRASS_COUNT;
+  const TOTAL_BLADES = targetPatchCount * GRASS_PATCH_SIZE;
+
+  if (grassMesh) {
+    scene.remove(grassMesh);
+    grassMesh.geometry.dispose();
+    grassMesh.material.dispose();
+    grassMesh = null;
+  }
+
   const geo = buildBladeGeometry();
   grassMaterial = buildGrassMaterial();
 
@@ -241,27 +294,43 @@ export function createGrass() {
   const instanceRandom = new Float32Array(TOTAL_BLADES);
 
   let bladeIndex = 0;
+  lastGrassPatchPlacements = [];
 
-  for (let p = 0; p < GRASS_COUNT; p++) {
-    // Position on a free space
-    let px, pz;
-    let attempts = 0;
-    do {
-      px = (Math.random() * 2 - 1) * half;
-      pz = (Math.random() * 2 - 1) * half;
-      attempts++;
-    } while (!isFreePosition(px, pz) && attempts < 30);
+  for (let p = 0; p < targetPatchCount; p++) {
+    let px = 0;
+    let pz = 0;
+    let patchSeed = 0;
 
-    if (!isFreePosition(px, pz)) continue; // give up
+    if (hasImportedPatches) {
+      const patch = importedPatchPlacements[p];
+      if (!patch) continue;
+      px = patch[0];
+      pz = patch[1];
+      patchSeed = patch[2];
+    } else {
+      // Position on a free space
+      let attempts = 0;
+      do {
+        px = (Math.random() * 2 - 1) * half;
+        pz = (Math.random() * 2 - 1) * half;
+        attempts++;
+      } while (!isFreePosition(px, pz) && attempts < 30);
+
+      if (!isFreePosition(px, pz)) continue; // give up
+      patchSeed = (Math.random() * 0xFFFFFFFF) >>> 0;
+    }
+
+    const rng = createSeededRandom(patchSeed);
+    lastGrassPatchPlacements.push([px, pz, patchSeed]);
 
     // Register patch
     occupiedPositions.push(new THREE.Vector2(px, pz));
 
     for (let b = 0; b < GRASS_PATCH_SIZE; b++) {
-      const offsetX = (Math.random() - 0.5) * GRASS_SPREAD * 2;
-      const offsetZ = (Math.random() - 0.5) * GRASS_SPREAD * 2;
-      const rot     = Math.random() * Math.PI;
-      const scale   = 0.75 + Math.random() * 0.5;
+      const offsetX = (rng() - 0.5) * GRASS_SPREAD * 2;
+      const offsetZ = (rng() - 0.5) * GRASS_SPREAD * 2;
+      const rot     = rng() * Math.PI;
+      const scale   = 0.75 + rng() * 0.5;
 
       dummy.position.set(px + offsetX, 0, pz + offsetZ);
       dummy.rotation.set(0, rot, 0);
@@ -270,7 +339,7 @@ export function createGrass() {
 
       mesh.setMatrixAt(bladeIndex, dummy.matrix);
       // Each blade gets a unique random phase
-      instanceRandom[bladeIndex] = Math.random() * Math.PI * 2;
+      instanceRandom[bladeIndex] = rng() * Math.PI * 2;
       bladeIndex++;
     }
   }
@@ -289,6 +358,10 @@ export function createGrass() {
   grassMesh.visible = grassEnabled;
   scene.add(mesh);
   return mesh;
+}
+
+export function getGrassPatchPlacements() {
+  return lastGrassPatchPlacements.map((patch) => [...patch]);
 }
 
 // Called every frame from the animation loop

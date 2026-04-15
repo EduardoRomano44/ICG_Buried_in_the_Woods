@@ -54,6 +54,12 @@ export const WORLD_BARRIER_THICKNESS = 3;
 export const WORLD_EXTENDED_GROUND_SCALE = 1.35;
 export const WORLD_EXTENDED_GROUND_Y_OFFSET = -0.03;
 
+// Placement persistence (trees + grass)
+export const WORLD_POSITIONS_FILE_URL = './src/world/generated-positions.json';
+export const WORLD_POSITIONS_AUTO_IMPORT = true;
+export const WORLD_POSITIONS_AUTO_DOWNLOAD_ON_GENERATE = true;
+export const WORLD_POSITIONS_DOWNLOAD_FILENAME = 'generated-positions.json';
+
 // Slime enemy
 export const SLIME_SCALE = 1.4;
 // Slime idle
@@ -87,7 +93,7 @@ export const DEBUG_SLIME_RESPAWN_DELAY = 5;
 
 // Ambient Light
 export const AMBIENT_LIGHT_COLOR = 0x505050;
-export const AMBIENT_LIGHT_INTENSITY = 0.12;
+export const AMBIENT_LIGHT_INTENSITY = 10.12;
 
 // Object Interaction
 export const INTERACT_MAX_DISTANCE = 5.5;
