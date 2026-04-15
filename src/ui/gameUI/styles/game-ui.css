@@ -97,6 +97,7 @@ textarea {
   overflow: hidden;
   display: flex;
   align-items: flex-end;
+  contain: layout paint;
 }
 
 .stamina-fill {
@@ -104,7 +105,54 @@ textarea {
   width: 100%;
   background: linear-gradient(0deg, #d69d00, #f6d43f);
   transform-origin: center bottom;
-  transition: height 90ms linear;
+  transform: scaleY(1);
+  will-change: transform;
+  transition: transform 90ms linear;
+}
+
+.flashlight-slot {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  width: 74px;
+  height: 74px;
+  transform: translateY(-50%);
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 9px;
+  background: rgba(12, 18, 24, 0.45);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(1px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.flashlight-slot-icon {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.flashlight-slot-key {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}
+
+.flashlight-slot.active {
+  border-width: 4px;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45), 0 12px 24px rgba(0, 0, 0, 0.5);
+  background: rgba(30, 35, 40, 0.62);
 }
 
 .screen-overlay {
@@ -437,6 +485,18 @@ textarea {
 @media (max-width: 640px) {
   .panel {
     padding: 14px;
+  }
+
+  .flashlight-slot {
+    width: 64px;
+    height: 64px;
+    right: 12px;
+  }
+
+  .flashlight-slot-key {
+    font-size: 12px;
+    top: 4px;
+    right: 6px;
   }
 
   .title-card-prompt {

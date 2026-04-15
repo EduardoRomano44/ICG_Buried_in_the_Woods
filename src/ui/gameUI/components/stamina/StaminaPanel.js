@@ -11,14 +11,17 @@ function createStaminaPanel() {
   `);
 
   const fill = element.querySelector('.stamina-fill');
-  let lastRatio = null;
+  const STAMINA_UI_STEPS = 80;
+  let lastStep = null;
 
   function update(stamina, maxStamina) {
-    const ratio = Math.max(0, Math.min(1, stamina / maxStamina));
-    if (lastRatio !== null && Math.abs(lastRatio - ratio) <= 0.001) return;
+    const safeMax = Number.isFinite(maxStamina) && maxStamina > 0 ? maxStamina : 1;
+    const ratio = Math.max(0, Math.min(1, stamina / safeMax));
+    const step = Math.round(ratio * STAMINA_UI_STEPS);
+    if (lastStep === step) return;
 
-    fill.style.height = `${ratio * 100}%`;
-    lastRatio = ratio;
+    fill.style.transform = `scaleY(${step / STAMINA_UI_STEPS})`;
+    lastStep = step;
   }
 
   return {

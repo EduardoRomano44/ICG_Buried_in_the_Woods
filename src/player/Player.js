@@ -69,6 +69,7 @@ fpControls.pointerSpeed = settings.cameraSensitivity;
 const colliders = [];
 const interactables = [];
 let currentInteractable = null;
+let toggleFlashlightHandler = null;
 
 // Movement
 function setGameplayCursorHidden(hidden) {
@@ -111,9 +112,13 @@ function removeCollider(obj) {
 function registerInteractable(obj, options = {}) {
   if (!obj) return;
 
+  const actionText = typeof options.actionText === 'string'
+    ? options.actionText.trim()
+    : '';
+
   interactables.push({
     obj,
-    actionText: (options.actionText || 'USE').toUpperCase(),
+    actionText: actionText || 'Use',
     onInteract: typeof options.onInteract === 'function' ? options.onInteract : null,
   });
 }
@@ -197,12 +202,21 @@ function intersectsPlayerHitboxSphere(center, radius) {
 
 // Input
 function onKeyDown(e) {
+  if (e.repeat) return;
+
   pressedKeys.add(e.code);
 
   if (!inputEnabled) return;
 
   if (e.code === 'KeyE') {
     tryInteractCurrentTarget();
+    return;
+  }
+
+  if (e.code === 'KeyT') {
+    if (typeof toggleFlashlightHandler === 'function') {
+      toggleFlashlightHandler();
+    }
     return;
   }
 
@@ -228,10 +242,6 @@ function clearMovementInput() {
   pressedKeys.clear();
   isSprinting = false;
   isSprintActive = false;
-}
-
-function requestPointerLock() {
-  fpControls.lock();
 }
 
 function enterFirstPerson() {
@@ -262,6 +272,10 @@ function resumeFirstPersonControls() {
 function setInputEnabled(enabled) {
   inputEnabled = enabled;
   if (!enabled) clearMovementInput();
+}
+
+function setToggleFlashlightHandler(handler) {
+  toggleFlashlightHandler = typeof handler === 'function' ? handler : null;
 }
 
 function resetPlayerState() {
@@ -377,8 +391,14 @@ function updatePlayer(delta) {
 
   // soft FOV
   const targetFOV = isSprintActive ? CAMERA_SPRINT_FOV : CAMERA_NORMAL_FOV;
-  camera.fov += (targetFOV - camera.fov) * delta * CAMERA_FOV_LERP_SPEED;
-  camera.updateProjectionMatrix();
+  const fovDelta = targetFOV - camera.fov;
+  if (Math.abs(fovDelta) > 0.01) {
+    camera.fov += fovDelta * delta * CAMERA_FOV_LERP_SPEED;
+    if (Math.abs(targetFOV - camera.fov) <= 0.01) {
+      camera.fov = targetFOV;
+    }
+    camera.updateProjectionMatrix();
+  }
 
   if (damageShakeTimer > 0) {
     damageShakeTimer = Math.max(0, damageShakeTimer - delta);
@@ -396,10 +416,6 @@ function updatePlayer(delta) {
   updateInteractionTarget();
 }
 
-function isFirstPerson() {
-  return isFPMode;
-}
-
 export {
   initInput,
   updatePlayer,
@@ -409,12 +425,11 @@ export {
   unregisterInteractable,
   damagePlayer,
   intersectsPlayerHitboxSphere,
-  isFirstPerson,
-  requestPointerLock,
   enterFirstPerson,
   pauseFirstPersonControls,
   resumeFirstPersonControls,
   setInputEnabled,
+  setToggleFlashlightHandler,
   resetPlayerState,
   getPlayerVitals,
 };

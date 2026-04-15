@@ -117,7 +117,6 @@ export const SHADOW_CAMERA_NEAR = 1.7;
 export const SHADOW_CAMERA_FAR = LAMP_LIGHT_DISTANCE;
 
 // Shadow optimization
-export const SHADOW_UPDATE_INTERVAL_FRAMES = 3;
 export const SHADOW_LIGHT_NEAR_DISTANCE = 60;
 export const SHADOW_LIGHT_FAR_DISTANCE = 170;
 export const SHADOW_LIGHT_MAP_SCALE_NEAR = 1;
@@ -129,14 +128,13 @@ export const SHADOW_LIGHT_RADIUS_SCALE_FAR = 1.85;
 export const SHADOW_OBJECT_NEAR_DISTANCE = 70;
 export const SHADOW_OBJECT_FAR_DISTANCE = 180;
 export const SHADOW_OBJECT_SIMPLIFIED_MESH_THRESHOLD = 0.42;
-export const SHADOW_DYNAMIC_POSITION_EPSILON = 0.025;
 
 // Flashlight
 export const FLASHLIGHT_SCALE = 0.2;
 export const FLASHLIGHT_COLOR = 0xffffff;
 export const FLASHLIGHT_INTENSITY = 110;
 // Lamp Spotlight
-export const FLASHLIGHT_SPOT_DISTANCE = 140;
+export const FLASHLIGHT_SPOT_DISTANCE = 80;
 export const FLASHLIGHT_SPOT_POSITION = { x: 0, y: 1, z: -2.5 };
 export const FLASHLIGHT_SPOT_ROTATION = { x: 0, y: 0, z: 0 };
 export const FLASHLIGHT_SPOT_SCALE_Z = 0.583;
@@ -205,3 +203,4 @@ export const SLIME_IDLE_AUDIO_MAX_DISTANCE = 45;
 export const SLIME_EXPLODE_AUDIO_REF_DISTANCE = 6;
 export const SLIME_EXPLODE_AUDIO_MAX_DISTANCE = 45;
 export const FOREST_AUDIO_VOLUME = 1;
+export const FLASHLIGHT_TOGGLE_AUDIO_VOLUME = 0.55;

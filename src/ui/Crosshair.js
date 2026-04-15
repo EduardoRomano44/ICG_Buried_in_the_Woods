@@ -7,6 +7,7 @@ import {
 
 let element = null;
 let interactionElement = null;
+let currentPromptText = '';
 
 function createCrosshair() {
   element = document.createElement('div');
@@ -60,13 +61,18 @@ function hideCrosshair() {
 function setInteractionPrompt(actionLabel) {
   if (!interactionElement) return;
 
+  const nextPromptText = actionLabel ? `Press E to ${actionLabel}` : '';
+  if (nextPromptText === currentPromptText) return;
+
+  currentPromptText = nextPromptText;
+
   if (!actionLabel) {
     interactionElement.style.display = 'none';
     interactionElement.textContent = '';
     return;
   }
 
-  interactionElement.textContent = `Press E to ${actionLabel}`;
+  interactionElement.textContent = nextPromptText;
   interactionElement.style.display = 'block';
 }
 

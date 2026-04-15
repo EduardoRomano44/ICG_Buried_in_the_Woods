@@ -134,4 +134,4 @@ function updateWorld(camera) {
   moon.position.copy(camera.position).add(moonOffset);
 }
 
-export { ground, updateWorld, updateGrass };
+export { updateWorld, updateGrass };

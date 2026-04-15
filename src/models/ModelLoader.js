@@ -13,6 +13,10 @@ import { createFireflies } from '../animations/fireflies.js';
 import { createSlimeIdle } from '../animations/slimeIdle.js';
 import { registerGrassBlocker, registerOccupied, isPlacementFreeWithRadius } from '../world/Grass.js';
 import {
+  registerWorldFlashlight,
+  pickupFlashlightFromWorld,
+} from '../world/FlashlightSystem.js';
+import {
   GROUND_SIZE,
   ROAD_MODEL_PATH,
   ROAD_POSITION,
@@ -331,8 +335,6 @@ function loadFlashlight(x, y, z, rotationY = 0) {
     );
 
     configureShadowCastingLight(spotLight);
-
-    // Flashlight lights are marked dynamic by design.
     tagShadowLight(spotLight, false);
     registerShadowLight(spotLight, { staticLight: false });
 
@@ -346,10 +348,7 @@ function loadFlashlight(x, y, z, rotationY = 0) {
       FLASHLIGHT_INTERNAL_POSITION.y,
       FLASHLIGHT_INTERNAL_POSITION.z
     );
-    tagShadowLight(internalLight, false);
-    registerShadowLight(internalLight, { staticLight: false });
-
-    setupModelShadows(model, true);
+    internalLight.castShadow = false;
 
     model.add(spotLight);
     model.add(spotLight.target);
@@ -357,8 +356,15 @@ function loadFlashlight(x, y, z, rotationY = 0) {
     scene.add(model);
     registerOccupied(x, z);
 
+    registerWorldFlashlight({
+      model,
+      spotLight,
+      internalLight,
+    });
+
     registerInteractable(model, {
-      actionText: 'GRAB',
+      actionText: 'Grab',
+      onInteract: pickupFlashlightFromWorld,
     });
 
     return model;
@@ -497,12 +503,5 @@ async function loadAllModels(options = {}) {
 }
 
 export {
-  loadRoad,
-  loadSlime,
-  loadLamp,
-  loadTree,
-  loadBench,
-  loadFlashlight,
-  getTreePlacements,
   loadAllModels,
 };

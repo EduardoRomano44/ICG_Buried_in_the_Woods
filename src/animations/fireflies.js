@@ -101,4 +101,4 @@ function setFirefliesEnabled(enabled) {
   }
 }
 
-export { createFireflies, animateFireflies, fireflies, setFirefliesEnabled };
+export { createFireflies, animateFireflies, setFirefliesEnabled };

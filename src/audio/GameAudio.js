@@ -8,6 +8,7 @@ import {
   SLIME_EXPLODE_AUDIO_REF_DISTANCE,
   SLIME_EXPLODE_AUDIO_MAX_DISTANCE,
   FOREST_AUDIO_VOLUME,
+  FLASHLIGHT_TOGGLE_AUDIO_VOLUME,
 } from '../config/constants.js';
 
 /*
@@ -21,6 +22,7 @@ const tracks = {
   slimeExplode: createTrack('slimeExplode.mp3', SLIME_EXPLODE_AUDIO_VOLUME, false),
   slimeIdle: createTrack('slimeIdle.mp3', SLIME_IDLE_AUDIO_VOLUME, true),
   forest: createTrack('forest.mp3', FOREST_AUDIO_VOLUME, true),
+  flashlightToggle: createTrack('toggleFlashlight.mp3', FLASHLIGHT_TOGGLE_AUDIO_VOLUME, false),
 };
 
 const state = {
@@ -30,6 +32,7 @@ const state = {
   slimeIdleDistance: Infinity,
   forestActive: false,
   initialVolumeApplied: false,
+  oneShotWarmupDone: false,
 };
 
 let unlockListenerInstalled = false;
@@ -121,10 +124,47 @@ function refreshPlayback() {
   setTrackActive('forest', state.forestActive);
 }
 
+function warmUpOneShotTrack(trackName) {
+  const track = tracks[trackName];
+  if (!track || track.loop) return;
+
+  const { audio } = track;
+  const previousVolume = audio.volume;
+  audio.volume = 0;
+  audio.currentTime = 0;
+
+  const playResult = audio.play();
+  if (playResult && typeof playResult.then === 'function') {
+    playResult
+      .then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = previousVolume;
+      })
+      .catch(() => {
+        audio.volume = previousVolume;
+      });
+    return;
+  }
+
+  audio.pause();
+  audio.currentTime = 0;
+  audio.volume = previousVolume;
+}
+
+function warmUpOneShotTracks() {
+  if (!state.unlocked || state.oneShotWarmupDone) return;
+
+  state.oneShotWarmupDone = true;
+  warmUpOneShotTrack('slimeExplode');
+  warmUpOneShotTrack('flashlightToggle');
+}
+
 function unlockGameAudioPlayback() {
   if (state.unlocked) return;
   state.unlocked = true;
   refreshPlayback();
+  warmUpOneShotTracks();
 }
 
 function installUnlockListeners() {
@@ -185,17 +225,12 @@ function playSlimeExplodeAudio(distance = 0) {
   tryPlay(track);
 }
 
-function startGameAudio() {
+function playFlashlightToggleAudio() {
   ensureAudioInitialized();
-  setTitleCardAudioActive(false);
-  setForestAudioActive(true);
-}
-
-function stopGameAudio() {
-  ensureAudioInitialized();
-  setForestAudioActive(false);
-  setSlimeIdleAudioActive(false);
-  setSlimeIdleAudioDistance(Infinity);
+  const track = tracks.flashlightToggle;
+  track.audio.volume = clampVolume(getGlobalVolume() * FLASHLIGHT_TOGGLE_AUDIO_VOLUME);
+  track.audio.currentTime = 0;
+  tryPlay(track);
 }
 
 ensureAudioInitialized();
@@ -207,7 +242,6 @@ export {
   setSlimeIdleAudioActive,
   setSlimeIdleAudioDistance,
   playSlimeExplodeAudio,
+  playFlashlightToggleAudio,
   unlockGameAudioPlayback,
-  startGameAudio,
-  stopGameAudio,
 };

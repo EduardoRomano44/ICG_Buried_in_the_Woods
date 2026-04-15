@@ -11,7 +11,6 @@ import {
   SHADOW_OBJECT_NEAR_DISTANCE,
   SHADOW_OBJECT_FAR_DISTANCE,
   SHADOW_OBJECT_SIMPLIFIED_MESH_THRESHOLD,
-  SHADOW_DYNAMIC_POSITION_EPSILON,
 } from '../config/constants.js';
 
 /*
@@ -20,7 +19,7 @@ import {
   Solutions: - Decrease shadow quality when player is far away;
              - Seperate shadows into two types: + Static (from objects that dont move and made by Lamps, Moon, etc.)
                                                 + Dynamic (from object that move and are made by the Flashlight)
-                Static shadows are not updated after creation; Dynamic shadows are updated every X frames.
+                Static shadows are not updated after creation; Dynamic shadows are updated every frame.
 */
 
 const shadowLights = [];
@@ -178,19 +177,6 @@ function updateLightShadowLod(entry, camera) {
   return true;
 }
 
-function movedBeyondThreshold(object3D, previousPosition) {
-  if (!object3D) return false;
-
-  object3D.getWorldPosition(tmpVecA);
-  const moved = tmpVecA.distanceToSquared(previousPosition) > (SHADOW_DYNAMIC_POSITION_EPSILON * SHADOW_DYNAMIC_POSITION_EPSILON);
-
-  if (moved) {
-    previousPosition.copy(tmpVecA);
-  }
-
-  return moved;
-}
-
 function registerShadowLight(light, options = {}) {
   if (!light || !light.isLight) return light;
 
@@ -208,7 +194,6 @@ function registerShadowLight(light, options = {}) {
       : new THREE.Vector2(0, 0),
     baseRadius: light.shadow ? Math.max(0.1, light.shadow.radius || 1) : 1,
     lodLevel: -1,
-    lastPosition: light.getWorldPosition(new THREE.Vector3()),
   });
 
   pendingShadowRefresh = true;
@@ -253,7 +238,6 @@ function registerShadowObject(object3D, options = {}) {
     object3D,
     meshEntries: rankedMeshes,
     lodLevel: -1,
-    lastPosition: object3D.getWorldPosition(new THREE.Vector3()),
   });
 
   pendingShadowRefresh = true;
@@ -285,31 +269,41 @@ function updateShadowOptimization(camera) {
   if (!rendererRef || !rendererRef.shadowMap.enabled || !camera) return false;
 
   let lodChanged = false;
-  let dynamicMoved = false;
+  let dynamicCasterActive = false;
 
-  for (const entry of shadowLights) {
-    if (!entry.light) continue;
+  for (let i = shadowLights.length - 1; i >= 0; i--) {
+    const entry = shadowLights[i];
+    if (!entry.light || !entry.light.parent) {
+      shadowLights.splice(i, 1);
+      pendingShadowRefresh = true;
+      continue;
+    }
 
     lodChanged = updateLightShadowLod(entry, camera) || lodChanged;
 
     const isStaticLight = entry.light.userData.staticLight !== false;
-    if (!isStaticLight && movedBeyondThreshold(entry.light, entry.lastPosition)) {
-      dynamicMoved = true;
+    if (!isStaticLight && entry.light.castShadow) {
+      dynamicCasterActive = true;
     }
   }
 
-  for (const entry of shadowObjects) {
-    if (!entry.object3D) continue;
+  for (let i = shadowObjects.length - 1; i >= 0; i--) {
+    const entry = shadowObjects[i];
+    if (!entry.object3D || !entry.object3D.parent) {
+      shadowObjects.splice(i, 1);
+      pendingShadowRefresh = true;
+      continue;
+    }
 
     lodChanged = updateObjectShadowLod(entry, camera) || lodChanged;
 
     const isStaticObject = entry.object3D.userData.staticObject !== false;
-    if (!isStaticObject && movedBeyondThreshold(entry.object3D, entry.lastPosition)) {
-      dynamicMoved = true;
+    if (!isStaticObject && entry.meshEntries.some((meshEntry) => meshEntry.mesh.castShadow)) {
+      dynamicCasterActive = true;
     }
   }
 
-  if (lodChanged || dynamicMoved || !hasInitialRefresh) {
+  if (lodChanged || dynamicCasterActive || !hasInitialRefresh) {
     pendingShadowRefresh = true;
   }
 

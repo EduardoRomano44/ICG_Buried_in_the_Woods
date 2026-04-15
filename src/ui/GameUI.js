@@ -21,6 +21,11 @@ function setPaused(paused) {
   controller.setPaused(paused);
 }
 
+function setFlashlightState(state) {
+  if (!controller) return;
+  controller.setFlashlightState(state);
+}
+
 function setStartLoading(visible, label = 'Loading...') {
   if (!controller) return;
   controller.setStartLoading(visible, label);
@@ -41,6 +46,7 @@ export {
   updateHUD,
   setGameStarted,
   setPaused,
+  setFlashlightState,
   applyBarsSizePreset,
   setStartLoading,
   isSettingsBusy,

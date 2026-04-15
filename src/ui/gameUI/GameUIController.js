@@ -69,6 +69,7 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
 
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
   syncSettingsControls();
+  hud.setFlashlightState({ hasFlashlight: false, isOn: false });
 
   return {
     updateHUD(vitals) {
@@ -86,6 +87,9 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
     setPaused(paused) {
       settingsPanel.setVisible(paused);
       overlay.setVisible(paused);
+    },
+    setFlashlightState(state) {
+      hud.setFlashlightState(state);
     },
     setStartLoading(visible, label = 'Loading...') {
       titleCardPanel.setLoading(visible, label);

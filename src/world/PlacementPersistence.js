@@ -261,25 +261,6 @@ async function loadSavedWorldPositions() {
   }
 }
 
-async function prepareWorldPositionsWriteAccessFromGesture() {
-  if (!supportsWorkspaceFileAccess()) return false;
-
-  try {
-    if (localStorage.getItem(FILE_HANDLE_HINT_KEY) === '1') {
-      return true;
-    }
-  } catch {
-    // ignore localStorage failures
-  }
-
-  const handle = await getWritablePositionsFileHandle({
-    allowPrompt: true,
-    promptFromGesture: true,
-  });
-
-  return Boolean(handle);
-}
-
 function createWorldPositionsPayload({ trees = [], grassPatches = [] } = {}) {
   return {
     schemaVersion: POSITIONS_SCHEMA_VERSION,
@@ -352,7 +333,6 @@ async function downloadGeneratedWorldPositions(payload, options = {}) {
 
 export {
   loadSavedWorldPositions,
-  prepareWorldPositionsWriteAccessFromGesture,
   createWorldPositionsPayload,
   downloadGeneratedWorldPositions,
 };

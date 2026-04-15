@@ -10,11 +10,11 @@ import { updateWorld, updateGrass } from './src/world/World.js';
 import {
   initInput,
   updatePlayer,
-  requestPointerLock,
   enterFirstPerson,
   pauseFirstPersonControls,
   resumeFirstPersonControls,
   setInputEnabled,
+  setToggleFlashlightHandler,
   resetPlayerState,
   getPlayerVitals,
 } from './src/player/Player.js';
@@ -37,6 +37,7 @@ import {
   updateHUD,
   setGameStarted,
   setPaused,
+  setFlashlightState,
   applyBarsSizePreset,
   setStartLoading,
   isSettingsBusy,
@@ -57,6 +58,11 @@ import {
   setForestAudioActive,
   unlockGameAudioPlayback,
 } from './src/audio/GameAudio.js';
+import {
+  getFlashlightState,
+  setFlashlightStateListener,
+  toggleInventoryFlashlight,
+} from './src/world/FlashlightSystem.js';
 
 // Bootstrap
 createCrosshair();
@@ -76,8 +82,6 @@ renderer.domElement.style.display = 'none';
 setInputEnabled(false);
 
 async function applyRuntimeSettings() {
-  const shadowsChanged = renderer.shadowMap.enabled !== settings.shadowsEnabled;
-
   renderer.shadowMap.enabled = settings.shadowsEnabled;
   setGrassEnabled(!settings.lowQuality);
   setFirefliesEnabled(!settings.lowQuality);
@@ -86,14 +90,7 @@ async function applyRuntimeSettings() {
   setGlobalAudioVolume(settings.audioVolume ?? 0.8);
 
   if (settings.shadowsEnabled) {
-    forceShadowRefresh(true);
-  }
-
-  if (shadowsChanged && hasStarted) {
-    await new Promise((resolve) => requestAnimationFrame(resolve));
-    renderer.compile(scene, camera);
-    forceShadowRefresh(true);
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    forceShadowRefresh();
   }
 }
 
@@ -121,7 +118,9 @@ async function preloadWorldAssets() {
           trees: loadedModels.treePlacements,
           grassPatches: getGrassPatchPlacements(),
         });
-        await downloadGeneratedWorldPositions(generatedPayload);
+        void downloadGeneratedWorldPositions(generatedPayload).catch((error) => {
+          console.warn('Failed to save generated world positions:', error);
+        });
       }
 
       modelsReady = true;
@@ -141,17 +140,10 @@ async function preloadWorldAssets() {
 function beginStartFromTitle() {
   if (hasStarted || isLoadingWorld) return;
 
-  // Lock pointer while still in main menu
-  requestPointerLock();
-
   preloadWorldAssets().then((ok) => {
     if (ok && !hasStarted) {
       startNewGame();
       return;
-    }
-
-    if (!ok && !hasStarted && document.pointerLockElement === document.body) {
-      document.exitPointerLock?.();
     }
   });
 }
@@ -178,7 +170,6 @@ function startNewGame() {
 
   applyRuntimeSettings()
     .then(() => {
-      renderer.compile(scene, camera);
       forceShadowRefresh(true);
       renderer.render(scene, camera);
     })
@@ -231,6 +222,10 @@ createGameUI({
   onSettingsChanged: applyRuntimeSettings,
   onBackToMenu: resetGame,
 });
+
+setFlashlightStateListener(setFlashlightState);
+setFlashlightState(getFlashlightState());
+setToggleFlashlightHandler(toggleInventoryFlashlight);
 
 setGameStarted(false);
 setPaused(false);
@@ -285,12 +280,14 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // Game Loop
-const clock = new THREE.Clock();
+const timer = new THREE.Timer();
+timer.connect(document);
 
-function animate() {
+function animate(timestamp) {
   requestAnimationFrame(animate);
-  const delta = clock.getDelta();
-  const elapsed = clock.getElapsedTime();
+  timer.update(timestamp);
+  const delta = timer.getDelta();
+  const elapsed = timer.getElapsed();
 
   if (!hasStarted) return;
 
