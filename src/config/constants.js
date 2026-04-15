@@ -112,7 +112,7 @@ export const LAMP_LIGHT_POSITION = { x: -0.008793, y: 14.0006, z: 0.00729 };
 export const SHADOW_RADIUS = 2;
 export const SHADOW_MAP_SIZE = 2048;
 export const SHADOW_BIAS = -0.0005;
-export const SHADOW_NORMAL_BIAS = 0.015;
+export const SHADOW_NORMAL_BIAS = 0.03;
 export const SHADOW_CAMERA_NEAR = 1.7;
 export const SHADOW_CAMERA_FAR = LAMP_LIGHT_DISTANCE;
 
