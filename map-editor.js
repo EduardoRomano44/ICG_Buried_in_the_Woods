@@ -9,7 +9,6 @@ let controls = null;
 async function startMapEditor() {
   renderer.domElement.style.display = 'block';
 
-  // Keep map editing clean: no gameplay grass clutter.
   setGrassEnabled(false);
 
   camera.position.set(34, 24, 34);

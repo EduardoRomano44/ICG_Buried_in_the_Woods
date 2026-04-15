@@ -23,7 +23,7 @@ export const HEAD_BOB_AMOUNT_WALK = 0.3;
 export const HEAD_BOB_AMOUNT_SPRINT = 0.6;
 
 // Ground
-export const GROUND_SIZE = 350;
+export const GROUND_SIZE = 250;
 export const GROUND_COLOR = 0x008018;
 
 // Sky
@@ -37,8 +37,8 @@ export const MOON_COLOR = 0xffffdd;
 export const MOON_OFFSET = { x: 100, y: 50, z: -300 };
 export const MOONLIGHT_COLOR = 0x7aa8ff;
 export const MOONLIGHT_INTENSITY = 0.2;
-export const MOONLIGHT_WORLD_DISTANCE = 520;
-export const MOONLIGHT_SHADOW_MAP_SIZE = 2048;
+export const MOONLIGHT_WORLD_DISTANCE = 800;
+export const MOONLIGHT_SHADOW_MAP_SIZE = 1024;
 export const MOONLIGHT_SHADOW_CAMERA_MARGIN = 48;
 export const MOONLIGHT_SHADOW_BIAS = -0.00045;
 
@@ -151,7 +151,7 @@ export const FIREFLY_OPACITY = 0.8;
 
 // Road
 export const ROAD_MODEL_PATH = './models/Road.glb';
-export const ROAD_POSITION = { x: 105, y: 0.005, z: 5 };
+export const ROAD_POSITION = { x: 70, y: 0.005, z: -15 };
 export const ROAD_SCALE = { x: 4, y: 1, z: 4 };
 export const ROAD_ROTATION = { x: 0, y: -1.1, z: 0 };
 export const ROAD_ALIGN_TO_GROUND = true;
@@ -173,7 +173,7 @@ export const WIND_STRENGH = 7.0;
 export const WIND_SPEED = 2;
 
 // Camera
-export const INITIAL_CAMERA_POSITION = { x: 120, y: 5, z: 25 };
+export const INITIAL_CAMERA_POSITION = { x: 80, y: 5, z: 7 };
 export const INITIAL_CAMERA_ROTATION_Y = Math.PI / 2;
 export const CAMERA_NEAR = 0.1;
 export const CAMERA_FAR = 1000;
@@ -185,14 +185,14 @@ export const CAMERA_FOV_LERP_SPEED = 8;
 export const BENCH_SCALE = 1.2;
 
 // Trees
-export const TREE_COUNT = 150;
+export const TREE_COUNT = 80;
 export const TREE_PLACEMENT_ATTEMPTS = 30;
 export const TREE_WORLD_MARGIN = 2;
 export const TREE_EXCLUSION_RADIUS = 10;
 
 // Audio
 export const TITLE_CARD_AUDIO_VOLUME = 0.65;
-export const SLIME_EXPLODE_AUDIO_VOLUME = 0.7;
+export const SLIME_EXPLODE_AUDIO_VOLUME = 0.6;
 export const SLIME_IDLE_AUDIO_VOLUME = 0.4;
 export const SLIME_IDLE_AUDIO_REF_DISTANCE = 6;
 export const SLIME_IDLE_AUDIO_MAX_DISTANCE = 45;

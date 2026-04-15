@@ -430,9 +430,9 @@ async function loadAllModels() {
   await loadRoad();
 
   const [slimes, lamps, benches, flashlights] = await Promise.all([
-    loadSlimes([[-100, 0, -50, 90], [-120, 0, -50, -90]]),
-    loadLamps([[95, 0, 20], [102, 0, 120], [102, 0, -70], [-90, 0, -60], [-10, 0, 0]]),
-    loadBenches([[93, 0, 30, -97], [-22, 0, 12, 45]]),
+    loadSlimes([[-60, 0, -30, 90], [-80, 0, -30, -90]]),
+    loadLamps([[60, 0, 0], [62, 0, 80], [65, 0, -80], [-50, 0, -40], [-10, 0, 0]]),
+    loadBenches([[58, 0, 10, -97], [-22, 0, 12, 45]]),
     loadFlashlights([[-23, 1, 13]]),
   ]);
 
