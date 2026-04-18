@@ -40,6 +40,7 @@ import {
   FLASHLIGHT_INTENSITY,
   FLASHLIGHT_SPOT_DISTANCE,
   FLASHLIGHT_SPOT_POSITION,
+  FLASHLIGHT_SPOT_ROTATION,
   FLASHLIGHT_SPOT_RADIUS,
   FLASHLIGHT_SPOT_BEAM_RADIUS,
   FLASHLIGHT_SPOT_BEAM_BLEND,
@@ -48,6 +49,7 @@ import {
   FLASHLIGHT_INTERNAL_DISTANCE,
   FLASHLIGHT_INTERNAL_POSITION,
   BENCH_SCALE,
+  TABLE_SCALE,
   FLASHLIGHT_SPOT_SCALE_Z,
   TREE_COUNT,
   TREE_PLACEMENT_ATTEMPTS,
@@ -64,6 +66,7 @@ const LAMP_MODEL_PATH = './models/Lamp.glb';
 const TREE_MODEL_PATH = './models/Tree.glb';
 const BENCH_MODEL_PATH = './models/Bench.glb';
 const FLASHLIGHT_MODEL_PATH = './models/Flashlight.glb';
+const TABLE_MODEL_PATH = './models/Table.glb';
 
 function normalizeTreePlacementEntry(entry) {
   // Using previously generated positions
@@ -301,6 +304,22 @@ function loadBench(x, y, z, rotationY = 0) {
   });
 }
 
+// Table
+function loadTable(x, y, z, rotationY = 0) {
+  return cloneModelTemplate(TABLE_MODEL_PATH).then((model) => {
+    model.scale.set(TABLE_SCALE, TABLE_SCALE, TABLE_SCALE);
+    placeModelOnGround(model, x, z, y);
+    model.rotation.y = rotationY * (Math.PI / 180);
+
+    setupModelShadows(model, true);
+
+    scene.add(model);
+    addCollider(model);
+    registerOccupied(x, z);
+    return model;
+  });
+}
+
 // Flashlight
 function loadFlashlight(x, y, z, rotationY = 0) {
   return cloneModelTemplate(FLASHLIGHT_MODEL_PATH).then((model) => {
@@ -328,7 +347,15 @@ function loadFlashlight(x, y, z, rotationY = 0) {
       FLASHLIGHT_SPOT_POSITION.y,
       FLASHLIGHT_SPOT_POSITION.z
     );
+
+    // Apply configured rotation to the spotlight direction so the beam points correctly
     const spotDirection = new THREE.Vector3(0, 0, 1);
+    spotDirection.applyEuler(new THREE.Euler(
+      FLASHLIGHT_SPOT_ROTATION.x,
+      FLASHLIGHT_SPOT_ROTATION.y,
+      FLASHLIGHT_SPOT_ROTATION.z
+    ));
+
     const targetDistance = Math.max(2, FLASHLIGHT_SPOT_DISTANCE * FLASHLIGHT_SPOT_SCALE_Z);
     spotLight.target.position.copy(
       spotOrigin.clone().addScaledVector(spotDirection, targetDistance)
@@ -464,6 +491,12 @@ function loadFlashlights(list_positions = []) {
   );
 }
 
+function loadTables(list_positions = []) {
+  return Promise.all(
+    list_positions.map((position) => loadTable(position[0], position[1], position[2], position[3] || 0))
+  );
+}
+
 function preloadModelTemplates() {
   return Promise.all([
     loadModelTemplate(ROAD_MODEL_PATH),
@@ -472,6 +505,7 @@ function preloadModelTemplates() {
     loadModelTemplate(TREE_MODEL_PATH),
     loadModelTemplate(BENCH_MODEL_PATH),
     loadModelTemplate(FLASHLIGHT_MODEL_PATH),
+    loadModelTemplate(TABLE_MODEL_PATH),
   ]);
 }
 
@@ -488,7 +522,8 @@ async function loadAllModels(options = {}) {
     loadSlimes([[-60, 0, -30, 90], [-80, 0, -30, -90]]),
     loadLamps([[60, 0, 0], [62, 0, 80], [65, 0, -80], [-50, 0, -40], [-10, 0, 0]]),
     loadBenches([[58, 0, 10, -97], [-22, 0, 12, 45]]),
-    loadFlashlights([[-23, 1, 13]]),
+    loadFlashlights([[-13, 3.3, 11, -80]]),
+    loadTables([[-10, 0, 10, -90]])
   ]);
 
   const trees = await loadTrees(importedTreePlacements);

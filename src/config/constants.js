@@ -133,16 +133,15 @@ export const SHADOW_OBJECT_SIMPLIFIED_MESH_THRESHOLD = 0.42;
 export const FLASHLIGHT_SCALE = 0.2;
 export const FLASHLIGHT_COLOR = 0xffffff;
 export const FLASHLIGHT_INTENSITY = 110;
-// Lamp Spotlight
+// Flashlight Spotlight
 export const FLASHLIGHT_SPOT_DISTANCE = 80;
-export const FLASHLIGHT_SPOT_POSITION = { x: 0, y: 1, z: -2.5 };
-export const FLASHLIGHT_SPOT_ROTATION = { x: 0, y: 0, z: 0 };
+export const FLASHLIGHT_SPOT_POSITION = { x: 0, y: 1, z: -2.4 };
+export const FLASHLIGHT_SPOT_ROTATION = { x: -0.18, y: 0, z: 0 };
 export const FLASHLIGHT_SPOT_SCALE_Z = 0.583;
 export const FLASHLIGHT_SPOT_RADIUS = 0.2;
-export const FLASHLIGHT_SPOT_ROTATION_X = 90;
 export const FLASHLIGHT_SPOT_BEAM_RADIUS = 33;
 export const FLASHLIGHT_SPOT_BEAM_BLEND = 0.7;
-// Lamp Point Light
+// Flashlight Point Light
 export const FLASHLIGHT_INTERNAL_COLOR = 0xffffff;
 export const FLASHLIGHT_INTERNAL_INTENSITY = 5;
 export const FLASHLIGHT_INTERNAL_DISTANCE = 0.24;
@@ -187,6 +186,9 @@ export const CAMERA_FOV_LERP_SPEED = 8;
 
 // Bench
 export const BENCH_SCALE = 1.2;
+
+// Table
+export const TABLE_SCALE = 0.75;
 
 // Trees
 export const TREE_COUNT = 80;
