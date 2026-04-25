@@ -119,8 +119,21 @@ function registerInteractable(obj, options = {}) {
   interactables.push({
     obj,
     actionText: actionText || 'Use',
+    getActionText: typeof options.getActionText === 'function' ? options.getActionText : null,
+    isEnabled: typeof options.isEnabled === 'function' ? options.isEnabled : null,
     onInteract: typeof options.onInteract === 'function' ? options.onInteract : null,
   });
+}
+
+function getInteractableActionText(entry) {
+  if (!entry) return '';
+
+  if (typeof entry.getActionText === 'function') {
+    const dynamicText = entry.getActionText();
+    return typeof dynamicText === 'string' ? dynamicText.trim() : '';
+  }
+
+  return typeof entry.actionText === 'string' ? entry.actionText.trim() : '';
 }
 
 function unregisterInteractable(obj) {
@@ -164,16 +177,24 @@ function updateInteractionTarget() {
   let candidate = null;
   for (const hit of hits) {
     if (hit.distance > INTERACT_MAX_DISTANCE) continue;
-    candidate = findInteractableEntryForObject(hit.object);
-    if (candidate) break;
+    const found = findInteractableEntryForObject(hit.object);
+    if (!found) continue;
+    if (typeof found.isEnabled === 'function' && !found.isEnabled()) continue;
+
+    const actionText = getInteractableActionText(found);
+    if (!actionText) continue;
+
+    candidate = found;
+    break;
   }
 
   currentInteractable = candidate;
-  setInteractionPrompt(candidate ? candidate.actionText : null);
+  setInteractionPrompt(candidate ? getInteractableActionText(candidate) : null);
 }
 
 function tryInteractCurrentTarget() {
   if (!currentInteractable || typeof currentInteractable.onInteract !== 'function') return;
+  if (typeof currentInteractable.isEnabled === 'function' && !currentInteractable.isEnabled()) return;
   currentInteractable.onInteract();
 }
 

@@ -26,6 +26,11 @@ export const HEAD_BOB_AMOUNT_SPRINT = 0.6;
 export const GROUND_SIZE = 250;
 export const GROUND_COLOR = 0x008018;
 
+// Basement door
+export const BASEMENT_DOOR_MODEL_PATH = './models/Basement_door.glb';
+export const BASEMENT_DOOR_POSITION = { x: -28, y: 0, z: 24 };
+export const BASEMENT_DOOR_ROTATION_Y = Math.PI * 0.5;
+
 // Sky
 export const SKY_RADIUS = 1000;
 export const SKY_TOP_COLOR = '#1a1e41';

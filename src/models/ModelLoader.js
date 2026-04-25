@@ -16,6 +16,7 @@ import {
   registerWorldFlashlight,
   pickupFlashlightFromWorld,
 } from '../world/FlashlightSystem.js';
+import { createBasementDoorSystem } from '../world/BasementDoorSystem.js';
 import {
   GROUND_SIZE,
   ROAD_MODEL_PATH,
@@ -51,6 +52,9 @@ import {
   BENCH_SCALE,
   TABLE_SCALE,
   FLASHLIGHT_SPOT_SCALE_Z,
+  BASEMENT_DOOR_MODEL_PATH,
+  BASEMENT_DOOR_POSITION,
+  BASEMENT_DOOR_ROTATION_Y,
   TREE_COUNT,
   TREE_PLACEMENT_ATTEMPTS,
   TREE_WORLD_MARGIN,
@@ -67,6 +71,8 @@ const TREE_MODEL_PATH = './models/Tree2.glb';
 const BENCH_MODEL_PATH = './models/Bench.glb';
 const FLASHLIGHT_MODEL_PATH = './models/Flashlight.glb';
 const TABLE_MODEL_PATH = './models/Table.glb';
+
+let basementDoorTemplatePromise = null;
 
 function normalizeTreePlacementEntry(entry) {
   // Using previously generated positions
@@ -120,6 +126,23 @@ function loadModelTemplate(modelPath) {
 
   modelTemplatePromises.set(modelPath, promise);
   return promise;
+}
+
+function loadBasementDoorTemplate() {
+  if (basementDoorTemplatePromise) {
+    return basementDoorTemplatePromise;
+  }
+
+  basementDoorTemplatePromise = new Promise((resolve, reject) => {
+    loader.load(
+      BASEMENT_DOOR_MODEL_PATH,
+      (gltf) => resolve(gltf),
+      undefined,
+      reject
+    );
+  });
+
+  return basementDoorTemplatePromise;
 }
 
 function cloneModelTemplate(modelPath) {
@@ -320,6 +343,25 @@ function loadTable(x, y, z, rotationY = 0) {
   });
 }
 
+function loadBasementDoor() {
+  return loadBasementDoorTemplate().then((gltf) => {
+    const model = gltf.scene.clone(true);
+    model.scale.setScalar(1);
+    placeModelOnGround(model, BASEMENT_DOOR_POSITION.x, BASEMENT_DOOR_POSITION.z, BASEMENT_DOOR_POSITION.y);
+    model.rotation.y = BASEMENT_DOOR_ROTATION_Y;
+
+    setupModelShadows(model, true);
+
+    createBasementDoorSystem(model, gltf.animations, {
+      onEnterBasement: () => window.location.reload(),
+    });
+
+    scene.add(model);
+    registerOccupied(BASEMENT_DOOR_POSITION.x, BASEMENT_DOOR_POSITION.z);
+    return model;
+  });
+}
+
 // Flashlight
 function loadFlashlight(x, y, z, rotationY = 0) {
   return cloneModelTemplate(FLASHLIGHT_MODEL_PATH).then((model) => {
@@ -506,6 +548,7 @@ function preloadModelTemplates() {
     loadModelTemplate(BENCH_MODEL_PATH),
     loadModelTemplate(FLASHLIGHT_MODEL_PATH),
     loadModelTemplate(TABLE_MODEL_PATH),
+    loadBasementDoorTemplate(),
   ]);
 }
 
@@ -515,6 +558,7 @@ async function loadAllModels(options = {}) {
 
   // Road first so tree placement can respect grass blocker ray checks.
   await loadRoad();
+  await loadBasementDoor();
 
   const importedTreePlacements = normalizeTreePlacementList(options.treePlacements);
 

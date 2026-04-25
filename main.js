@@ -58,6 +58,7 @@ import {
   setForestAudioActive,
   unlockGameAudioPlayback,
 } from './src/audio/GameAudio.js';
+import { updateBasementDoorSystem } from './src/world/BasementDoorSystem.js';
 import {
   getFlashlightState,
   setFlashlightStateListener,
@@ -299,6 +300,7 @@ function animate(timestamp) {
     }
     updateSlimeIdle(elapsed);
     updateWorld(camera);
+    updateBasementDoorSystem(delta);
   }
 
   const vitals = getPlayerVitals();
