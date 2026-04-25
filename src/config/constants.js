@@ -198,7 +198,7 @@ export const TREE_EXCLUSION_RADIUS = 10;
 
 // Audio
 export const TITLE_CARD_AUDIO_VOLUME = 0.65;
-export const SLIME_EXPLODE_AUDIO_VOLUME = 0.6;
+export const SLIME_EXPLODE_AUDIO_VOLUME = 0.45;
 export const SLIME_IDLE_AUDIO_VOLUME = 0.4;
 export const SLIME_IDLE_AUDIO_REF_DISTANCE = 6;
 export const SLIME_IDLE_AUDIO_MAX_DISTANCE = 45;
