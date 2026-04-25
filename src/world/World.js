@@ -25,8 +25,29 @@ const planeGeometry = new THREE.PlaneGeometry(
   GROUND_SIZE * WORLD_EXTENDED_GROUND_SCALE,
   GROUND_SIZE * WORLD_EXTENDED_GROUND_SCALE
 );
-const planeMaterial = new THREE.MeshLambertMaterial({ color: GROUND_COLOR });
-planeMaterial.side = THREE.DoubleSide;
+const groundTextureLoader = new THREE.TextureLoader();
+const groundColorMap = groundTextureLoader.load('./imgs/Grass006_1K/Grass006_1K-JPG_Color.jpg');
+const groundRoughnessMap = groundTextureLoader.load('./imgs/Grass006_1K/Grass006_1K-JPG_Roughness.jpg');
+const groundNormalMap = groundTextureLoader.load('./imgs/Grass006_1K/Grass006_1K-JPG_NormalGL.jpg');
+const groundTextureRepeat = Math.max(1, Math.round((GROUND_SIZE * WORLD_EXTENDED_GROUND_SCALE) / 20));
+
+for (const texture of [groundColorMap, groundRoughnessMap, groundNormalMap]) {
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(groundTextureRepeat, groundTextureRepeat);
+}
+
+groundColorMap.colorSpace = THREE.SRGBColorSpace;
+
+const planeMaterial = new THREE.MeshStandardMaterial({
+  color: GROUND_COLOR,
+  map: groundColorMap,
+  roughnessMap: groundRoughnessMap,
+  normalMap: groundNormalMap,
+  roughness: 1,
+  normalScale: new THREE.Vector2(1, 1),
+  side: THREE.DoubleSide,
+});
 const ground = new THREE.Mesh(planeGeometry, planeMaterial);
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;

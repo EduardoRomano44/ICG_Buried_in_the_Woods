@@ -26,6 +26,11 @@ export const HEAD_BOB_AMOUNT_SPRINT = 0.6;
 export const GROUND_SIZE = 250;
 export const GROUND_COLOR = 0x008018;
 
+// Basement door
+export const BASEMENT_DOOR_MODEL_PATH = './models/Basement_door.glb';
+export const BASEMENT_DOOR_POSITION = { x: -28, y: 0, z: 24 };
+export const BASEMENT_DOOR_ROTATION_Y = Math.PI * 0.5;
+
 // Sky
 export const SKY_RADIUS = 1000;
 export const SKY_TOP_COLOR = '#1a1e41';
@@ -133,16 +138,15 @@ export const SHADOW_OBJECT_SIMPLIFIED_MESH_THRESHOLD = 0.42;
 export const FLASHLIGHT_SCALE = 0.2;
 export const FLASHLIGHT_COLOR = 0xffffff;
 export const FLASHLIGHT_INTENSITY = 110;
-// Lamp Spotlight
+// Flashlight Spotlight
 export const FLASHLIGHT_SPOT_DISTANCE = 80;
-export const FLASHLIGHT_SPOT_POSITION = { x: 0, y: 1, z: -2.5 };
-export const FLASHLIGHT_SPOT_ROTATION = { x: 0, y: 0, z: 0 };
+export const FLASHLIGHT_SPOT_POSITION = { x: 0, y: 1, z: -2.4 };
+export const FLASHLIGHT_SPOT_ROTATION = { x: -0.18, y: 0, z: 0 };
 export const FLASHLIGHT_SPOT_SCALE_Z = 0.583;
 export const FLASHLIGHT_SPOT_RADIUS = 0.2;
-export const FLASHLIGHT_SPOT_ROTATION_X = 90;
 export const FLASHLIGHT_SPOT_BEAM_RADIUS = 33;
 export const FLASHLIGHT_SPOT_BEAM_BLEND = 0.7;
-// Lamp Point Light
+// Flashlight Point Light
 export const FLASHLIGHT_INTERNAL_COLOR = 0xffffff;
 export const FLASHLIGHT_INTERNAL_INTENSITY = 5;
 export const FLASHLIGHT_INTERNAL_DISTANCE = 0.24;
@@ -188,6 +192,9 @@ export const CAMERA_FOV_LERP_SPEED = 8;
 // Bench
 export const BENCH_SCALE = 1.2;
 
+// Table
+export const TABLE_SCALE = 0.75;
+
 // Trees
 export const TREE_COUNT = 80;
 export const TREE_PLACEMENT_ATTEMPTS = 30;
@@ -196,7 +203,7 @@ export const TREE_EXCLUSION_RADIUS = 10;
 
 // Audio
 export const TITLE_CARD_AUDIO_VOLUME = 0.65;
-export const SLIME_EXPLODE_AUDIO_VOLUME = 0.6;
+export const SLIME_EXPLODE_AUDIO_VOLUME = 0.45;
 export const SLIME_IDLE_AUDIO_VOLUME = 0.4;
 export const SLIME_IDLE_AUDIO_REF_DISTANCE = 6;
 export const SLIME_IDLE_AUDIO_MAX_DISTANCE = 45;

@@ -7,7 +7,9 @@ import {
 
 let element = null;
 let interactionElement = null;
+let noticeElement = null;
 let currentPromptText = '';
+let noticeTimer = null;
 
 function createCrosshair() {
   element = document.createElement('div');
@@ -40,6 +42,25 @@ function createCrosshair() {
   promptStyle.color = INTERACT_PROMPT_COLOR;
   promptStyle.textShadow = '0 2px 8px rgba(0, 0, 0, 0.85)';
   document.body.appendChild(interactionElement);
+
+  noticeElement = document.createElement('div');
+  const noticeStyle = noticeElement.style;
+  noticeStyle.position = 'fixed';
+  noticeStyle.left = '50%';
+  noticeStyle.top = 'calc(50% + 132px)';
+  noticeStyle.transform = 'translateX(-50%)';
+  noticeStyle.pointerEvents = 'none';
+  noticeStyle.display = 'none';
+  noticeStyle.zIndex = '41';
+  noticeStyle.fontFamily = 'Finger Paint, system-ui, -apple-system, Segoe UI, sans-serif';
+  noticeStyle.fontSize = '18px';
+  noticeStyle.fontWeight = '600';
+  noticeStyle.letterSpacing = '0.04em';
+  noticeStyle.color = '#f3f4ff';
+  noticeStyle.textAlign = 'center';
+  noticeStyle.textShadow = '0 2px 10px rgba(0, 0, 0, 0.9)';
+  noticeStyle.maxWidth = 'min(84vw, 520px)';
+  document.body.appendChild(noticeElement);
 }
 
 function refreshCrosshair() {
@@ -56,6 +77,7 @@ function showCrosshair() {
 function hideCrosshair() {
   if (element) element.style.display = 'none';
   setInteractionPrompt(null);
+  hideInteractionNotice();
 }
 
 function setInteractionPrompt(actionLabel) {
@@ -76,4 +98,32 @@ function setInteractionPrompt(actionLabel) {
   interactionElement.style.display = 'block';
 }
 
-export { createCrosshair, showCrosshair, hideCrosshair, refreshCrosshair, setInteractionPrompt };
+function hideInteractionNotice() {
+  if (noticeTimer) {
+    window.clearTimeout(noticeTimer);
+    noticeTimer = null;
+  }
+
+  if (!noticeElement) return;
+  noticeElement.textContent = '';
+  noticeElement.style.display = 'none';
+}
+
+function showInteractionNotice(message, durationMs = 3000) {
+  if (!noticeElement) return;
+
+  hideInteractionNotice();
+
+  const text = typeof message === 'string' ? message.trim() : '';
+  if (!text) return;
+
+  noticeElement.textContent = text;
+  noticeElement.style.display = 'block';
+
+  const holdTime = Math.max(0, Number(durationMs) || 0);
+  noticeTimer = window.setTimeout(() => {
+    hideInteractionNotice();
+  }, holdTime);
+}
+
+export { createCrosshair, showCrosshair, hideCrosshair, refreshCrosshair, setInteractionPrompt, showInteractionNotice };
