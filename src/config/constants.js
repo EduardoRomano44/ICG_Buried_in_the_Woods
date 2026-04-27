@@ -31,6 +31,26 @@ export const BASEMENT_DOOR_MODEL_PATH = './models/Basement_door.glb';
 export const BASEMENT_DOOR_POSITION = { x: -28, y: 0, z: 24 };
 export const BASEMENT_DOOR_ROTATION_Y = Math.PI * 0.5;
 
+// Basement mapping
+export const BASEMENT_MAPPING_MODEL_PATH = './models/Basement_Mapping.glb';
+export const BASEMENT_MAPPING_SCALE = 1;
+export const BASEMENT_WALL1_LOCAL_OFFSET = { x: 0, y: 0, z: 0 };
+export const BASEMENT_WALL2_LOCAL_OFFSET = { x: 0, y: 0, z: 0 };
+export const BASEMENT_PREVIEW_CAMERA_POSITION = { x: 24, y: 18, z: 24 };
+export const BASEMENT_PREVIEW_CAMERA_TARGET = { x: 0, y: 2, z: 0 };
+export const BASEMENT_PREVIEW_BACKGROUND_COLOR = 0x05070b;
+export const BASEMENT_PREVIEW_FOG_NEAR = 80;
+export const BASEMENT_PREVIEW_FOG_FAR = 190;
+export const BASEMENT_PREVIEW_SUN_COLOR = 0xfff0d6;
+export const BASEMENT_PREVIEW_SUN_INTENSITY = 2.2;
+export const BASEMENT_PREVIEW_SUN_POSITION = { x: 32, y: 44, z: 22 };
+export const BASEMENT_PREVIEW_FILL_COLOR = 0x88b6ff;
+export const BASEMENT_PREVIEW_FILL_INTENSITY = 0.28;
+export const BASEMENT_PREVIEW_FILL_POSITION = { x: -26, y: 16, z: -30 };
+export const BASEMENT_PREVIEW_SUN_SHADOW_BIAS = -0.00035;
+export const BASEMENT_PREVIEW_SUN_SHADOW_NORMAL_BIAS = 0.03;
+export const BASEMENT_PREVIEW_SUN_SHADOW_RADIUS = 2;
+
 // Sky
 export const SKY_RADIUS = 1000;
 export const SKY_TOP_COLOR = '#1a1e41';
