@@ -20,6 +20,10 @@ const NON_COLOR_TEXTURE_COLOR_SPACE = 'NoColorSpace' in THREE ? THREE.NoColorSpa
 const tempPosition = new THREE.Vector3();
 const tempQuaternion = new THREE.Quaternion();
 const tempScale = new THREE.Vector3();
+const tempSourceInverseMatrix = new THREE.Matrix4();
+const tempRelativeMatrix = new THREE.Matrix4();
+const tempBox = new THREE.Box3();
+const tempBoxCenter = new THREE.Vector3();
 
 function loadGLTF(modelPath) {
   return new Promise((resolve, reject) => {
@@ -188,6 +192,65 @@ function setShadowProfile(root, options = {}) {
   });
 }
 
+function getLocalMeshBoxes(sourceNode) {
+  const boxes = [];
+
+  sourceNode.updateWorldMatrix(true, true);
+  tempSourceInverseMatrix.copy(sourceNode.matrixWorld).invert();
+
+  sourceNode.traverse((child) => {
+    if (!child.isMesh || !child.geometry) return;
+
+    const geometry = child.geometry;
+    if (!geometry.boundingBox) {
+      geometry.computeBoundingBox();
+    }
+    if (!geometry.boundingBox) return;
+
+    child.updateWorldMatrix(true, false);
+    tempRelativeMatrix.multiplyMatrices(tempSourceInverseMatrix, child.matrixWorld);
+    const localBox = geometry.boundingBox.clone().applyMatrix4(tempRelativeMatrix);
+    const size = localBox.getSize(new THREE.Vector3());
+
+    boxes.push({
+      box: localBox,
+      height: size.y,
+    });
+  });
+
+  return boxes;
+}
+
+function getWallPivotOffset(sourceNode, prefix) {
+  const meshBoxes = getLocalMeshBoxes(sourceNode);
+  if (meshBoxes.length === 0) {
+    return getWallLocalOffset(prefix);
+  }
+
+  let lowestPart = meshBoxes[0];
+  for (let i = 1; i < meshBoxes.length; i++) {
+    const candidate = meshBoxes[i];
+    if (candidate.height < lowestPart.height) {
+      lowestPart = candidate;
+      continue;
+    }
+
+    if (Math.abs(candidate.height - lowestPart.height) <= 0.0001
+      && candidate.box.min.y < lowestPart.box.min.y) {
+      lowestPart = candidate;
+    }
+  }
+
+  const userOffset = getWallLocalOffset(prefix);
+  lowestPart.box.getCenter(tempBoxCenter);
+
+  return new THREE.Vector3(
+    userOffset.x - tempBoxCenter.x,
+    userOffset.y - lowestPart.box.min.y,
+    userOffset.z - tempBoxCenter.z
+  );
+}
+
 function addColliderForObject(root, object3d, registerCollider) {
   const colliderBox = new THREE.Box3().setFromObject(object3d);
   const size = colliderBox.getSize(new THREE.Vector3());
@@ -234,10 +297,10 @@ function createAnchorInstance(sourceNode, anchor, prefix) {
   const clone = sourceNode.clone(true);
   enableShadows(clone);
 
-  const localOffset = getWallLocalOffset(prefix);
+  const localOffset = getWallPivotOffset(sourceNode, prefix);
   clone.position.set(
     localOffset.x,
-    sourceNode.position.y + localOffset.y,
+    localOffset.y,
     localOffset.z
   );
   clone.quaternion.copy(sourceNode.quaternion);

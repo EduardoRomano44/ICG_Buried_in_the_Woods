@@ -1,19 +1,43 @@
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from 'three';
 import { scene, camera, renderer } from './src/core/SceneManager.js';
-import { addCollider } from './src/player/Player.js';
+import {
+  addCollider,
+  initInput,
+  updatePlayer,
+  enterFirstPerson,
+  pauseFirstPersonControls,
+  setInputEnabled,
+  setToggleFlashlightHandler,
+} from './src/player/Player.js';
+import { createCrosshair } from './src/ui/Crosshair.js';
 import {
   BASEMENT_PREVIEW_CAMERA_POSITION,
   BASEMENT_PREVIEW_CAMERA_TARGET,
+  PLAYER_HEIGHT,
 } from './src/config/constants.js';
 import { createBasementPreviewWorld } from './src/world/basement/BasementPreviewWorld.js';
 import { loadBasementMapping } from './src/world/basement/BasementMappingLoader.js';
+import {
+  grantInventoryFlashlight,
+  toggleInventoryFlashlight,
+} from './src/world/FlashlightSystem.js';
 
 let controls = null;
 let statusLabel = null;
+let isPlayerPreviewMode = false;
+let currentStatusBaseMessage = 'Loading basement mapping...';
+const timer = new THREE.Timer();
+const orbitForward = new THREE.Vector3();
+const orbitTarget = new THREE.Vector3();
 
 function setStatus(message) {
   if (!statusLabel) return;
   statusLabel.textContent = message;
+}
+
+function setBaseStatus(message) {
+  currentStatusBaseMessage = message;
 }
 
 function createEditorToolbar() {
@@ -72,10 +96,77 @@ function setupCameraAndControls() {
   controls.update();
 }
 
+function updateModeStatus(baseMessage) {
+  setBaseStatus(baseMessage);
+  const suffix = isPlayerPreviewMode
+    ? ' Preview Play active. Press P or Esc to return to orbit. Press T to toggle flashlight.'
+    : ' Press P to enter Preview Play.';
+  setStatus(`${baseMessage}${suffix}`);
+}
+
+function enterPlayerPreviewMode() {
+  if (isPlayerPreviewMode) return;
+
+  isPlayerPreviewMode = true;
+  controls.enabled = false;
+  camera.position.y = PLAYER_HEIGHT;
+  setInputEnabled(true);
+  enterFirstPerson();
+  updateModeStatus(currentStatusBaseMessage);
+}
+
+function exitPlayerPreviewMode() {
+  if (!isPlayerPreviewMode) return;
+
+  isPlayerPreviewMode = false;
+  setInputEnabled(false);
+  pauseFirstPersonControls();
+
+  camera.getWorldDirection(orbitForward);
+  orbitTarget.copy(camera.position).add(orbitForward.multiplyScalar(12));
+  controls.target.copy(orbitTarget);
+  controls.enabled = true;
+  controls.update();
+  updateModeStatus(currentStatusBaseMessage);
+}
+
+function setupPreviewPlayerControls() {
+  createCrosshair();
+  initInput();
+  setToggleFlashlightHandler(toggleInventoryFlashlight);
+  grantInventoryFlashlight({ isOn: false });
+  setInputEnabled(false);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.repeat || event.code !== 'KeyP') return;
+    event.preventDefault();
+
+    if (isPlayerPreviewMode) {
+      exitPlayerPreviewMode();
+      return;
+    }
+
+    enterPlayerPreviewMode();
+  });
+
+  document.addEventListener('pointerlockchange', () => {
+    if (!isPlayerPreviewMode) return;
+    if (document.pointerLockElement === document.body) return;
+    exitPlayerPreviewMode();
+  });
+
+  document.addEventListener('click', () => {
+    if (!isPlayerPreviewMode) return;
+    if (document.pointerLockElement === document.body) return;
+    enterFirstPerson();
+  });
+}
+
 async function startBasementEditor() {
   renderer.domElement.style.display = 'block';
   createEditorToolbar();
   setupCameraAndControls();
+  setupPreviewPlayerControls();
   createBasementPreviewWorld(scene);
 
   try {
@@ -84,7 +175,7 @@ async function startBasementEditor() {
       registerCollider: addCollider,
     });
 
-    setStatus(
+    updateModeStatus(
       `Loaded floor + ${stats.wall1Instances} Wall1 and ${stats.wall2Instances} Wall2 instances. ${stats.colliderCount} colliders registered. ${stats.materialsWithNormalMap} materials with normal maps and ${stats.materialsWithRoughnessMap} with roughness maps configured.`
     );
   } catch (error) {
@@ -97,12 +188,19 @@ async function startBasementEditor() {
 
 function animate() {
   requestAnimationFrame(animate);
+  timer.update();
+  const delta = timer.getDelta();
 
-  if (controls) {
+  if (controls && !isPlayerPreviewMode) {
     controls.update();
+  }
+
+  if (isPlayerPreviewMode) {
+    updatePlayer(delta);
   }
 
   renderer.render(scene, camera);
 }
 
+timer.connect(document);
 startBasementEditor();
