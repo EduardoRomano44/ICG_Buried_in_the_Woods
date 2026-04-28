@@ -43,6 +43,7 @@ let health = PLAYER_MAX_HEALTH;
 let stamina = PLAYER_MAX_STAMINA;
 let staminaRecoveryTimer = PLAYER_STAMINA_RECOVERY_DELAY;
 let damageShakeTimer = 0;
+let lastHorizontalMovementDistance = 0;
 
 const move = { forward: false, backward: false, left: false, right: false };
 const direction = new THREE.Vector3();
@@ -51,6 +52,8 @@ const previousShakeOffset = new THREE.Vector3();
 const interactionRaycaster = new THREE.Raycaster();
 const interactionCenter = new THREE.Vector2(0, 0);
 const pressedKeys = new Set();
+const horizontalPositionBeforeMove = new THREE.Vector2();
+const horizontalPositionAfterMove = new THREE.Vector2();
 
 const KEY_BINDINGS = {
   // Multiple bindings support
@@ -309,6 +312,7 @@ function resetPlayerState() {
   damageShakeTimer = 0;
   velocityY = 0;
   bobTime = 0;
+  lastHorizontalMovementDistance = 0;
   clearMovementInput();
   camera.position.copy(initialCameraPosition);
   camera.rotation.set(0, INITIAL_CAMERA_ROTATION_Y, 0);
@@ -323,6 +327,14 @@ function getPlayerVitals() {
     stamina,
     maxStamina: PLAYER_MAX_STAMINA,
     isSprinting: isSprintActive,
+  };
+}
+
+function getPlayerMovementState() {
+  return {
+    isMoving: lastHorizontalMovementDistance > 0.001,
+    isSprinting: isSprintActive,
+    horizontalDistance: lastHorizontalMovementDistance,
   };
 }
 
@@ -362,6 +374,7 @@ function updatePlayer(delta) {
   }
 
   const currentSpeed = PLAYER_BASE_SPEED * (isSprintActive ? PLAYER_SPRINT_MULTIPLIER : 1);
+  horizontalPositionBeforeMove.set(camera.position.x, camera.position.z);
 
   // Movement
   if (isMoving) {
@@ -410,6 +423,9 @@ function updatePlayer(delta) {
     }
   }
 
+  horizontalPositionAfterMove.set(camera.position.x, camera.position.z);
+  lastHorizontalMovementDistance = horizontalPositionAfterMove.distanceTo(horizontalPositionBeforeMove);
+
   // soft FOV
   const targetFOV = isSprintActive ? CAMERA_SPRINT_FOV : CAMERA_NORMAL_FOV;
   const fovDelta = targetFOV - camera.fov;
@@ -453,4 +469,5 @@ export {
   setToggleFlashlightHandler,
   resetPlayerState,
   getPlayerVitals,
+  getPlayerMovementState,
 };

@@ -10,6 +10,7 @@ import { updateWorld, updateGrass } from './src/world/World.js';
 import {
   initInput,
   updatePlayer,
+  getPlayerMovementState,
   enterFirstPerson,
   pauseFirstPersonControls,
   resumeFirstPersonControls,
@@ -56,9 +57,11 @@ import {
   setGlobalAudioVolume,
   setTitleCardAudioActive,
   setForestAudioActive,
+  updateWalkSurfaceAudio,
   unlockGameAudioPlayback,
 } from './src/audio/GameAudio.js';
 import { updateBasementDoorSystem } from './src/world/BasementDoorSystem.js';
+import { detectWalkSurfaceType } from './src/world/WalkSurfaceRegistry.js';
 import {
   getFlashlightState,
   setFlashlightStateListener,
@@ -290,10 +293,18 @@ function animate(timestamp) {
   const delta = timer.getDelta();
   const elapsed = timer.getElapsed();
 
-  if (!hasStarted) return;
+  if (!hasStarted) {
+    updateWalkSurfaceAudio(null, false);
+    return;
+  }
 
   if (!isPaused && !isGameOver) {
     updatePlayer(delta);
+    const movementState = getPlayerMovementState();
+    const walkSurfaceType = detectWalkSurfaceType(camera.position);
+    updateWalkSurfaceAudio(walkSurfaceType, movementState.isMoving, {
+      isSprinting: movementState.isSprinting,
+    });
     if (!settings.lowQuality) {
       animateFireflies(elapsed);
       updateGrass(elapsed);
@@ -301,6 +312,8 @@ function animate(timestamp) {
     updateSlimeIdle(elapsed);
     updateWorld(camera);
     updateBasementDoorSystem(delta);
+  } else {
+    updateWalkSurfaceAudio(null, false);
   }
 
   const vitals = getPlayerVitals();

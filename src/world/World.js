@@ -3,6 +3,7 @@ import { scene } from '../core/SceneManager.js';
 import { addCollider } from '../player/Player.js';
 import { registerShadowLight, tagShadowLight, tagShadowObject } from '../core/ShadowOptimizer.js';
 import { updateGrass } from './Grass.js';
+import { registerWalkSurface } from './WalkSurfaceRegistry.js';
 import {
   GROUND_SIZE, GROUND_COLOR,
   SKY_RADIUS, SKY_TOP_COLOR, SKY_BOTTOM_COLOR,
@@ -49,10 +50,12 @@ const planeMaterial = new THREE.MeshStandardMaterial({
   side: THREE.DoubleSide,
 });
 const ground = new THREE.Mesh(planeGeometry, planeMaterial);
+ground.name = 'WorldGround';
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 tagShadowObject(ground, true);
 scene.add(ground);
+registerWalkSurface(ground, 'woods');
 
 const playableHalf = Math.max(8, (GROUND_SIZE * 0.5) - WORLD_BARRIER_INSET);
 const barrierY = WORLD_BARRIER_HEIGHT * 0.5;

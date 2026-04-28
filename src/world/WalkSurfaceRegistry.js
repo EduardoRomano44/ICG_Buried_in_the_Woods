@@ -1,0 +1,84 @@
+import * as THREE from 'three';
+
+const walkSurfaces = [];
+const detectionRaycaster = new THREE.Raycaster();
+const detectionOrigin = new THREE.Vector3();
+const DOWN_DIRECTION = new THREE.Vector3(0, -1, 0);
+
+function registerWalkSurface(root, surfaceType, options = {}) {
+  if (!root || typeof surfaceType !== 'string') return;
+
+  const existing = walkSurfaces.find((entry) => entry.root === root);
+  if (existing) {
+    existing.surfaceType = surfaceType;
+    existing.priority = Number.isFinite(options.priority) ? options.priority : existing.priority;
+    return;
+  }
+
+  walkSurfaces.push({
+    root,
+    surfaceType,
+    priority: Number.isFinite(options.priority) ? options.priority : 0,
+  });
+}
+
+function unregisterWalkSurface(root) {
+  const index = walkSurfaces.findIndex((entry) => entry.root === root);
+  if (index >= 0) {
+    walkSurfaces.splice(index, 1);
+  }
+}
+
+function findWalkSurfaceEntryForObject(object) {
+  let current = object;
+
+  while (current) {
+    const found = walkSurfaces.find((entry) => entry.root === current);
+    if (found) return found;
+    current = current.parent;
+  }
+
+  return null;
+}
+
+function detectWalkSurfaceType(position, options = {}) {
+  if (!position || walkSurfaces.length === 0) return null;
+
+  const originHeight = Number.isFinite(options.originHeight) ? options.originHeight : 1.5;
+  const maxDistance = Number.isFinite(options.maxDistance) ? options.maxDistance : 12;
+
+  detectionOrigin.set(position.x, position.y + originHeight, position.z);
+  detectionRaycaster.set(detectionOrigin, DOWN_DIRECTION);
+  detectionRaycaster.near = 0;
+  detectionRaycaster.far = maxDistance;
+
+  const roots = walkSurfaces
+    .filter((entry) => entry.root?.parent || entry.root?.isScene)
+    .map((entry) => entry.root);
+
+  if (roots.length === 0) return null;
+
+  const hits = detectionRaycaster.intersectObjects(roots, true);
+  let bestEntry = null;
+
+  for (const hit of hits) {
+    const entry = findWalkSurfaceEntryForObject(hit.object);
+    if (!entry) continue;
+
+    if (!bestEntry || entry.priority > bestEntry.priority) {
+      bestEntry = entry;
+    }
+
+    if (bestEntry && hit.distance <= 0.001) {
+      break;
+    }
+  }
+
+  return bestEntry ? bestEntry.surfaceType : null;
+}
+
+export {
+  registerWalkSurface,
+  unregisterWalkSurface,
+  detectWalkSurfaceType,
+};

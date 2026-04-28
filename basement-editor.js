@@ -5,6 +5,7 @@ import {
   addCollider,
   initInput,
   updatePlayer,
+  getPlayerMovementState,
   enterFirstPerson,
   pauseFirstPersonControls,
   setInputEnabled,
@@ -22,11 +23,15 @@ import {
   grantInventoryFlashlight,
   toggleInventoryFlashlight,
 } from './src/world/FlashlightSystem.js';
+import { registerWalkSurface, detectWalkSurfaceType } from './src/world/WalkSurfaceRegistry.js';
+import { setTitleCardAudioActive, updateWalkSurfaceAudio } from './src/audio/GameAudio.js';
 
 let controls = null;
 let statusLabel = null;
 let isPlayerPreviewMode = false;
-let currentStatusBaseMessage = 'Loading basement mapping...';
+let sceneStatusMessage = 'Loading basement mapping...';
+let basementCeilings = [];
+let basementCeilVisible = true;
 const timer = new THREE.Timer();
 const orbitForward = new THREE.Vector3();
 const orbitTarget = new THREE.Vector3();
@@ -36,8 +41,16 @@ function setStatus(message) {
   statusLabel.textContent = message;
 }
 
-function setBaseStatus(message) {
-  currentStatusBaseMessage = message;
+function setSceneStatusMessage(message) {
+  sceneStatusMessage = message;
+}
+
+function getStatusBaseMessage() {
+  if (basementCeilings.length > 0 && !basementCeilVisible) {
+    return `${sceneStatusMessage} Ceiling hidden.`;
+  }
+
+  return sceneStatusMessage;
 }
 
 function createEditorToolbar() {
@@ -97,11 +110,11 @@ function setupCameraAndControls() {
 }
 
 function updateModeStatus(baseMessage) {
-  setBaseStatus(baseMessage);
+  setSceneStatusMessage(baseMessage);
   const suffix = isPlayerPreviewMode
-    ? ' Preview Play active. Press P or Esc to return to orbit. Press T to toggle flashlight.'
-    : ' Press P to enter Preview Play.';
-  setStatus(`${baseMessage}${suffix}`);
+    ? ' Preview Play active. Press P or Esc to return to orbit. Press T to toggle flashlight. Press K to toggle ceiling.'
+    : ' Press P to enter Preview Play. Press K to toggle ceiling.';
+  setStatus(`${getStatusBaseMessage()}${suffix}`);
 }
 
 function enterPlayerPreviewMode() {
@@ -112,7 +125,7 @@ function enterPlayerPreviewMode() {
   camera.position.y = PLAYER_HEIGHT;
   setInputEnabled(true);
   enterFirstPerson();
-  updateModeStatus(currentStatusBaseMessage);
+  updateModeStatus(sceneStatusMessage);
 }
 
 function exitPlayerPreviewMode() {
@@ -127,7 +140,7 @@ function exitPlayerPreviewMode() {
   controls.target.copy(orbitTarget);
   controls.enabled = true;
   controls.update();
-  updateModeStatus(currentStatusBaseMessage);
+  updateModeStatus(sceneStatusMessage);
 }
 
 function setupPreviewPlayerControls() {
@@ -149,6 +162,18 @@ function setupPreviewPlayerControls() {
     enterPlayerPreviewMode();
   });
 
+  document.addEventListener('keydown', (event) => {
+    if (event.repeat || event.code !== 'KeyK') return;
+    if (basementCeilings.length === 0) return;
+
+    event.preventDefault();
+    basementCeilVisible = !basementCeilVisible;
+    for (const ceiling of basementCeilings) {
+      ceiling.visible = basementCeilVisible;
+    }
+    updateModeStatus(sceneStatusMessage);
+  });
+
   document.addEventListener('pointerlockchange', () => {
     if (!isPlayerPreviewMode) return;
     if (document.pointerLockElement === document.body) return;
@@ -164,19 +189,26 @@ function setupPreviewPlayerControls() {
 
 async function startBasementEditor() {
   renderer.domElement.style.display = 'block';
+  setTitleCardAudioActive(false);
   createEditorToolbar();
   setupCameraAndControls();
   setupPreviewPlayerControls();
   createBasementPreviewWorld(scene);
 
   try {
-    const { stats } = await loadBasementMapping({
+    const { stats, grounds, ceilings } = await loadBasementMapping({
       scene,
       registerCollider: addCollider,
     });
+    basementCeilings = ceilings;
+    basementCeilVisible = true;
+
+    for (const ground of grounds) {
+      registerWalkSurface(ground, 'basement', { priority: 5 });
+    }
 
     updateModeStatus(
-      `Loaded floor + ${stats.wall1Instances} Wall1 and ${stats.wall2Instances} Wall2 instances. ${stats.colliderCount} colliders registered. ${stats.materialsWithNormalMap} materials with normal maps and ${stats.materialsWithRoughnessMap} with roughness maps configured.`
+      `Loaded floor + ${stats.wall1Instances} Wall1 and ${stats.wall2Instances} Wall2 instances. ${stats.ceilInstances} Ceil instances. ${stats.colliderCount} colliders registered. ${stats.materialsWithNormalMap} materials with normal maps and ${stats.materialsWithRoughnessMap} with roughness maps configured.`
     );
   } catch (error) {
     console.error('Failed to load basement mapping:', error);
@@ -197,6 +229,13 @@ function animate() {
 
   if (isPlayerPreviewMode) {
     updatePlayer(delta);
+    const movementState = getPlayerMovementState();
+    const walkSurfaceType = detectWalkSurfaceType(camera.position);
+    updateWalkSurfaceAudio(walkSurfaceType, movementState.isMoving, {
+      isSprinting: movementState.isSprinting,
+    });
+  } else {
+    updateWalkSurfaceAudio(null, false);
   }
 
   renderer.render(scene, camera);

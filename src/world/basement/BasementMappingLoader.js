@@ -43,6 +43,7 @@ function getBaseName(name) {
 function collectNamedBasementData(root) {
   const data = {
     floorNodes: [],
+    ceilNodes: [],
     wall1Node: null,
     wall2Node: null,
     anchors: {
@@ -62,6 +63,10 @@ function collectNamedBasementData(root) {
 
     if (baseName === 'ground' && !data.floorNodes.includes(child)) {
       data.floorNodes.push(child);
+    }
+
+    if (baseName === 'ceil' && !data.ceilNodes.includes(child)) {
+      data.ceilNodes.push(child);
     }
 
     if (baseName === 'wall1' && !data.wall1Node) {
@@ -361,6 +366,8 @@ async function loadBasementMapping(options = {}) {
   const basementRoot = new THREE.Group();
   basementRoot.name = 'BasementRoot';
   basementRoot.scale.setScalar(BASEMENT_MAPPING_SCALE);
+  const groundInstances = [];
+  const ceilInstances = [];
 
   for (const floorNode of namedData.floorNodes) {
     const floorClone = cloneNodeWithWorldTransform(floorNode);
@@ -370,6 +377,18 @@ async function loadBasementMapping(options = {}) {
       receiveShadow: true,
     });
     basementRoot.add(floorClone);
+    groundInstances.push(floorClone);
+  }
+
+  for (const ceilNode of namedData.ceilNodes) {
+    const ceilClone = cloneNodeWithWorldTransform(ceilNode);
+    ceilClone.name = 'CeilInstance';
+    setShadowProfile(ceilClone, {
+      castShadow: true,
+      receiveShadow: false,
+    });
+    basementRoot.add(ceilClone);
+    ceilInstances.push(ceilClone);
   }
 
   const wall1Instances = buildClonedGroup(
@@ -394,9 +413,12 @@ async function loadBasementMapping(options = {}) {
 
   return {
     root: basementRoot,
+    grounds: groundInstances,
+    ceilings: ceilInstances,
     stats: {
       wall1Instances,
       wall2Instances,
+      ceilInstances: ceilInstances.length,
       colliderCount: wall1Instances + wall2Instances,
       materialsWithColorMap: materialStats.materialsWithColorMap,
       materialsWithNormalMap: materialStats.materialsWithNormalMap,

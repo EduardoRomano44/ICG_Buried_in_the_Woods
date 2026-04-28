@@ -8,6 +8,7 @@ import {
   createWorldPositionsPayload,
   downloadGeneratedWorldPositions,
 } from './src/world/PlacementPersistence.js';
+import { setTitleCardAudioActive } from './src/audio/GameAudio.js';
 
 let controls = null;
 
@@ -92,6 +93,7 @@ function createEditorToolbar() {
 }
 
 async function startMapEditor() {
+  setTitleCardAudioActive(false);
   createEditorToolbar();
   renderer.domElement.style.display = 'block';
 
