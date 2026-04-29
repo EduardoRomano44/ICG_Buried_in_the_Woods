@@ -10,6 +10,7 @@ import { updateWorld, updateGrass } from './src/world/World.js';
 import {
   initInput,
   updatePlayer,
+  getPlayerMovementState,
   enterFirstPerson,
   pauseFirstPersonControls,
   resumeFirstPersonControls,
@@ -38,6 +39,7 @@ import {
   setGameStarted,
   setPaused,
   setFlashlightState,
+  setKeyState,
   applyBarsSizePreset,
   setStartLoading,
   isSettingsBusy,
@@ -56,14 +58,27 @@ import {
   setGlobalAudioVolume,
   setTitleCardAudioActive,
   setForestAudioActive,
+  updateWalkSurfaceAudio,
   unlockGameAudioPlayback,
 } from './src/audio/GameAudio.js';
 import { updateBasementDoorSystem } from './src/world/BasementDoorSystem.js';
+import { detectWalkSurfaceType } from './src/world/WalkSurfaceRegistry.js';
 import {
   getFlashlightState,
   setFlashlightStateListener,
   toggleInventoryFlashlight,
 } from './src/world/FlashlightSystem.js';
+
+// Basement transition
+import {
+  transitionToBasement,
+  isInBasement,
+} from './src/world/basement/BasementTransition.js';
+import {
+  setKeyStateListener,
+  getKeyState,
+} from './src/world/basement/KeySystem.js';
+import { updateDoorMetalSystem } from './src/world/basement/BasementDoorMetalSystem.js';
 
 // Bootstrap
 createCrosshair();
@@ -95,6 +110,23 @@ async function applyRuntimeSettings() {
   }
 }
 
+/**
+ * Callback wired to the basement door's onEnterBasement.
+ * Triggers the full level transition instead of reloading the page.
+ */
+function handleEnterBasement() {
+  transitionToBasement({
+    onComplete: () => {
+      // Basement is now active — the game loop will use the basement branch
+      forceShadowRefresh(true);
+      renderer.render(scene, camera);
+    },
+    onFail: (error) => {
+      console.error('Basement transition failed:', error);
+    },
+  });
+}
+
 async function preloadWorldAssets() {
   if (modelsReady) return true;
   if (isLoadingWorld && worldPreloadPromise) return worldPreloadPromise;
@@ -108,6 +140,7 @@ async function preloadWorldAssets() {
 
       const loadedModels = await loadAllModels({
         treePlacements: savedPositions?.trees,
+        onEnterBasement: handleEnterBasement,
       });
 
       createGrass({
@@ -228,6 +261,9 @@ setFlashlightStateListener(setFlashlightState);
 setFlashlightState(getFlashlightState());
 setToggleFlashlightHandler(toggleInventoryFlashlight);
 
+setKeyStateListener(setKeyState);
+setKeyState(getKeyState());
+
 setGameStarted(false);
 setPaused(false);
 setStartLoading(false);
@@ -290,17 +326,35 @@ function animate(timestamp) {
   const delta = timer.getDelta();
   const elapsed = timer.getElapsed();
 
-  if (!hasStarted) return;
+  if (!hasStarted) {
+    updateWalkSurfaceAudio(null, false);
+    return;
+  }
 
   if (!isPaused && !isGameOver) {
     updatePlayer(delta);
-    if (!settings.lowQuality) {
-      animateFireflies(elapsed);
-      updateGrass(elapsed);
+    const movementState = getPlayerMovementState();
+    const walkSurfaceType = detectWalkSurfaceType(camera.position);
+    updateWalkSurfaceAudio(walkSurfaceType, movementState.isMoving, {
+      isSprinting: movementState.isSprinting,
+    });
+
+    if (isInBasement()) {
+      // ── Basement-specific updates ──────────────────────────────────
+      updateSlimeIdle(elapsed);
+      updateDoorMetalSystem(delta);
+    } else {
+      // ── Overworld-specific updates ─────────────────────────────────
+      if (!settings.lowQuality) {
+        animateFireflies(elapsed);
+        updateGrass(elapsed);
+      }
+      updateSlimeIdle(elapsed);
+      updateWorld(camera);
+      updateBasementDoorSystem(delta);
     }
-    updateSlimeIdle(elapsed);
-    updateWorld(camera);
-    updateBasementDoorSystem(delta);
+  } else {
+    updateWalkSurfaceAudio(null, false);
   }
 
   const vitals = getPlayerVitals();
@@ -315,4 +369,3 @@ function animate(timestamp) {
 }
 
 animate();
-

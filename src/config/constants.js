@@ -6,7 +6,7 @@ export const PLAYER_BASE_SPEED = 6;
 export const PLAYER_SPRINT_MULTIPLIER = 1.8;
 export const PLAYER_COLLISION_RADIUS = 0.5;
 export const PLAYER_MAX_HEALTH = 3;
-export const PLAYER_MAX_STAMINA = 100;
+export const PLAYER_MAX_STAMINA = 150;
 export const PLAYER_STAMINA_DRAIN_PER_SEC = 30;
 export const PLAYER_STAMINA_RECOVERY_PER_SEC = 24;
 export const PLAYER_STAMINA_RECOVERY_DELAY = 1.2;
@@ -30,6 +30,39 @@ export const GROUND_COLOR = 0x008018;
 export const BASEMENT_DOOR_MODEL_PATH = './models/Basement_door.glb';
 export const BASEMENT_DOOR_POSITION = { x: -28, y: 0, z: 24 };
 export const BASEMENT_DOOR_ROTATION_Y = Math.PI * 0.5;
+
+export const DOOR_METAL_MODEL_PATH = './models/Door-metal.glb';
+export const KEY_MODEL_PATH = './models/Key.glb';
+export const SLIME_MODEL_PATH = './models/Slime.glb';
+export const TABLE_MODEL_PATH = './models/Table.glb';
+
+// Basement mapping
+export const BASEMENT_MAPPING_MODEL_PATH = './models/Basement_Mapping2.glb';
+export const BASEMENT_MAPPING_SCALE = 1;
+export const BASEMENT_WALL1_LOCAL_OFFSET = { x: 0, y: 0, z: 0 };
+export const BASEMENT_WALL2_LOCAL_OFFSET = { x: 0, y: 0, z: 0 };
+export const BASEMENT_PREVIEW_CAMERA_POSITION = { x: 24, y: 18, z: 24 };
+export const BASEMENT_PREVIEW_CAMERA_TARGET = { x: 0, y: 2, z: 0 };
+export const BASEMENT_PREVIEW_BACKGROUND_COLOR = 0x05070b;
+export const BASEMENT_PREVIEW_FOG_NEAR = 80;
+export const BASEMENT_PREVIEW_FOG_FAR = 190;
+export const BASEMENT_PREVIEW_SUN_COLOR = 0xfff0d6;
+export const BASEMENT_PREVIEW_SUN_INTENSITY = 1.2;
+export const BASEMENT_PREVIEW_SUN_POSITION = { x: 32, y: 44, z: 22 };
+export const BASEMENT_PREVIEW_FILL_COLOR = 0x88b6ff;
+export const BASEMENT_PREVIEW_FILL_INTENSITY = 0.52;
+export const BASEMENT_PREVIEW_FILL_POSITION = { x: -26, y: 16, z: -30 };
+export const BASEMENT_PREVIEW_SUN_SHADOW_BIAS = -0.00035;
+export const BASEMENT_PREVIEW_SUN_SHADOW_NORMAL_BIAS = 0.03;
+export const BASEMENT_PREVIEW_SUN_SHADOW_RADIUS = 2;
+
+// Basement environment (in-game)
+export const BASEMENT_AMBIENT_COLOR = 0x1a1a2e;
+export const BASEMENT_AMBIENT_INTENSITY = 0.08;
+export const BASEMENT_FOG_COLOR = 0x020208;
+export const BASEMENT_FOG_NEAR = 5;
+export const BASEMENT_FOG_FAR = 45;
+export const BASEMENT_PLAYER_SPAWN_FALLBACK = { x: 0, y: 5, z: 0 };
 
 // Sky
 export const SKY_RADIUS = 1000;
@@ -70,7 +103,7 @@ export const SLIME_SCALE = 1.4;
 // Slime idle
 export const SLIME_IDLE_SPEED = 2;
 export const SLIME_IDLE_XZ_AMPLITUDE = 0.2;
-export const SLIME_IDLE_Y_AMPLITUDE  = 0.2;
+export const SLIME_IDLE_Y_AMPLITUDE = 0.2;
 export const SLIME_IDLE_TRIGGER_DISTANCE = 4.5;
 // Slime attack
 export const SLIME_ATTACK_DURATION = 1.5;
@@ -172,7 +205,7 @@ export const GRASS_BLADE_WIDTH = 0.18;
 export const GRASS_BLADE_HEIGHT = 0.7;
 export const GRASS_SPREAD = 0.4;
 export const GRASS_COLOR_BASE = 0x2d6a1f;
-export const GRASS_COLOR_TIP  = 0x7ec850;
+export const GRASS_COLOR_TIP = 0x7ec850;
 export const GRASS_EXCLUSION_RADIUS = 2.5;
 export const GRASS_BLOCKER_RAY_HEIGHT = 150;
 
@@ -211,3 +244,6 @@ export const SLIME_EXPLODE_AUDIO_REF_DISTANCE = 6;
 export const SLIME_EXPLODE_AUDIO_MAX_DISTANCE = 45;
 export const FOREST_AUDIO_VOLUME = 1;
 export const FLASHLIGHT_TOGGLE_AUDIO_VOLUME = 0.55;
+export const WALK_WOODS_AUDIO_VOLUME = 0.4;
+export const WALK_BASEMENT_AUDIO_VOLUME = 0.3;
+export const WALK_AUDIO_SPRINT_PLAYBACK_RATE = 2;

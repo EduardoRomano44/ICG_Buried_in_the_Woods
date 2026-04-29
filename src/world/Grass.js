@@ -378,3 +378,21 @@ export function setGrassEnabled(enabled) {
     grassMesh.visible = enabled;
   }
 }
+
+/**
+ * Fully tear down the grass system — removes mesh from scene and disposes GPU resources.
+ * Used during level transitions so the new level starts without overworld grass.
+ */
+export function disposeGrass() {
+  if (grassMesh) {
+    scene.remove(grassMesh);
+    grassMesh.geometry.dispose();
+    grassMesh.material.dispose();
+    grassMesh = null;
+  }
+
+  grassMaterial = null;
+  occupiedPositions.length = 0;
+  grassBlockers.length = 0;
+  lastGrassPatchPlacements.length = 0;
+}

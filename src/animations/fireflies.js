@@ -101,4 +101,19 @@ function setFirefliesEnabled(enabled) {
   }
 }
 
-export { createFireflies, animateFireflies, setFirefliesEnabled };
+/**
+ * Remove all firefly meshes from the scene and clear internal state.
+ * Called during level transitions since fireflies belong to overworld lamps.
+ */
+function disposeFireflies() {
+  for (const firefly of fireflies) {
+    if (firefly.mesh.parent) {
+      firefly.mesh.parent.remove(firefly.mesh);
+    }
+    firefly.mesh.geometry?.dispose();
+    firefly.mesh.material?.dispose();
+  }
+  fireflies.length = 0;
+}
+
+export { createFireflies, animateFireflies, setFirefliesEnabled, disposeFireflies };

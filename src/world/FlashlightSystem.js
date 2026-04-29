@@ -192,10 +192,25 @@ function toggleInventoryFlashlight() {
   return true;
 }
 
+function grantInventoryFlashlight(options = {}) {
+  const {
+    isOn = false,
+  } = options;
+
+  ensureInventoryLights();
+  state.hasFlashlight = true;
+  state.isOn = Boolean(isOn);
+  setInventoryLightsEnabled(state.isOn);
+  notifyStateChanged();
+
+  return getFlashlightState();
+}
+
 export {
   registerWorldFlashlight,
   pickupFlashlightFromWorld,
   toggleInventoryFlashlight,
+  grantInventoryFlashlight,
   setFlashlightStateListener,
   getFlashlightState,
 };

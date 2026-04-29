@@ -9,6 +9,9 @@ import {
   SLIME_EXPLODE_AUDIO_MAX_DISTANCE,
   FOREST_AUDIO_VOLUME,
   FLASHLIGHT_TOGGLE_AUDIO_VOLUME,
+  WALK_WOODS_AUDIO_VOLUME,
+  WALK_BASEMENT_AUDIO_VOLUME,
+  WALK_AUDIO_SPRINT_PLAYBACK_RATE,
 } from '../config/constants.js';
 
 /*
@@ -23,6 +26,8 @@ const tracks = {
   slimeIdle: createTrack('slimeIdle.mp3', SLIME_IDLE_AUDIO_VOLUME, true),
   forest: createTrack('forest.mp3', FOREST_AUDIO_VOLUME, true),
   flashlightToggle: createTrack('toggleFlashlight.mp3', FLASHLIGHT_TOGGLE_AUDIO_VOLUME, false),
+  walkWoods: createTrack('walk_woods.mp3', WALK_WOODS_AUDIO_VOLUME, true),
+  walkBasement: createTrack('walk_basement.mp3', WALK_BASEMENT_AUDIO_VOLUME, true),
 };
 
 const state = {
@@ -31,6 +36,8 @@ const state = {
   slimeIdleActive: false,
   slimeIdleDistance: Infinity,
   forestActive: false,
+  walkWoodsActive: false,
+  walkBasementActive: false,
   initialVolumeApplied: false,
   oneShotWarmupDone: false,
 };
@@ -42,6 +49,7 @@ function createTrack(fileName, baseVolume, loop) {
   audio.preload = 'auto';
   audio.loop = loop;
   audio.volume = 0;
+  audio.playbackRate = 1;
 
   return {
     audio,
@@ -92,6 +100,17 @@ function tryPlay(track) {
   }
 }
 
+function setTrackPlaybackRate(trackName, playbackRate) {
+  const track = tracks[trackName];
+  if (!track) return;
+
+  const safeRate = Number.isFinite(playbackRate)
+    ? Math.max(0.5, Math.min(2, playbackRate))
+    : 1;
+
+  track.audio.playbackRate = safeRate;
+}
+
 function setTrackActive(trackName, active) {
   const track = tracks[trackName];
   if (!track) return;
@@ -122,6 +141,8 @@ function refreshPlayback() {
   setTrackActive('titleCard', state.titleCardActive);
   setTrackActive('slimeIdle', state.slimeIdleActive);
   setTrackActive('forest', state.forestActive);
+  setTrackActive('walkWoods', state.walkWoodsActive);
+  setTrackActive('walkBasement', state.walkBasementActive);
 }
 
 function warmUpOneShotTrack(trackName) {
@@ -233,6 +254,21 @@ function playFlashlightToggleAudio() {
   tryPlay(track);
 }
 
+function updateWalkSurfaceAudio(surfaceType, isMoving, options = {}) {
+  ensureAudioInitialized();
+
+  const moving = Boolean(isMoving);
+  const nextSurface = typeof surfaceType === 'string' ? surfaceType : '';
+  const isSprinting = Boolean(options.isSprinting);
+  const playbackRate = isSprinting ? WALK_AUDIO_SPRINT_PLAYBACK_RATE : 1;
+
+  setTrackPlaybackRate('walkWoods', playbackRate);
+  setTrackPlaybackRate('walkBasement', playbackRate);
+
+  setTrackActive('walkWoods', moving && nextSurface === 'woods');
+  setTrackActive('walkBasement', moving && nextSurface === 'basement');
+}
+
 ensureAudioInitialized();
 
 export {
@@ -243,5 +279,6 @@ export {
   setSlimeIdleAudioDistance,
   playSlimeExplodeAudio,
   playFlashlightToggleAudio,
+  updateWalkSurfaceAudio,
   unlockGameAudioPlayback,
 };

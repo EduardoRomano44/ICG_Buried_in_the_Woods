@@ -26,6 +26,11 @@ function setFlashlightState(state) {
   controller.setFlashlightState(state);
 }
 
+function setKeyState(state) {
+  if (!controller) return;
+  controller.setKeyState(state);
+}
+
 function setStartLoading(visible, label = 'Loading...') {
   if (!controller) return;
   controller.setStartLoading(visible, label);
@@ -47,6 +52,7 @@ export {
   setGameStarted,
   setPaused,
   setFlashlightState,
+  setKeyState,
   applyBarsSizePreset,
   setStartLoading,
   isSettingsBusy,
