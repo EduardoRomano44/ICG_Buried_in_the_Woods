@@ -6,7 +6,7 @@ export const PLAYER_BASE_SPEED = 6;
 export const PLAYER_SPRINT_MULTIPLIER = 1.8;
 export const PLAYER_COLLISION_RADIUS = 0.5;
 export const PLAYER_MAX_HEALTH = 3;
-export const PLAYER_MAX_STAMINA = 100;
+export const PLAYER_MAX_STAMINA = 150;
 export const PLAYER_STAMINA_DRAIN_PER_SEC = 30;
 export const PLAYER_STAMINA_RECOVERY_PER_SEC = 24;
 export const PLAYER_STAMINA_RECOVERY_DELAY = 1.2;
@@ -55,6 +55,14 @@ export const BASEMENT_PREVIEW_FILL_POSITION = { x: -26, y: 16, z: -30 };
 export const BASEMENT_PREVIEW_SUN_SHADOW_BIAS = -0.00035;
 export const BASEMENT_PREVIEW_SUN_SHADOW_NORMAL_BIAS = 0.03;
 export const BASEMENT_PREVIEW_SUN_SHADOW_RADIUS = 2;
+
+// Basement environment (in-game)
+export const BASEMENT_AMBIENT_COLOR = 0x1a1a2e;
+export const BASEMENT_AMBIENT_INTENSITY = 0.08;
+export const BASEMENT_FOG_COLOR = 0x020208;
+export const BASEMENT_FOG_NEAR = 5;
+export const BASEMENT_FOG_FAR = 45;
+export const BASEMENT_PLAYER_SPAWN_FALLBACK = { x: 0, y: 5, z: 0 };
 
 // Sky
 export const SKY_RADIUS = 1000;

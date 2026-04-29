@@ -110,13 +110,21 @@ textarea {
   transition: transform 90ms linear;
 }
 
-.flashlight-slot {
+.inventory-slots {
   position: absolute;
   top: 50%;
   right: 18px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.flashlight-slot {
+  position: relative;
   width: 74px;
   height: 74px;
-  transform: translateY(-50%);
   border: 2px solid rgba(255, 255, 255, 0.82);
   border-radius: 9px;
   background: rgba(12, 18, 24, 0.45);
@@ -153,6 +161,30 @@ textarea {
   border-color: #ffffff;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45), 0 12px 24px rgba(0, 0, 0, 0.5);
   background: rgba(30, 35, 40, 0.62);
+}
+
+.key-slot {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 9px;
+  background: rgba(12, 18, 24, 0.45);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(1px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.key-slot-icon {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
 .screen-overlay {
@@ -487,10 +519,18 @@ textarea {
     padding: 14px;
   }
 
+  .inventory-slots {
+    right: 12px;
+  }
+
   .flashlight-slot {
     width: 64px;
     height: 64px;
-    right: 12px;
+  }
+
+  .key-slot {
+    width: 64px;
+    height: 64px;
   }
 
   .flashlight-slot-key {

@@ -11,6 +11,7 @@ import {
 function scheduleSlimeRespawnDebug(slimeMesh, baseScale) {
   if (!DEBUG_SLIME_RESPAWN_ENABLED || !slimeMesh) return;
 
+  const respawnParent = slimeMesh.parent || scene;
   const respawnPosition = slimeMesh.position.clone();
   const respawnRotation = slimeMesh.rotation.clone();
   const respawnScale = baseScale ? baseScale.clone() : slimeMesh.scale.clone();
@@ -23,7 +24,9 @@ function scheduleSlimeRespawnDebug(slimeMesh, baseScale) {
     slimeMesh.scale.copy(respawnScale);
     slimeMesh.visible = true;
 
-    scene.add(slimeMesh);
+    // Re-add to original parent (basementRoot or scene) to preserve transform hierarchy
+    const target = respawnParent.parent ? respawnParent : scene;
+    target.add(slimeMesh);
     addCollider(slimeMesh, { dynamic: true });
     createSlimeIdle(slimeMesh);
   }, DEBUG_SLIME_RESPAWN_DELAY * 1000);

@@ -14,6 +14,8 @@ import {
   TABLE_SCALE,
 } from '../../config/constants.js';
 import { createSlimeIdle } from '../../animations/slimeIdle.js';
+import { createDoorMetalSystem } from './BasementDoorMetalSystem.js';
+import { registerWorldKey } from './KeySystem.js';
 
 const loader = new GLTFLoader();
 
@@ -460,7 +462,7 @@ async function loadBasementMapping(options = {}) {
 
       const clone = sourceNode.clone(true);
       enableShadows(clone);
-      clone.name = `${prefix}Instance`;
+      clone.name = sourceNode.name || `${prefix}Instance`;
       clone.position.set(0, 0, 0);
       clone.quaternion.set(0, 0, 0, 1);
       clone.scale.setScalar(scale);
@@ -490,6 +492,16 @@ async function loadBasementMapping(options = {}) {
 
   for (const slimeRoot of slimeGroup.instances) {
     createSlimeIdle(slimeRoot);
+  }
+
+  for (const doorMetalRoot of doorMetalGroup.instances) {
+    // The actual clone is the first child of the anchor root
+    const doorMetalClone = doorMetalRoot.children[0];
+    if (doorMetalClone) {
+      createDoorMetalSystem(doorMetalClone, doorMetalGltf.animations, {
+        onExit: options.onExitBasement || (() => window.location.reload())
+      });
+    }
   }
 
   const doorMetalInstances = doorMetalGroup.count;
@@ -527,6 +539,8 @@ async function loadBasementMapping(options = {}) {
     keyInstanceRoot.add(keyClone);
     keyInstanceRoot.updateMatrixWorld(true);
     basementRoot.add(keyInstanceRoot);
+    
+    registerWorldKey(keyClone);
   }
 
   if (scene) {

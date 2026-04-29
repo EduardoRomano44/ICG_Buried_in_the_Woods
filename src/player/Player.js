@@ -453,6 +453,28 @@ function updatePlayer(delta) {
   updateInteractionTarget();
 }
 
+/**
+ * Remove every registered collider. Used during level transitions
+ * so overworld colliders don't affect the basement.
+ */
+function clearAllColliders() {
+  colliders.length = 0;
+  interactables.length = 0;
+  currentInteractable = null;
+}
+
+/**
+ * Teleport the player camera to a specific world position.
+ * Preserves Y at PLAYER_HEIGHT for consistency.
+ */
+function setPlayerPosition(x, y, z) {
+  camera.position.set(
+    Number.isFinite(x) ? x : 0,
+    Number.isFinite(y) ? y : PLAYER_HEIGHT,
+    Number.isFinite(z) ? z : 0
+  );
+}
+
 export {
   initInput,
   updatePlayer,
@@ -470,4 +492,6 @@ export {
   resetPlayerState,
   getPlayerVitals,
   getPlayerMovementState,
+  clearAllColliders,
+  setPlayerPosition,
 };

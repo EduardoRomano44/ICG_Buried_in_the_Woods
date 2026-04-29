@@ -343,7 +343,11 @@ function loadTable(x, y, z, rotationY = 0) {
   });
 }
 
-function loadBasementDoor() {
+function loadBasementDoor(onEnterBasement) {
+  const enterCallback = typeof onEnterBasement === 'function'
+    ? onEnterBasement
+    : () => window.location.reload();
+
   return loadBasementDoorTemplate().then((gltf) => {
     const model = gltf.scene.clone(true);
     model.scale.setScalar(1);
@@ -353,7 +357,7 @@ function loadBasementDoor() {
     setupModelShadows(model, true);
 
     createBasementDoorSystem(model, gltf.animations, {
-      onEnterBasement: () => window.location.reload(),
+      onEnterBasement: enterCallback,
     });
 
     scene.add(model);
@@ -558,7 +562,7 @@ async function loadAllModels(options = {}) {
 
   // Road first so tree placement can respect grass blocker ray checks.
   await loadRoad();
-  await loadBasementDoor();
+  await loadBasementDoor(options.onEnterBasement);
 
   const importedTreePlacements = normalizeTreePlacementList(options.treePlacements);
 

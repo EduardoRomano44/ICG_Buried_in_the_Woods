@@ -330,14 +330,14 @@ function explodeSlime(attackState) {
     damagePlayer(SLIME_ATTACK_DAMAGE);
   }
 
-  scene.remove(attackState.hitboxMesh);
+  attackState.hitboxMesh.removeFromParent();
   attackState.hitboxMesh.geometry.dispose();
   attackState.hitboxMesh.material.dispose();
   playSlimeExplodeAudio(center.distanceTo(camera.position));
   spawnSlimeExplodeParticles(center);
 
   removeCollider(attackState.slimeMesh);
-  scene.remove(attackState.slimeMesh);
+  attackState.slimeMesh.removeFromParent();
   document.dispatchEvent(new CustomEvent('slime:exploded', {
     detail: {
       slimeMesh: attackState.slimeMesh,

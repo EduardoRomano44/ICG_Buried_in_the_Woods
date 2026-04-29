@@ -91,6 +91,9 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
     setFlashlightState(state) {
       hud.setFlashlightState(state);
     },
+    setKeyState(state) {
+      hud.setKeyState(state);
+    },
     setStartLoading(visible, label = 'Loading...') {
       titleCardPanel.setLoading(visible, label);
     },
