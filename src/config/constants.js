@@ -31,8 +31,13 @@ export const BASEMENT_DOOR_MODEL_PATH = './models/Basement_door.glb';
 export const BASEMENT_DOOR_POSITION = { x: -28, y: 0, z: 24 };
 export const BASEMENT_DOOR_ROTATION_Y = Math.PI * 0.5;
 
+export const DOOR_METAL_MODEL_PATH = './models/Door-metal.glb';
+export const KEY_MODEL_PATH = './models/Key.glb';
+export const SLIME_MODEL_PATH = './models/Slime.glb';
+export const TABLE_MODEL_PATH = './models/Table.glb';
+
 // Basement mapping
-export const BASEMENT_MAPPING_MODEL_PATH = './models/Basement_Mapping.glb';
+export const BASEMENT_MAPPING_MODEL_PATH = './models/Basement_Mapping2.glb';
 export const BASEMENT_MAPPING_SCALE = 1;
 export const BASEMENT_WALL1_LOCAL_OFFSET = { x: 0, y: 0, z: 0 };
 export const BASEMENT_WALL2_LOCAL_OFFSET = { x: 0, y: 0, z: 0 };
@@ -42,10 +47,10 @@ export const BASEMENT_PREVIEW_BACKGROUND_COLOR = 0x05070b;
 export const BASEMENT_PREVIEW_FOG_NEAR = 80;
 export const BASEMENT_PREVIEW_FOG_FAR = 190;
 export const BASEMENT_PREVIEW_SUN_COLOR = 0xfff0d6;
-export const BASEMENT_PREVIEW_SUN_INTENSITY = 0;
+export const BASEMENT_PREVIEW_SUN_INTENSITY = 1.2;
 export const BASEMENT_PREVIEW_SUN_POSITION = { x: 32, y: 44, z: 22 };
 export const BASEMENT_PREVIEW_FILL_COLOR = 0x88b6ff;
-export const BASEMENT_PREVIEW_FILL_INTENSITY = 0.05;
+export const BASEMENT_PREVIEW_FILL_INTENSITY = 0.52;
 export const BASEMENT_PREVIEW_FILL_POSITION = { x: -26, y: 16, z: -30 };
 export const BASEMENT_PREVIEW_SUN_SHADOW_BIAS = -0.00035;
 export const BASEMENT_PREVIEW_SUN_SHADOW_NORMAL_BIAS = 0.03;
@@ -90,7 +95,7 @@ export const SLIME_SCALE = 1.4;
 // Slime idle
 export const SLIME_IDLE_SPEED = 2;
 export const SLIME_IDLE_XZ_AMPLITUDE = 0.2;
-export const SLIME_IDLE_Y_AMPLITUDE  = 0.2;
+export const SLIME_IDLE_Y_AMPLITUDE = 0.2;
 export const SLIME_IDLE_TRIGGER_DISTANCE = 4.5;
 // Slime attack
 export const SLIME_ATTACK_DURATION = 1.5;
@@ -192,7 +197,7 @@ export const GRASS_BLADE_WIDTH = 0.18;
 export const GRASS_BLADE_HEIGHT = 0.7;
 export const GRASS_SPREAD = 0.4;
 export const GRASS_COLOR_BASE = 0x2d6a1f;
-export const GRASS_COLOR_TIP  = 0x7ec850;
+export const GRASS_COLOR_TIP = 0x7ec850;
 export const GRASS_EXCLUSION_RADIUS = 2.5;
 export const GRASS_BLOCKER_RAY_HEIGHT = 150;
 

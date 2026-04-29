@@ -24,6 +24,7 @@ import {
   toggleInventoryFlashlight,
 } from './src/world/FlashlightSystem.js';
 import { registerWalkSurface, detectWalkSurfaceType } from './src/world/WalkSurfaceRegistry.js';
+import { updateSlimeIdle } from './src/animations/slimeIdle.js';
 import { setTitleCardAudioActive, updateWalkSurfaceAudio } from './src/audio/GameAudio.js';
 
 let controls = null;
@@ -32,6 +33,7 @@ let isPlayerPreviewMode = false;
 let sceneStatusMessage = 'Loading basement mapping...';
 let basementCeilings = [];
 let basementCeilVisible = true;
+let playerSpawnPosition = null;
 const timer = new THREE.Timer();
 const orbitForward = new THREE.Vector3();
 const orbitTarget = new THREE.Vector3();
@@ -112,8 +114,8 @@ function setupCameraAndControls() {
 function updateModeStatus(baseMessage) {
   setSceneStatusMessage(baseMessage);
   const suffix = isPlayerPreviewMode
-    ? ' Preview Play active. Press P or Esc to return to orbit. Press T to toggle flashlight. Press K to toggle ceiling.'
-    : ' Press P to enter Preview Play. Press K to toggle ceiling.';
+    ? ' Preview Play active. Press P/Esc to exit. Press T: flashlight. Press C: toggle ceiling. Press K: teleport to spawn.'
+    : ' Press P to enter Preview Play. Press C: toggle ceiling. Press K: teleport to spawn.';
   setStatus(`${getStatusBaseMessage()}${suffix}`);
 }
 
@@ -163,7 +165,7 @@ function setupPreviewPlayerControls() {
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.repeat || event.code !== 'KeyK') return;
+    if (event.repeat || event.code !== 'KeyC') return;
     if (basementCeilings.length === 0) return;
 
     event.preventDefault();
@@ -172,6 +174,21 @@ function setupPreviewPlayerControls() {
       ceiling.visible = basementCeilVisible;
     }
     updateModeStatus(sceneStatusMessage);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.repeat || event.code !== 'KeyK') return;
+    if (!playerSpawnPosition) return;
+
+    event.preventDefault();
+    camera.position.copy(playerSpawnPosition);
+    camera.position.y += PLAYER_HEIGHT;
+
+    if (!isPlayerPreviewMode && controls) {
+      controls.target.copy(playerSpawnPosition);
+      controls.target.y += PLAYER_HEIGHT;
+      controls.update();
+    }
   });
 
   document.addEventListener('pointerlockchange', () => {
@@ -196,19 +213,24 @@ async function startBasementEditor() {
   createBasementPreviewWorld(scene);
 
   try {
-    const { stats, grounds, ceilings } = await loadBasementMapping({
+    const { stats, grounds, ceilings, playerSpawn } = await loadBasementMapping({
       scene,
       registerCollider: addCollider,
     });
     basementCeilings = ceilings;
     basementCeilVisible = true;
 
+    if (playerSpawn) {
+      playerSpawnPosition = new THREE.Vector3();
+      playerSpawn.getWorldPosition(playerSpawnPosition);
+    }
+
     for (const ground of grounds) {
       registerWalkSurface(ground, 'basement', { priority: 5 });
     }
 
     updateModeStatus(
-      `Loaded floor + ${stats.wall1Instances} Wall1 and ${stats.wall2Instances} Wall2 instances. ${stats.ceilInstances} Ceil instances. ${stats.colliderCount} colliders registered. ${stats.materialsWithNormalMap} materials with normal maps and ${stats.materialsWithRoughnessMap} with roughness maps configured.`
+      `Loaded floor + ${stats.wall1Instances} Wall1, ${stats.wall2Instances} Wall2, ${stats.doorMetalInstances || 0} Doors, ${stats.tableInstances || 0} Tables. ${stats.colliderCount} colliders.`
     );
   } catch (error) {
     console.error('Failed to load basement mapping:', error);
@@ -229,6 +251,7 @@ function animate() {
 
   if (isPlayerPreviewMode) {
     updatePlayer(delta);
+    updateSlimeIdle(delta);
     const movementState = getPlayerMovementState();
     const walkSurfaceType = detectWalkSurfaceType(camera.position);
     updateWalkSurfaceAudio(walkSurfaceType, movementState.isMoving, {

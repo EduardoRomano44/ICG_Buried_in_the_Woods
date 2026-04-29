@@ -6,7 +6,14 @@ import {
   BASEMENT_MAPPING_SCALE,
   BASEMENT_WALL1_LOCAL_OFFSET,
   BASEMENT_WALL2_LOCAL_OFFSET,
+  DOOR_METAL_MODEL_PATH,
+  KEY_MODEL_PATH,
+  SLIME_MODEL_PATH,
+  TABLE_MODEL_PATH,
+  SLIME_SCALE,
+  TABLE_SCALE,
 } from '../../config/constants.js';
+import { createSlimeIdle } from '../../animations/slimeIdle.js';
 
 const loader = new GLTFLoader();
 
@@ -49,6 +56,10 @@ function collectNamedBasementData(root) {
     anchors: {
       t1: [],
       t2: [],
+      md: [],
+      player: [],
+      slime: [],
+      table: [],
     },
     debugNames: [],
   };
@@ -81,6 +92,14 @@ function collectNamedBasementData(root) {
       data.anchors.t1.push(child);
     } else if (baseName.startsWith('t2')) {
       data.anchors.t2.push(child);
+    } else if (baseName.startsWith('md')) {
+      data.anchors.md.push(child);
+    } else if (baseName.startsWith('player')) {
+      data.anchors.player.push(child);
+    } else if (baseName.startsWith('slime')) {
+      data.anchors.slime.push(child);
+    } else if (baseName.startsWith('table')) {
+      data.anchors.table.push(child);
     }
   });
 
@@ -133,6 +152,7 @@ function configureImportedMaterial(material) {
 }
 
 function prepareBasementMaterials(root) {
+  if (!root) return {};
   const visitedMaterials = new Set();
   const stats = {
     materialsWithColorMap: 0,
@@ -343,10 +363,33 @@ async function loadBasementMapping(options = {}) {
     modelPath = BASEMENT_MAPPING_MODEL_PATH,
   } = options;
 
-  const gltf = await loadGLTF(modelPath);
+  const [
+    gltf,
+    doorMetalGltf,
+    keyGltf,
+    slimeGltf,
+    tableGltf
+  ] = await Promise.all([
+    loadGLTF(modelPath),
+    loadGLTF(DOOR_METAL_MODEL_PATH),
+    loadGLTF(KEY_MODEL_PATH),
+    loadGLTF(SLIME_MODEL_PATH),
+    loadGLTF(TABLE_MODEL_PATH)
+  ]);
+
   const gltfRoot = gltf.scene;
   gltfRoot.updateMatrixWorld(true);
   const materialStats = prepareBasementMaterials(gltfRoot);
+
+  const doorMetalNode = doorMetalGltf.scene || doorMetalGltf.scenes?.[0] || new THREE.Group();
+  const keyNode = keyGltf.scene || keyGltf.scenes?.[0] || new THREE.Group();
+  const slimeNode = slimeGltf.scene || slimeGltf.scenes?.[0] || new THREE.Group();
+  const tableNode = tableGltf.scene || tableGltf.scenes?.[0] || new THREE.Group();
+
+  prepareBasementMaterials(doorMetalNode);
+  prepareBasementMaterials(keyNode);
+  prepareBasementMaterials(slimeNode);
+  prepareBasementMaterials(tableNode);
 
   const namedData = collectNamedBasementData(gltfRoot);
   const debugHint = createMissingNodesDebugHint(namedData);
@@ -407,6 +450,85 @@ async function loadBasementMapping(options = {}) {
     'Wall2'
   );
 
+  function buildStandardClonedGroup(root, sourceNode, anchors, regCollider, prefix, addCollider, scale = 1) {
+    let count = 0;
+    const instances = [];
+    for (const anchor of anchors) {
+      const instanceRoot = new THREE.Group();
+      instanceRoot.name = `${prefix}Anchor`;
+      copyWorldTransform(instanceRoot, anchor);
+
+      const clone = sourceNode.clone(true);
+      enableShadows(clone);
+      clone.name = `${prefix}Instance`;
+      clone.position.set(0, 0, 0);
+      clone.quaternion.set(0, 0, 0, 1);
+      clone.scale.setScalar(scale);
+      setShadowProfile(clone, { castShadow: true, receiveShadow: true });
+
+      instanceRoot.add(clone);
+      instanceRoot.updateMatrixWorld(true);
+      root.add(instanceRoot);
+
+      if (addCollider && typeof regCollider === 'function') {
+        if (prefix === 'Slime') {
+          regCollider(instanceRoot, { dynamic: true });
+        } else {
+          regCollider(instanceRoot);
+        }
+      }
+
+      instances.push(instanceRoot);
+      count++;
+    }
+    return { count, instances };
+  }
+
+  const doorMetalGroup = buildStandardClonedGroup(basementRoot, doorMetalNode, namedData.anchors.md, registerCollider, 'DoorMetal', true, 1);
+  const slimeGroup = buildStandardClonedGroup(basementRoot, slimeNode, namedData.anchors.slime, registerCollider, 'Slime', true, SLIME_SCALE);
+  const tableGroup = buildStandardClonedGroup(basementRoot, tableNode, namedData.anchors.table, registerCollider, 'Table', true, TABLE_SCALE);
+
+  for (const slimeRoot of slimeGroup.instances) {
+    createSlimeIdle(slimeRoot);
+  }
+
+  const doorMetalInstances = doorMetalGroup.count;
+  const slimeInstances = slimeGroup.count;
+  const tableInstances = tableGroup.count;
+
+  let playerSpawnNode = null;
+  if (namedData.anchors.player.length > 0) {
+    playerSpawnNode = new THREE.Group();
+    copyWorldTransform(playerSpawnNode, namedData.anchors.player[0]);
+    playerSpawnNode.name = 'PlayerSpawn';
+    basementRoot.add(playerSpawnNode);
+  }
+
+  if (namedData.anchors.table.length > 0) {
+    const randomIdx = Math.floor(Math.random() * namedData.anchors.table.length);
+    const keyAnchor = namedData.anchors.table[randomIdx];
+    const keyInstanceRoot = new THREE.Group();
+    keyInstanceRoot.name = 'KeyAnchor';
+    copyWorldTransform(keyInstanceRoot, keyAnchor);
+
+    const keyClone = keyNode.clone(true);
+    enableShadows(keyClone);
+    keyClone.name = 'KeyInstance';
+
+    const tableBox = new THREE.Box3().setFromObject(tableNode);
+    let tableTopY = tableBox.max.y;
+    if (tableTopY === -Infinity) tableTopY = 0;
+
+    keyClone.position.set(0, tableTopY * TABLE_SCALE, 0);
+    keyClone.quaternion.set(0, 0, 0, 1);
+    keyClone.scale.set(1, 1, 1);
+    setShadowProfile(keyClone, { castShadow: true, receiveShadow: true });
+
+    keyInstanceRoot.add(keyClone);
+    keyInstanceRoot.updateMatrixWorld(true);
+    basementRoot.add(keyInstanceRoot);
+  }
+
   if (scene) {
     scene.add(basementRoot);
   }
@@ -415,11 +537,15 @@ async function loadBasementMapping(options = {}) {
     root: basementRoot,
     grounds: groundInstances,
     ceilings: ceilInstances,
+    playerSpawn: playerSpawnNode,
     stats: {
       wall1Instances,
       wall2Instances,
+      doorMetalInstances,
+      slimeInstances,
+      tableInstances,
       ceilInstances: ceilInstances.length,
-      colliderCount: wall1Instances + wall2Instances,
+      colliderCount: wall1Instances + wall2Instances + doorMetalInstances + tableInstances,
       materialsWithColorMap: materialStats.materialsWithColorMap,
       materialsWithNormalMap: materialStats.materialsWithNormalMap,
       materialsWithRoughnessMap: materialStats.materialsWithRoughnessMap,
