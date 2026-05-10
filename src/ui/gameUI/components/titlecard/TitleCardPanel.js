@@ -43,6 +43,14 @@ function createTitleCardPanel(onSettingsChanged, syncSettingsControls) {
     prompt.style.display = visible ? 'none' : 'block';
   }
 
+  function setPlainMode(enabled) {
+    if (enabled) {
+      element.classList.add('is-plain');
+    } else {
+      element.classList.remove('is-plain');
+    }
+  }
+
   function syncControls() {
     qualityInput.checked = !settings.lowQuality;
     shadowInput.checked = settings.shadowsEnabled;
@@ -52,6 +60,7 @@ function createTitleCardPanel(onSettingsChanged, syncSettingsControls) {
     element,
     setVisible,
     setLoading,
+    setPlainMode,
     syncControls,
   };
 }

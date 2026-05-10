@@ -95,7 +95,19 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
       hud.setKeyState(state);
     },
     setStartLoading(visible, label = 'Loading...') {
-      titleCardPanel.setLoading(visible, label);
+      const isGameInProgress = hud.element.style.display === 'block';
+
+      if (visible) {
+        if (isGameInProgress) titleCardPanel.setPlainMode(true);
+        titleCardPanel.setLoading(true, label);
+        titleCardPanel.setVisible(true);
+      } else {
+        titleCardPanel.setLoading(false);
+        titleCardPanel.setPlainMode(false);
+        if (isGameInProgress) {
+          titleCardPanel.setVisible(false);
+        }
+      }
     },
     isSettingsBusy() {
       return settingsPanel.isBusy();

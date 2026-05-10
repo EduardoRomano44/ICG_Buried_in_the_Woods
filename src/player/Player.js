@@ -73,6 +73,7 @@ const colliders = [];
 const interactables = [];
 let currentInteractable = null;
 let toggleFlashlightHandler = null;
+let cameraRotationEnabled = true;
 
 // Movement
 function setGameplayCursorHidden(hidden) {
@@ -217,7 +218,7 @@ function damagePlayer(amount = 1) {
 function healPlayer(amount = 1) {
   const safeAmount = Number.isFinite(amount) ? amount : 0;
   if (safeAmount <= 0 || health <= 0) return;
-  
+
   health = Math.min(PLAYER_MAX_HEALTH, health + safeAmount);
 }
 
@@ -309,6 +310,13 @@ function setToggleFlashlightHandler(handler) {
   toggleFlashlightHandler = typeof handler === 'function' ? handler : null;
 }
 
+function setCameraRotationEnabled(enabled) {
+  cameraRotationEnabled = Boolean(enabled);
+  if (fpControls) {
+    fpControls.enabled = cameraRotationEnabled;
+  }
+}
+
 function resetPlayerState() {
   camera.position.sub(previousShakeOffset);
   previousShakeOffset.set(0, 0, 0);
@@ -345,6 +353,31 @@ function getPlayerMovementState() {
   };
 }
 
+function checkCollisions() {
+  const r = PLAYER_COLLISION_RADIUS;
+  playerBox.min.set(camera.position.x - r, 0.01, camera.position.z - r);
+  playerBox.max.set(camera.position.x + r, PLAYER_HEIGHT, camera.position.z + r);
+
+  for (const collider of colliders) {
+    if (!collider.box || collider.dynamic) {
+      collider.obj.updateWorldMatrix(true, false);
+      if (!collider.box) collider.box = new THREE.Box3();
+      collider.box.setFromObject(collider.obj);
+
+      if (collider.boundsScale !== 1) {
+        const center = collider.box.getCenter(new THREE.Vector3());
+        const size = collider.box.getSize(new THREE.Vector3()).multiplyScalar(collider.boundsScale);
+        collider.box.setFromCenterAndSize(center, size);
+      }
+    }
+
+    if (playerBox.intersectsBox(collider.box)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Update
 function updatePlayer(delta) {
   if (!isFPMode) return;
@@ -356,8 +389,8 @@ function updatePlayer(delta) {
   fpControls.pointerSpeed = settings.cameraSensitivity;
 
   // Direction
-  direction.z = Number(move.forward)  - Number(move.backward);
-  direction.x = Number(move.right)    - Number(move.left);
+  direction.z = Number(move.forward) - Number(move.backward);
+  direction.x = Number(move.right) - Number(move.left);
   direction.normalize();
 
   const isMoving = move.forward || move.backward || move.left || move.right;
@@ -383,10 +416,33 @@ function updatePlayer(delta) {
   const currentSpeed = PLAYER_BASE_SPEED * (isSprintActive ? PLAYER_SPRINT_MULTIPLIER : 1);
   horizontalPositionBeforeMove.set(camera.position.x, camera.position.z);
 
-  // Movement
+  // Movement with Sliding
   if (isMoving) {
+    const startX = camera.position.x;
+    const startZ = camera.position.z;
+
+    // 1. Get the target position from full movement
     fpControls.moveForward(direction.z * currentSpeed * delta);
     fpControls.moveRight(direction.x * currentSpeed * delta);
+
+    const targetX = camera.position.x;
+    const targetZ = camera.position.z;
+
+    // Reset to start
+    camera.position.x = startX;
+    camera.position.z = startZ;
+
+    // 2. Try X movement only
+    camera.position.x = targetX;
+    if (checkCollisions()) {
+      camera.position.x = startX;
+    }
+
+    // 3. Try Z movement only
+    camera.position.z = targetZ;
+    if (checkCollisions()) {
+      camera.position.z = startZ;
+    }
   }
 
   // Head bob
@@ -404,30 +460,6 @@ function updatePlayer(delta) {
   if (camera.position.y < PLAYER_HEIGHT) {
     velocityY = 0;
     camera.position.y = PLAYER_HEIGHT;
-  }
-
-  // Colision
-  const r = PLAYER_COLLISION_RADIUS;
-  playerBox.min.set(camera.position.x - r, 0.1, camera.position.z - r);
-  playerBox.max.set(camera.position.x + r, PLAYER_HEIGHT, camera.position.z + r);
-
-  for (const collider of colliders) {
-    if (!collider.box || collider.dynamic) {
-      collider.obj.updateWorldMatrix(true, false);
-      if (!collider.box) collider.box = new THREE.Box3();
-      collider.box.setFromObject(collider.obj);
-
-      if (collider.boundsScale !== 1) {
-        const center = collider.box.getCenter(new THREE.Vector3());
-        const size = collider.box.getSize(new THREE.Vector3()).multiplyScalar(collider.boundsScale);
-        collider.box.setFromCenterAndSize(center, size);
-      }
-    }
-
-    if (playerBox.intersectsBox(collider.box)) {
-      fpControls.moveForward(-direction.z * currentSpeed * delta);
-      fpControls.moveRight(-direction.x * currentSpeed * delta);
-    }
   }
 
   horizontalPositionAfterMove.set(camera.position.x, camera.position.z);
@@ -497,6 +529,7 @@ export {
   resumeFirstPersonControls,
   setInputEnabled,
   setToggleFlashlightHandler,
+  setCameraRotationEnabled,
   resetPlayerState,
   getPlayerVitals,
   getPlayerMovementState,

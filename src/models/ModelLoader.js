@@ -10,7 +10,6 @@ import {
   tagShadowObject,
 } from '../core/ShadowOptimizer.js';
 import { createFireflies } from '../animations/fireflies.js';
-import { createSlimeIdle } from '../animations/slimeIdle.js';
 import { registerGrassBlocker, registerOccupied, isPlacementFreeWithRadius } from '../world/Grass.js';
 import {
   registerWorldFlashlight,
@@ -35,7 +34,6 @@ import {
   SHADOW_NORMAL_BIAS,
   SHADOW_CAMERA_NEAR,
   SHADOW_CAMERA_FAR,
-  SLIME_SCALE,
   FLASHLIGHT_SCALE,
   FLASHLIGHT_COLOR,
   FLASHLIGHT_INTENSITY,
@@ -65,7 +63,6 @@ const loader = new GLTFLoader();
 const modelTemplatePromises = new Map();
 let lastTreePlacements = [];
 
-const SLIME_MODEL_PATH = './models/Slime.glb';
 const LAMP_MODEL_PATH = './models/Lamp.glb';
 const TREE_MODEL_PATH = './models/Tree2.glb';
 const BENCH_MODEL_PATH = './models/Bench.glb';
@@ -243,24 +240,6 @@ function loadRoad() {
   });
 }
 
-// Slime
-function loadSlime(x, y, z, rotationY = 0) {
-  return cloneModelTemplate(SLIME_MODEL_PATH).then((model) => {
-    model.position.set(x, y, z);
-    model.scale.set(SLIME_SCALE, SLIME_SCALE, SLIME_SCALE);
-    model.rotation.y = rotationY * (Math.PI / 180);
-
-    // Slime is dynamic in gameplay and should keep dynamic shadow invalidation.
-    setupModelShadows(model, false);
-
-    scene.add(model);
-    addCollider(model, { dynamic: true });
-    registerOccupied(x, z);
-    createSlimeIdle(model);
-    return model;
-  });
-}
-
 // Lamp
 function loadLamp(x, y, z, rotationY = 0) {
   return cloneModelTemplate(LAMP_MODEL_PATH).then((model) => {
@@ -360,6 +339,8 @@ function loadBasementDoor(onEnterBasement) {
       onEnterBasement: enterCallback,
     });
 
+    addCollider(model);
+
     scene.add(model);
     registerOccupied(BASEMENT_DOOR_POSITION.x, BASEMENT_DOOR_POSITION.z);
     return model;
@@ -446,11 +427,6 @@ function loadFlashlight(x, y, z, rotationY = 0) {
 
 // Loader Helpers
 // Position format: [x, y, z] or [x, y, z, rotationY(degrees)]
-function loadSlimes(list_positions = []) {
-  return Promise.all(
-    list_positions.map((position) => loadSlime(position[0], position[1], position[2], position[3] || 0))
-  );
-}
 
 function loadLamps(list_positions = []) {
   return Promise.all(
@@ -546,7 +522,6 @@ function loadTables(list_positions = []) {
 function preloadModelTemplates() {
   return Promise.all([
     loadModelTemplate(ROAD_MODEL_PATH),
-    loadModelTemplate(SLIME_MODEL_PATH),
     loadModelTemplate(LAMP_MODEL_PATH),
     loadModelTemplate(TREE_MODEL_PATH),
     loadModelTemplate(BENCH_MODEL_PATH),
@@ -566,8 +541,7 @@ async function loadAllModels(options = {}) {
 
   const importedTreePlacements = normalizeTreePlacementList(options.treePlacements);
 
-  const [slimes, lamps, benches, flashlights] = await Promise.all([
-    loadSlimes([[-60, 0, -30, 90], [-80, 0, -30, -90]]),
+  const [lamps, benches, flashlights] = await Promise.all([
     loadLamps([[60, 0, 0], [62, 0, 80], [65, 0, -80], [-50, 0, -40], [-10, 0, 0]]),
     loadBenches([[58, 0, 10, -97], [-22, 0, 12, 45]]),
     loadFlashlights([[-13, 3.3, 11, -80]]),
@@ -576,7 +550,6 @@ async function loadAllModels(options = {}) {
 
   const trees = await loadTrees(importedTreePlacements);
   return {
-    slimes,
     lamps,
     trees,
     benches,

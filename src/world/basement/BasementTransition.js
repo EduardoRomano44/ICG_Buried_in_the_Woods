@@ -2,17 +2,18 @@ import * as THREE from 'three';
 import { scene, clearScene } from '../../core/SceneManager.js';
 import {
   setInputEnabled,
-  pauseFirstPersonControls,
-  resetPlayerState,
   clearAllColliders,
   setPlayerPosition,
   addCollider,
   enterFirstPerson,
+  setCameraRotationEnabled,
+  resetPlayerState,
 } from '../../player/Player.js';
 import {
   setStartLoading,
   setFlashlightState,
 } from '../../ui/GameUI.js';
+import { showCrosshair, hideCrosshair } from '../../ui/Crosshair.js';
 import { resetKeyState } from './KeySystem.js';
 import {
   setForestAudioActive,
@@ -63,6 +64,10 @@ function isInBasement() {
   return basementLoaded;
 }
 
+function isBasementTransitioning() {
+  return isTransitioning;
+}
+
 /**
  * Full level-transition sequence: Overworld → Basement.
  *
@@ -84,10 +89,11 @@ async function transitionToBasement(options = {}) {
   try {
     // ── Phase 1: Freeze ──────────────────────────────────────────────
     setInputEnabled(false);
-    pauseFirstPersonControls();
+    setCameraRotationEnabled(false);
+    hideCrosshair();
     setForestAudioActive(false);
     updateWalkSurfaceAudio(null, false);
-    setStartLoading(true, 'Loading basement...');
+    setStartLoading(true, 'Loading...');
 
     // Small delay so the loading screen renders before heavy work
     await waitFrames(2);
@@ -128,15 +134,30 @@ async function transitionToBasement(options = {}) {
     forceShadowRefresh(true);
 
     setStartLoading(false);
+
+    // Yield to the event loop to ensure any queued blur/focus/pointerlockchange 
+    // events from the OS are processed before we make our final state decision.
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    setCameraRotationEnabled(true);
+    showCrosshair();
     enterFirstPerson();
     setInputEnabled(true);
+
+    if (typeof window.getAppFocusState === 'function' && window.getAppFocusState()) {
+    } else {
+      // User is away - pause
+      if (typeof window.pauseGameFromTransition === 'function') {
+        window.pauseGameFromTransition();
+      }
+    }
 
     if (typeof options.onComplete === 'function') {
       options.onComplete();
     }
   } catch (error) {
     console.error('Basement transition failed:', error);
-    setStartLoading(true, 'Loading failed — press ENTER to retry');
+    setStartLoading(true, 'Loading failed. Press ENTER to retry.');
 
     if (typeof options.onFail === 'function') {
       options.onFail(error);
@@ -191,6 +212,7 @@ function waitFrames(count = 1) {
 export {
   transitionToBasement,
   isInBasement,
+  isBasementTransitioning,
   updateBasement,
   setBasementUpdateCallback,
 };

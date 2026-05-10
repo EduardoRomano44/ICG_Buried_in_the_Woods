@@ -73,6 +73,7 @@ import {
 import {
   transitionToBasement,
   isInBasement,
+  isBasementTransitioning,
 } from './src/world/basement/BasementTransition.js';
 import {
   setKeyStateListener,
@@ -291,7 +292,7 @@ document.addEventListener('keydown', (event) => {
 });
 
 document.addEventListener('pointerlockchange', () => {
-  if (!hasStarted || isPaused || isGameOver) return;
+  if (!hasStarted || isPaused || isGameOver || isBasementTransitioning()) return;
   if (performance.now() < ignorePointerUnlockUntil) return;
   if (document.pointerLockElement !== document.body) {
     pauseGame();
@@ -305,13 +306,13 @@ document.addEventListener('click', () => {
 });
 
 window.addEventListener('blur', () => {
-  if (hasStarted && !isPaused && !isGameOver) {
+  if (hasStarted && !isPaused && !isGameOver && !isBasementTransitioning()) {
     pauseGame();
   }
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible' && hasStarted && !isPaused && !isGameOver) {
+  if (document.visibilityState !== 'visible' && hasStarted && !isPaused && !isGameOver && !isBasementTransitioning()) {
     pauseGame();
   }
 });
