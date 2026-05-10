@@ -1,12 +1,17 @@
+import * as THREE from 'three';
 import { camera } from '../core/SceneManager.js';
 import {
   SLIME_IDLE_SPEED,
   SLIME_IDLE_XZ_AMPLITUDE,
   SLIME_IDLE_Y_AMPLITUDE,
   SLIME_IDLE_TRIGGER_DISTANCE,
+  SLIME_MOVE_SPEED,
+  SLIME_COLLISION_RADIUS,
+  SLIME_COLLISION_HEIGHT,
 } from '../config/constants.js';
 import { startSlimeAttack, updateSlimeAttacks } from './slimeAttack.js';
 import { setSlimeIdleAudioActive, setSlimeIdleAudioDistance } from '../audio/GameAudio.js';
+import { checkObjectCollision } from '../player/Player.js';
 
 /* 
   Responsible for managing slime idle animation
@@ -14,6 +19,7 @@ import { setSlimeIdleAudioActive, setSlimeIdleAudioDistance } from '../audio/Gam
 */
 
 const slimes = [];
+const tempVec = new THREE.Vector3();
 
 function createSlimeIdle(model) {
   slimes.push({
@@ -25,7 +31,7 @@ function createSlimeIdle(model) {
   });
 }
 
-function updateSlimeIdle(elapsed) {
+function updateSlimeIdle(elapsed, delta = 0) {
   const playerPos = camera.position;
   let activeIdleSlimes = 0;
   let nearestDistSq = Infinity;
@@ -54,10 +60,30 @@ function updateSlimeIdle(elapsed) {
     }
 
     // Move on a sinusoid
-    const wave = (Math.sin(elapsed * SLIME_IDLE_SPEED + slime.phase) + 1) / 2;
+    const theta = elapsed * SLIME_IDLE_SPEED + slime.phase;
+    const wave = (Math.sin(theta) + 1) / 2;
+    const isVerticalExpanding = Math.cos(theta) < 0;
+
+    if (isVerticalExpanding && delta > 0) {
+      slime.mesh.getWorldDirection(tempVec);
+      const moveDistance = SLIME_MOVE_SPEED * delta;
+
+      const prevX = slime.mesh.position.x;
+      const prevZ = slime.mesh.position.z;
+
+      // Move in opposite direction (backwards)
+      slime.mesh.position.x -= tempVec.x * moveDistance;
+      slime.mesh.position.z -= tempVec.z * moveDistance;
+
+      if (checkObjectCollision(slime.mesh.position, SLIME_COLLISION_RADIUS, SLIME_COLLISION_HEIGHT, -0.1, slime.mesh)) {
+        slime.mesh.position.x = prevX;
+        slime.mesh.position.z = prevZ;
+        slime.mesh.rotation.y += Math.PI;
+      }
+    }
 
     const scaleXZ = slime.baseScale * (1 + SLIME_IDLE_XZ_AMPLITUDE * wave);
-    const scaleY  = slime.baseScale * (1 - SLIME_IDLE_Y_AMPLITUDE  * wave);
+    const scaleY = slime.baseScale * (1 - SLIME_IDLE_Y_AMPLITUDE * wave);
 
     slime.mesh.scale.set(scaleXZ, scaleY, scaleXZ);
   }
@@ -75,4 +101,4 @@ function clearSlimeIdleRegistry() {
   slimes.length = 0;
 }
 
-export { createSlimeIdle, updateSlimeIdle, clearSlimeIdleRegistry };
+export { createSlimeIdle, updateSlimeIdle, clearSlimeIdleRegistry };

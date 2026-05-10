@@ -105,10 +105,13 @@ export const WORLD_POSITIONS_DOWNLOAD_FILENAME = 'generated-positions.json';
 // Slime enemy
 export const SLIME_SCALE = 1.4;
 // Slime idle
-export const SLIME_IDLE_SPEED = 2;
-export const SLIME_IDLE_XZ_AMPLITUDE = 0.2;
-export const SLIME_IDLE_Y_AMPLITUDE = 0.2;
+export const SLIME_IDLE_SPEED = 3;
+export const SLIME_IDLE_XZ_AMPLITUDE = 0.3;
+export const SLIME_IDLE_Y_AMPLITUDE = 0.3;
 export const SLIME_IDLE_TRIGGER_DISTANCE = 4.5;
+export const SLIME_MOVE_SPEED = 3.0;
+export const SLIME_COLLISION_RADIUS = 0.8;
+export const SLIME_COLLISION_HEIGHT = 1.0;
 // Slime attack
 export const SLIME_ATTACK_DURATION = 1.5;
 export const SLIME_ATTACK_BLINK_SPEED = 10;

@@ -47,7 +47,9 @@ let lastHorizontalMovementDistance = 0;
 
 const move = { forward: false, backward: false, left: false, right: false };
 const direction = new THREE.Vector3();
-const playerBox = new THREE.Box3();
+const tempBox = new THREE.Box3();
+const tempVector = new THREE.Vector3();
+const tempSize = new THREE.Vector3();
 const previousShakeOffset = new THREE.Vector3();
 const interactionRaycaster = new THREE.Raycaster();
 const interactionCenter = new THREE.Vector2(0, 0);
@@ -354,24 +356,30 @@ function getPlayerMovementState() {
 }
 
 function checkCollisions() {
-  const r = PLAYER_COLLISION_RADIUS;
-  playerBox.min.set(camera.position.x - r, 0.01, camera.position.z - r);
-  playerBox.max.set(camera.position.x + r, PLAYER_HEIGHT, camera.position.z + r);
+  // The player's feet are at camera.position.y - PLAYER_HEIGHT
+  return checkObjectCollision(camera.position, PLAYER_COLLISION_RADIUS, PLAYER_HEIGHT, -PLAYER_HEIGHT);
+}
+
+function checkObjectCollision(position, radius, height, yOffset = -0.1, ignoreObj = null) {
+  tempBox.min.set(position.x - radius, position.y + yOffset, position.z - radius);
+  tempBox.max.set(position.x + radius, position.y + yOffset + height, position.z + radius);
 
   for (const collider of colliders) {
+    if (collider.obj === ignoreObj) continue;
+
     if (!collider.box || collider.dynamic) {
       collider.obj.updateWorldMatrix(true, false);
       if (!collider.box) collider.box = new THREE.Box3();
       collider.box.setFromObject(collider.obj);
 
       if (collider.boundsScale !== 1) {
-        const center = collider.box.getCenter(new THREE.Vector3());
-        const size = collider.box.getSize(new THREE.Vector3()).multiplyScalar(collider.boundsScale);
-        collider.box.setFromCenterAndSize(center, size);
+        collider.box.getCenter(tempVector);
+        collider.box.getSize(tempSize).multiplyScalar(collider.boundsScale);
+        collider.box.setFromCenterAndSize(tempVector, tempSize);
       }
     }
 
-    if (playerBox.intersectsBox(collider.box)) {
+    if (tempBox.intersectsBox(collider.box)) {
       return true;
     }
   }
@@ -535,4 +543,5 @@ export {
   getPlayerMovementState,
   clearAllColliders,
   setPlayerPosition,
+  checkObjectCollision,
 };

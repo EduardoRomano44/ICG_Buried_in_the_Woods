@@ -341,16 +341,16 @@ function animate(timestamp) {
     });
 
     if (isInBasement()) {
-      // ── Basement-specific updates ──────────────────────────────────
-      updateSlimeIdle(elapsed);
+      // Basement-specific updates
+      updateSlimeIdle(elapsed, delta);
       updateDoorMetalSystem(delta);
     } else {
-      // ── Overworld-specific updates ─────────────────────────────────
+      // Overworld-specific updates
       if (!settings.lowQuality) {
         animateFireflies(elapsed);
         updateGrass(elapsed);
       }
-      updateSlimeIdle(elapsed);
+      updateSlimeIdle(elapsed, delta);
       updateWorld(camera);
       updateBasementDoorSystem(delta);
     }
