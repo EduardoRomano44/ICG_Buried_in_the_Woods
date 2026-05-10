@@ -214,6 +214,13 @@ function damagePlayer(amount = 1) {
   health = nextHealth;
 }
 
+function healPlayer(amount = 1) {
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
+  if (safeAmount <= 0 || health <= 0) return;
+  
+  health = Math.min(PLAYER_MAX_HEALTH, health + safeAmount);
+}
+
 function intersectsPlayerHitboxSphere(center, radius) {
   const r = PLAYER_COLLISION_RADIUS;
   const hitbox = new THREE.Box3(
@@ -483,6 +490,7 @@ export {
   registerInteractable,
   unregisterInteractable,
   damagePlayer,
+  healPlayer,
   intersectsPlayerHitboxSphere,
   enterFirstPerson,
   pauseFirstPersonControls,

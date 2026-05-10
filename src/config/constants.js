@@ -33,8 +33,12 @@ export const BASEMENT_DOOR_ROTATION_Y = Math.PI * 0.5;
 
 export const DOOR_METAL_MODEL_PATH = './models/Door-metal.glb';
 export const KEY_MODEL_PATH = './models/Key.glb';
+export const COOKIE_MODEL_PATH = './models/Cookie.glb';
 export const SLIME_MODEL_PATH = './models/Slime.glb';
 export const TABLE_MODEL_PATH = './models/Table.glb';
+
+// Cookie
+export const COOKIE_SCALE = 0.9;
 
 // Basement mapping
 export const BASEMENT_MAPPING_MODEL_PATH = './models/Basement_Mapping2.glb';
