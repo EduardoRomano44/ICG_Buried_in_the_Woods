@@ -17,11 +17,6 @@ const direction = new THREE.Vector3();
 const horizontalPositionBeforeMove = new THREE.Vector2();
 const horizontalPositionAfterMove = new THREE.Vector2();
 
-/**
- * Updates player movement based on input and collisions.
- * @param {object} params - { camera, controls, input, delta, checkCollisions }
- * @returns {object} - { isMoving, isSprinting, horizontalDistance }
- */
 export function updateMovement({ camera, controls, input, delta, checkCollisions }) {
   // 1. Direction calculation
   direction.z = Number(input.forward) - Number(input.backward);
@@ -33,7 +28,7 @@ export function updateMovement({ camera, controls, input, delta, checkCollisions
 
   horizontalPositionBeforeMove.set(camera.position.x, camera.position.z);
 
-  // 2. Movement with Sliding/Collision Handling
+  // 2. Movement with Sliding/Collision
   if (isMovingInput) {
     const startX = camera.position.x;
     const startZ = camera.position.z;
@@ -84,9 +79,6 @@ export function updateMovement({ camera, controls, input, delta, checkCollisions
   };
 }
 
-/**
- * Resets movement state.
- */
 export function resetMovement() {
   velocityY = 0;
   bobTime = 0;
