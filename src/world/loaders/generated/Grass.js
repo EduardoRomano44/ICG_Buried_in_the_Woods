@@ -13,7 +13,7 @@
  */
 
 import * as THREE from 'three';
-import { scene } from '../core/SceneManager.js';
+import { scene } from '../../../core/SceneManager.js';
 import {
   GROUND_SIZE,
   GRASS_SEGMENTS,
@@ -28,22 +28,22 @@ import {
   GRASS_BLOCKER_RAY_HEIGHT,
   WIND_STRENGH,
   WIND_SPEED,
-} from '../config/constants.js';
+} from '../../../config/constants.js';
 
 function buildBladeGeometry() {
   const SEG = GRASS_SEGMENTS;
-  const hw  = GRASS_BLADE_WIDTH * 0.5;
-  const h   = GRASS_BLADE_HEIGHT;
+  const hw = GRASS_BLADE_WIDTH * 0.5;
+  const h = GRASS_BLADE_HEIGHT;
 
   const positions = [];
-  const normals   = [];
-  const uvs       = [];
-  const colors    = [];
-  const uvYVals   = [];
-  const indices   = [];
+  const normals = [];
+  const uvs = [];
+  const colors = [];
+  const uvYVals = [];
+  const indices = [];
 
   const colorBase = new THREE.Color(GRASS_COLOR_BASE);
-  const colorTip  = new THREE.Color(GRASS_COLOR_TIP);
+  const colorTip = new THREE.Color(GRASS_COLOR_TIP);
   const tmp = new THREE.Color();
 
   // Two quads crossed at 90° (X shape when viewed from above).
@@ -60,17 +60,17 @@ function buildBladeGeometry() {
       const w = hw * (1 - t * 0.85); // taper to tip
 
       positions.push(-w * ax, y, -w * az);
-      positions.push( w * ax, y,  w * az);
-      normals.push(0, 1, 0,  0, 1, 0);
-      uvs.push(0, t,  1, t);
+      positions.push(w * ax, y, w * az);
+      normals.push(0, 1, 0, 0, 1, 0);
+      uvs.push(0, t, 1, t);
       tmp.lerpColors(colorBase, colorTip, t);
-      colors.push(tmp.r, tmp.g, tmp.b,  tmp.r, tmp.g, tmp.b);
+      colors.push(tmp.r, tmp.g, tmp.b, tmp.r, tmp.g, tmp.b);
       uvYVals.push(t, t);
     }
 
     for (let s = 0; s < SEG; s++) {
       const b = vertexOffset + s * 2;
-      indices.push(b, b + 2, b + 1,  b + 1, b + 2, b + 3);
+      indices.push(b, b + 2, b + 1, b + 1, b + 2, b + 3);
     }
 
     vertexOffset += (SEG + 1) * 2;
@@ -78,10 +78,10 @@ function buildBladeGeometry() {
 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geo.setAttribute('normal',   new THREE.Float32BufferAttribute(normals,   3));
-  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs,       2));
-  geo.setAttribute('color',    new THREE.Float32BufferAttribute(colors,    3));
-  geo.setAttribute('aUvY',     new THREE.Float32BufferAttribute(uvYVals,   1));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geo.setAttribute('aUvY', new THREE.Float32BufferAttribute(uvYVals, 1));
   // aRandom is set later as InstancedBufferAttribute (one value per instance)
   geo.setIndex(indices);
   geo.computeBoundingBox();
@@ -100,9 +100,9 @@ function buildGrassMaterial() {
 
   // Wind uniforms — shared reference so updateGrass can write uTime each frame
   const windUniforms = {
-    uTime:         { value: 0 },
+    uTime: { value: 0 },
     uWindStrength: { value: WIND_STRENGH * 0.012 },
-    uWindSpeed:    { value: WIND_SPEED },
+    uWindSpeed: { value: WIND_SPEED },
   };
 
   mat.onBeforeCompile = (shader) => {
@@ -284,10 +284,10 @@ export function createGrass(options = {}) {
   grassMaterial = buildGrassMaterial();
 
   const mesh = new THREE.InstancedMesh(geo, grassMaterial, TOTAL_BLADES);
-  mesh.castShadow    = false; // small blades don't need expensive shadow casts
+  mesh.castShadow = false; // small blades don't need expensive shadow casts
   mesh.receiveShadow = true;
 
-  const half  = (GROUND_SIZE * 0.5) - 2; // keep away from edges
+  const half = (GROUND_SIZE * 0.5) - 2; // keep away from edges
   const dummy = new THREE.Object3D();
 
   // Random phase for the wind
@@ -329,8 +329,8 @@ export function createGrass(options = {}) {
     for (let b = 0; b < GRASS_PATCH_SIZE; b++) {
       const offsetX = (rng() - 0.5) * GRASS_SPREAD * 2;
       const offsetZ = (rng() - 0.5) * GRASS_SPREAD * 2;
-      const rot     = rng() * Math.PI;
-      const scale   = 0.75 + rng() * 0.5;
+      const rot = rng() * Math.PI;
+      const scale = 0.75 + rng() * 0.5;
 
       dummy.position.set(px + offsetX, 0, pz + offsetZ);
       dummy.rotation.set(0, rot, 0);

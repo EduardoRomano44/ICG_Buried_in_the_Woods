@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, clearScene } from '../../core/SceneManager.js';
+import { scene, clearScene } from '../../../core/SceneManager.js';
 import {
   setInputEnabled,
   clearAllColliders,
@@ -8,32 +8,32 @@ import {
   enterFirstPerson,
   setCameraRotationEnabled,
   resetPlayerState,
-} from '../../player/Player.js';
+} from '../../../player/Player.js';
 import {
   setStartLoading,
   setFlashlightState,
-} from '../../ui/GameUI.js';
-import { showCrosshair, hideCrosshair } from '../../ui/Crosshair.js';
-import { resetKeyState } from './KeySystem.js';
+} from '../../../ui/GameUI.js';
+import { showCrosshair, hideCrosshair } from '../../../ui/Crosshair.js';
+import { resetKeyState } from '../systems/KeySystem.js';
 import {
   setForestAudioActive,
   updateWalkSurfaceAudio,
-} from '../../audio/GameAudio.js';
-import { disposeGrass } from '../Grass.js';
-import { disposeFireflies } from '../../animations/fireflies.js';
-import { clearSlimeIdleRegistry } from '../../animations/slimeIdle.js';
-import { disposeBasementDoorSystem } from '../BasementDoorSystem.js';
-import { disposeDoorMetalSystem } from './BasementDoorMetalSystem.js';
-import { forceShadowRefresh } from '../../core/ShadowOptimizer.js';
+} from '../../../audio/GameAudio.js';
+import { disposeGrass } from '../../loaders/generated/Grass.js';
+import { disposeFireflies } from '../../../animations/others/fireflies.js';
+import { clearSlimeIdleRegistry } from '../../../animations/slime/slimeIdle.js';
+import { disposeBasementDoorSystem } from '../../systems/BasementDoorSystem.js';
+import { disposeDoorMetalSystem } from '../systems/BasementDoorMetalSystem.js';
+import { forceShadowRefresh } from '../../../core/ShadowOptimizer.js';
 import { loadBasementMapping } from './BasementMappingLoader.js';
-import { setupBasementEnvironment } from './BasementWorld.js';
+import { setupBasementEnvironment } from '../BasementWorld.js';
 import {
   grantInventoryFlashlight,
-} from '../FlashlightSystem.js';
+} from '../../systems/FlashlightSystem.js';
 import {
   PLAYER_HEIGHT,
   BASEMENT_PLAYER_SPAWN_FALLBACK,
-} from '../../config/constants.js';
+} from '../../../config/constants.js';
 
 let isTransitioning = false;
 let basementLoaded = false;

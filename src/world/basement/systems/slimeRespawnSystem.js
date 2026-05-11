@@ -1,15 +1,15 @@
-import { scene } from '../core/SceneManager.js';
-import { addCollider } from '../player/Player.js';
-import { createSlimeIdle } from '../animations/slimeIdle.js';
+import { scene } from '../../../core/SceneManager.js';
+import { addCollider } from '../../../player/Player.js';
+import { createSlimeIdle } from '../../../animations/slime/slimeIdle.js';
 import {
-  DEBUG_SLIME_RESPAWN_ENABLED,
-  DEBUG_SLIME_RESPAWN_DELAY,
-} from '../config/constants.js';
+  SLIME_RESPAWN_ENABLED,
+  SLIME_RESPAWN_DELAY,
+} from '../../../config/constants.js';
 
 // For testing purpuses, slime will respawwn after attacking
 
-function scheduleSlimeRespawnDebug(slimeMesh, baseScale) {
-  if (!DEBUG_SLIME_RESPAWN_ENABLED || !slimeMesh) return;
+function scheduleSlimeRespawn(slimeMesh, baseScale) {
+  if (!SLIME_RESPAWN_ENABLED || !slimeMesh) return;
 
   const respawnParent = slimeMesh.parent || scene;
   const respawnPosition = slimeMesh.position.clone();
@@ -29,16 +29,16 @@ function scheduleSlimeRespawnDebug(slimeMesh, baseScale) {
     target.add(slimeMesh);
     addCollider(slimeMesh, { dynamic: true });
     createSlimeIdle(slimeMesh);
-  }, DEBUG_SLIME_RESPAWN_DELAY * 1000);
+  }, SLIME_RESPAWN_DELAY * 1000);
 }
 
-function initSlimeRespawnDebug() {
-  if (!DEBUG_SLIME_RESPAWN_ENABLED) return;
+function initSlimeRespawn() {
+  if (!SLIME_RESPAWN_ENABLED) return;
 
   document.addEventListener('slime:exploded', (event) => {
     const detail = event.detail || {};
-    scheduleSlimeRespawnDebug(detail.slimeMesh, detail.baseScale);
+    scheduleSlimeRespawn(detail.slimeMesh, detail.baseScale);
   });
 }
 
-export { initSlimeRespawnDebug };
+export { initSlimeRespawn };

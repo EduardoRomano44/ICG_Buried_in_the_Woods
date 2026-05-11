@@ -21,15 +21,15 @@ import {
 } from './src/player/Player.js';
 
 // Models
-import { loadAllModels } from './src/models/ModelLoader.js';
+import { loadAllModels } from './src/world/loaders/ModelLoader.js';
 
 // Grass (created after models register their occupied positions)
-import { createGrass, getGrassPatchPlacements, setGrassEnabled } from './src/world/Grass.js';
+import { createGrass, getGrassPatchPlacements, setGrassEnabled } from './src/world/loaders/generated/Grass.js';
 import {
   loadSavedWorldPositions,
   createWorldPositionsPayload,
   downloadGeneratedWorldPositions,
-} from './src/world/PlacementPersistence.js';
+} from './src/world/loaders/generated/PlacementPersistence.js';
 
 // UI
 import { createCrosshair, refreshCrosshair } from './src/ui/Crosshair.js';
@@ -45,10 +45,10 @@ import {
   isSettingsBusy,
   showGameOver,
 } from './src/ui/GameUI.js';
-import { animateFireflies, setFirefliesEnabled } from './src/animations/fireflies.js';
-import { updateSlimeIdle } from './src/animations/slimeIdle.js';
+import { animateFireflies, setFirefliesEnabled } from './src/animations/others/fireflies.js';
+import { updateSlimeIdle } from './src/animations/slime/slimeIdle.js';
 import settings from './src/config/settings.js';
-import { initSlimeRespawnDebug } from './src/debug/slimeRespawnDebug.js';
+import { initSlimeRespawn } from './src/world/basement/systems/slimeRespawnSystem.js';
 import {
   initShadowOptimizer,
   updateShadowOptimization,
@@ -61,30 +61,30 @@ import {
   updateWalkSurfaceAudio,
   unlockGameAudioPlayback,
 } from './src/audio/GameAudio.js';
-import { updateBasementDoorSystem } from './src/world/BasementDoorSystem.js';
+import { updateBasementDoorSystem } from './src/world/systems/BasementDoorSystem.js';
 import { detectWalkSurfaceType } from './src/world/WalkSurfaceRegistry.js';
 import {
   getFlashlightState,
   setFlashlightStateListener,
   toggleInventoryFlashlight,
-} from './src/world/FlashlightSystem.js';
+} from './src/world/systems/FlashlightSystem.js';
 
 // Basement transition
 import {
   transitionToBasement,
   isInBasement,
   isBasementTransitioning,
-} from './src/world/basement/BasementTransition.js';
+} from './src/world/basement/loaders/BasementTransition.js';
 import {
   setKeyStateListener,
   getKeyState,
-} from './src/world/basement/KeySystem.js';
-import { updateDoorMetalSystem } from './src/world/basement/BasementDoorMetalSystem.js';
+} from './src/world/basement/systems/KeySystem.js';
+import { updateDoorMetalSystem } from './src/world/basement/systems/BasementDoorMetalSystem.js';
 
 // Bootstrap
 createCrosshair();
 initInput();
-initSlimeRespawnDebug();
+initSlimeRespawn();
 initShadowOptimizer(renderer);
 
 let hasStarted = false;

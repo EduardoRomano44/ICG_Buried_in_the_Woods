@@ -1,4 +1,4 @@
-import { unregisterInteractable, registerInteractable } from '../../player/Player.js';
+import { unregisterInteractable, registerInteractable } from '../../../player/Player.js';
 
 /**
  * Manages the basement key item state.

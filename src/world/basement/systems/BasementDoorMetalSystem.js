@@ -1,12 +1,23 @@
 import * as THREE from 'three';
-import { registerInteractable } from '../player/Player.js';
-import { getFlashlightState } from './FlashlightSystem.js';
-import { showInteractionNotice } from '../ui/Crosshair.js';
+import { registerInteractable } from '../../../player/Player.js';
+import { getKeyState } from './KeySystem.js';
+import { showInteractionNotice } from '../../../ui/Crosshair.js';
 
-const basementDoorStates = new Set();
-const BASEMENT_DOOR_ANIMATION_FALLBACK_MS = 900;
+/**
+ * Metal door system for the basement.
+ *
+ * States:
+ * - Locked (no key) → "It's locked"
+ * - Has key, door closed → "OPEN"
+ * - Door open → "EXIT"
+ *
+ * Uses the GLB animation clips for the opening sequence.
+ */
 
-function createBasementDoorSystem(model, animations = [], options = {}) {
+const DOOR_METAL_ANIMATION_FALLBACK_MS = 900;
+const doorMetalStates = new Set();
+
+function createDoorMetalSystem(model, animations = [], options = {}) {
   if (!model) return null;
 
   const validClips = Array.isArray(animations) ? animations.filter(Boolean) : [];
@@ -18,12 +29,12 @@ function createBasementDoorSystem(model, animations = [], options = {}) {
   const state = {
     model,
     mixer,
-    openActions,
+    openActions: [...openActions],
     isOpening: false,
     isOpen: false,
     blockedUntil: 0,
-    enterCallback: typeof options.onEnterBasement === 'function'
-      ? options.onEnterBasement
+    exitCallback: typeof options.onExit === 'function'
+      ? options.onExit
       : () => window.location.reload(),
     finishedHandler: null,
   };
@@ -31,7 +42,11 @@ function createBasementDoorSystem(model, animations = [], options = {}) {
   state.getActionText = () => {
     if (Date.now() < state.blockedUntil) return '';
     if (state.isOpening) return '';
-    return state.isOpen ? 'ENTER' : 'OPEN';
+
+    const keyState = getKeyState();
+    if (state.isOpen) return 'EXIT';
+    if (!keyState.hasKey) return 'OPEN';
+    return 'OPEN';
   };
 
   state.isEnabled = () => !state.isOpening && Date.now() >= state.blockedUntil;
@@ -54,10 +69,8 @@ function createBasementDoorSystem(model, animations = [], options = {}) {
 
   state.finishedHandler = onFinished;
 
-  if (state.mixer && state.openActions.length > 0) {
+  if (state.mixer && openActions.length > 0) {
     state.mixer.addEventListener('finished', onFinished);
-  } else {
-    state.isOpen = false;
   }
 
   state.startOpening = () => {
@@ -72,65 +85,71 @@ function createBasementDoorSystem(model, animations = [], options = {}) {
         action.clampWhenFinished = true;
         action.play();
       }
+
+      window.setTimeout(() => {
+        if (state.isOpening) finishOpening();
+      }, DOOR_METAL_ANIMATION_FALLBACK_MS);
     } else {
       window.setTimeout(() => {
         finishOpening();
-      }, BASEMENT_DOOR_ANIMATION_FALLBACK_MS);
+      }, DOOR_METAL_ANIMATION_FALLBACK_MS);
     }
 
     return true;
   };
 
-  state.tryEnter = () => {
+  state.tryInteract = () => {
     if (state.isOpening) return false;
 
+    const keyState = getKeyState();
+
     if (!state.isOpen) {
+      // Door is closed
+      if (!keyState.hasKey) {
+        state.blockedUntil = Date.now() + 3000;
+        showInteractionNotice("It's locked", 3000);
+        return false;
+      }
+      // Has key → open the door
       return state.startOpening();
     }
 
-    const flashlightState = getFlashlightState();
-    if (!flashlightState.hasFlashlight) {
-      state.blockedUntil = Date.now() + 3000;
-      showInteractionNotice('I can\'t see anything down there', 3000);
-      return false;
-    }
-
-    state.enterCallback();
+    // Door is open → exit
+    state.exitCallback();
     return true;
   };
 
   registerInteractable(model, {
     getActionText: () => state.getActionText(),
     isEnabled: () => state.isEnabled(),
-    onInteract: () => state.tryEnter(),
+    onInteract: () => state.tryInteract(),
   });
 
-  basementDoorStates.add(state);
-  model.userData.basementDoorState = state;
+  doorMetalStates.add(state);
+  model.userData.doorMetalState = state;
   return state;
 }
 
-function updateBasementDoorSystem(delta) {
+function updateDoorMetalSystem(delta) {
   const safeDelta = Number.isFinite(delta) ? Math.max(0, delta) : 0;
-  for (const state of basementDoorStates) {
+  for (const state of doorMetalStates) {
     if (state.mixer) {
       state.mixer.update(safeDelta);
     }
   }
 }
 
-function disposeBasementDoorSystem() {
-  for (const state of basementDoorStates) {
+function disposeDoorMetalSystem() {
+  for (const state of doorMetalStates) {
     if (state.mixer && state.finishedHandler) {
       state.mixer.removeEventListener('finished', state.finishedHandler);
     }
   }
-
-  basementDoorStates.clear();
+  doorMetalStates.clear();
 }
 
 export {
-  createBasementDoorSystem,
-  updateBasementDoorSystem,
-  disposeBasementDoorSystem,
+  createDoorMetalSystem,
+  updateDoorMetalSystem,
+  disposeDoorMetalSystem,
 };

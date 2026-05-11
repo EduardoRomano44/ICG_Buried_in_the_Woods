@@ -97,7 +97,7 @@ export const WORLD_EXTENDED_GROUND_SCALE = 1.35;
 export const WORLD_EXTENDED_GROUND_Y_OFFSET = -0.03;
 
 // Placement persistence (trees + grass)
-export const WORLD_POSITIONS_FILE_URL = './src/world/generated-positions.json';
+export const WORLD_POSITIONS_FILE_URL = './src/world/loaders/generated/generated-positions.json';
 export const WORLD_POSITIONS_AUTO_IMPORT = true;
 export const WORLD_POSITIONS_AUTO_DOWNLOAD_ON_GENERATE = true;
 export const WORLD_POSITIONS_DOWNLOAD_FILENAME = 'generated-positions.json';
@@ -132,9 +132,9 @@ export const SLIME_EXPLODE_PARTICLE_SPEED_MAX = 15;
 export const SLIME_EXPLODE_PARTICLE_LIFETIME = 1.65;
 export const SLIME_EXPLODE_PARTICLE_GRAVITY = 10;
 export const SLIME_EXPLODE_PARTICLE_DRAG = 0.05;
-// Debug: Slime respawn
-export const DEBUG_SLIME_RESPAWN_ENABLED = true;
-export const DEBUG_SLIME_RESPAWN_DELAY = 5;
+// Slime respawn
+export const SLIME_RESPAWN_ENABLED = true;
+export const SLIME_RESPAWN_DELAY = 15;
 
 // Ambient Light
 export const AMBIENT_LIGHT_COLOR = 0x505050;

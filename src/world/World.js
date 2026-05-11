@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { scene } from '../core/SceneManager.js';
 import { addCollider } from '../player/Player.js';
 import { registerShadowLight, tagShadowLight, tagShadowObject } from '../core/ShadowOptimizer.js';
-import { updateGrass } from './Grass.js';
+import { updateGrass } from './loaders/generated/Grass.js';
 import { registerWalkSurface } from './WalkSurfaceRegistry.js';
 import {
   GROUND_SIZE, GROUND_COLOR,
@@ -84,7 +84,7 @@ const skyMat = new THREE.ShaderMaterial({ // Gradient Material
   side: THREE.BackSide,
   depthWrite: false,
   uniforms: {
-    topColor:    { value: new THREE.Color(SKY_TOP_COLOR) },
+    topColor: { value: new THREE.Color(SKY_TOP_COLOR) },
     bottomColor: { value: new THREE.Color(SKY_BOTTOM_COLOR) },
   },
   vertexShader: `

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { camera } from '../core/SceneManager.js';
+import { camera } from '../../core/SceneManager.js';
 import {
   SLIME_IDLE_SPEED,
   SLIME_IDLE_XZ_AMPLITUDE,
@@ -8,10 +8,10 @@ import {
   SLIME_MOVE_SPEED,
   SLIME_COLLISION_RADIUS,
   SLIME_COLLISION_HEIGHT,
-} from '../config/constants.js';
+} from '../../config/constants.js';
 import { startSlimeAttack, updateSlimeAttacks } from './slimeAttack.js';
-import { setSlimeIdleAudioActive, setSlimeIdleAudioDistance } from '../audio/GameAudio.js';
-import { checkObjectCollision } from '../player/Player.js';
+import { setSlimeIdleAudioActive, setSlimeIdleAudioDistance } from '../../audio/GameAudio.js';
+import { checkObjectCollision } from '../../player/Player.js';
 
 /* 
   Responsible for managing slime idle animation

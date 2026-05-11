@@ -1,21 +1,21 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { scene } from '../core/SceneManager.js';
-import { addCollider, registerInteractable } from '../player/Player.js';
-import { enableShadows } from '../utils/helpers.js';
+import { scene } from '../../core/SceneManager.js';
+import { addCollider, registerInteractable } from '../../player/Player.js';
+import { enableShadows } from '../../utils/helpers.js';
 import {
   registerShadowLight,
   registerShadowObject,
   tagShadowLight,
   tagShadowObject,
-} from '../core/ShadowOptimizer.js';
-import { createFireflies } from '../animations/fireflies.js';
-import { registerGrassBlocker, registerOccupied, isPlacementFreeWithRadius } from '../world/Grass.js';
+} from '../../core/ShadowOptimizer.js';
+import { createFireflies } from '../../animations/others/fireflies.js';
+import { registerGrassBlocker, registerOccupied, isPlacementFreeWithRadius } from './generated/Grass.js';
 import {
   registerWorldFlashlight,
   pickupFlashlightFromWorld,
-} from '../world/FlashlightSystem.js';
-import { createBasementDoorSystem } from '../world/BasementDoorSystem.js';
+} from '../systems/FlashlightSystem.js';
+import { createBasementDoorSystem } from '../systems/BasementDoorSystem.js';
 import {
   GROUND_SIZE,
   ROAD_MODEL_PATH,
@@ -57,7 +57,7 @@ import {
   TREE_PLACEMENT_ATTEMPTS,
   TREE_WORLD_MARGIN,
   TREE_EXCLUSION_RADIUS,
-} from '../config/constants.js';
+} from '../../config/constants.js';
 
 const loader = new GLTFLoader();
 const modelTemplatePromises = new Map();

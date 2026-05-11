@@ -18,13 +18,13 @@ import {
   PLAYER_HEIGHT,
 } from './src/config/constants.js';
 import { createBasementPreviewWorld } from './src/world/basement/BasementPreviewWorld.js';
-import { loadBasementMapping } from './src/world/basement/BasementMappingLoader.js';
+import { loadBasementMapping } from './src/world/basement/loaders/BasementMappingLoader.js';
 import {
   grantInventoryFlashlight,
   toggleInventoryFlashlight,
 } from './src/world/FlashlightSystem.js';
 import { registerWalkSurface, detectWalkSurfaceType } from './src/world/WalkSurfaceRegistry.js';
-import { updateSlimeIdle } from './src/animations/slimeIdle.js';
+import { updateSlimeIdle } from './src/animations/slime/slimeIdle.js';
 import { setTitleCardAudioActive, updateWalkSurfaceAudio } from './src/audio/GameAudio.js';
 
 let controls = null;

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { enableShadows } from '../../utils/helpers.js';
+import { enableShadows } from '../../../utils/helpers.js';
 import {
   BASEMENT_MAPPING_MODEL_PATH,
   BASEMENT_MAPPING_SCALE,
@@ -14,11 +14,11 @@ import {
   SLIME_SCALE,
   TABLE_SCALE,
   COOKIE_SCALE,
-} from '../../config/constants.js';
-import { createSlimeIdle } from '../../animations/slimeIdle.js';
-import { createDoorMetalSystem } from './BasementDoorMetalSystem.js';
-import { registerWorldKey } from './KeySystem.js';
-import { registerWorldCookie } from './CookieSystem.js';
+} from '../../../config/constants.js';
+import { createSlimeIdle } from '../../../animations/slime/slimeIdle.js';
+import { createDoorMetalSystem } from '../systems/BasementDoorMetalSystem.js';
+import { registerWorldKey } from '../systems/KeySystem.js';
+import { registerWorldCookie } from '../systems/CookieSystem.js';
 
 const loader = new GLTFLoader();
 
