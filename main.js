@@ -18,6 +18,7 @@ import {
   setToggleFlashlightHandler,
   resetPlayerState,
   getPlayerVitals,
+  syncCameraSensitivity,
 } from './src/player/Player.js';
 
 // Models
@@ -95,6 +96,7 @@ let isGameOver = false;
 let worldPreloadPromise = null;
 let ignorePointerUnlockUntil = 0;
 let ignoreEscapeUntil = 0;
+let pendingResume = false;
 renderer.domElement.style.display = 'none';
 setInputEnabled(false);
 
@@ -102,6 +104,7 @@ async function applyRuntimeSettings() {
   renderer.shadowMap.enabled = settings.shadowsEnabled;
   setGrassEnabled(!settings.lowQuality);
   setFirefliesEnabled(!settings.lowQuality);
+  syncCameraSensitivity();
   refreshCrosshair();
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
   setGlobalAudioVolume(settings.audioVolume ?? 0.8);
@@ -111,14 +114,10 @@ async function applyRuntimeSettings() {
   }
 }
 
-/**
- * Callback wired to the basement door's onEnterBasement.
- * Triggers the full level transition instead of reloading the page.
- */
 function handleEnterBasement() {
   transitionToBasement({
     onComplete: () => {
-      // Basement is now active — the game loop will use the basement branch
+      // Basement is now active - the game loop will use the basement branch
       forceShadowRefresh(true);
       renderer.render(scene, camera);
     },
@@ -283,11 +282,21 @@ document.addEventListener('keydown', (event) => {
   if (performance.now() < ignoreEscapeUntil) return;
 
   event.preventDefault();
-  ignoreEscapeUntil = performance.now() + 180;
+  
   if (isPaused) {
-    resumeGame();
+    // Wait for keyup to actually resume, ensuring a fresh user gesture for Pointer Lock
+    pendingResume = true;
   } else {
+    ignoreEscapeUntil = performance.now() + 180;
     pauseGame();
+  }
+});
+
+document.addEventListener('keyup', (event) => {
+  if (event.code === 'Escape' && pendingResume) {
+    pendingResume = false;
+    ignoreEscapeUntil = performance.now() + 180;
+    resumeGame();
   }
 });
 
