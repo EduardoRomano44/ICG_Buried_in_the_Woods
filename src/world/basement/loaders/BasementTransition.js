@@ -24,6 +24,7 @@ import { disposeFireflies } from '../../../animations/others/fireflies.js';
 import { clearSlimeIdleRegistry } from '../../../animations/slime/slimeIdle.js';
 import { disposeBasementDoorSystem } from '../../systems/BasementDoorSystem.js';
 import { disposeDoorMetalSystem } from '../systems/BasementDoorMetalSystem.js';
+import { disposeCandleSystem } from '../systems/CandleSystem.js';
 import { forceShadowRefresh } from '../../../core/ShadowOptimizer.js';
 import { loadBasementMapping } from './BasementMappingLoader.js';
 import { setupBasementEnvironment } from '../BasementWorld.js';
@@ -104,6 +105,7 @@ async function transitionToBasement(options = {}) {
     clearSlimeIdleRegistry();
     disposeBasementDoorSystem();
     disposeDoorMetalSystem();
+    disposeCandleSystem();
     clearAllColliders();
     clearScene();
     resetKeyState();

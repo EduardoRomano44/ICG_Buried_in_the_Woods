@@ -81,6 +81,7 @@ import {
   getKeyState,
 } from './src/world/basement/systems/KeySystem.js';
 import { updateDoorMetalSystem } from './src/world/basement/systems/BasementDoorMetalSystem.js';
+import { updateCandleSystem } from './src/world/basement/systems/CandleSystem.js';
 
 // Bootstrap
 createCrosshair();
@@ -353,6 +354,7 @@ function animate(timestamp) {
       // Basement-specific updates
       updateSlimeIdle(elapsed, delta);
       updateDoorMetalSystem(delta);
+      updateCandleSystem(delta);
     } else {
       // Overworld-specific updates
       if (!settings.lowQuality) {

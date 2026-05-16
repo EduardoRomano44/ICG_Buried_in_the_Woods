@@ -36,6 +36,15 @@ export const KEY_MODEL_PATH = './models/Key.glb';
 export const COOKIE_MODEL_PATH = './models/Cookie.glb';
 export const SLIME_MODEL_PATH = './models/Slime.glb';
 export const TABLE_MODEL_PATH = './models/Table.glb';
+export const CANDLE_MODEL_PATH = './models/Candle.glb';
+
+// Candle
+export const CANDLE_SCALE = 2.0;
+export const CANDLE_LIGHT_COLOR = 0xffaa44;
+export const CANDLE_LIGHT_INTENSITY = 30;
+export const CANDLE_LIGHT_DISTANCE = 10;
+export const CANDLE_SHADOW_RADIUS = 0.5;
+export const CANDLE_SHADOW_NEAR = 0.1;
 
 // Cookie
 export const COOKIE_SCALE = 0.9;
@@ -61,8 +70,11 @@ export const BASEMENT_PREVIEW_SUN_SHADOW_NORMAL_BIAS = 0.03;
 export const BASEMENT_PREVIEW_SUN_SHADOW_RADIUS = 2;
 
 // Basement environment (in-game)
-export const BASEMENT_AMBIENT_COLOR = 0x1a1a2e;
-export const BASEMENT_AMBIENT_INTENSITY = 0.08;
+export const BASEMENT_AMBIENT_COLOR = 0xf7d369;
+export const BASEMENT_AMBIENT_INTENSITY = 0.05;
+export const BASEMENT_SUN_COLOR = 0xf7d369;
+export const BASEMENT_SUN_INTENSITY = 0.2;
+export const BASEMENT_SUN_POSITION = { x: 0, y: 100, z: 0 };
 export const BASEMENT_FOG_COLOR = 0x020208;
 export const BASEMENT_FOG_NEAR = 5;
 export const BASEMENT_FOG_FAR = 45;

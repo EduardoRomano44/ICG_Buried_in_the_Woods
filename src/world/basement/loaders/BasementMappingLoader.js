@@ -14,9 +14,12 @@ import {
   SLIME_SCALE,
   TABLE_SCALE,
   COOKIE_SCALE,
+  CANDLE_MODEL_PATH,
+  CANDLE_SCALE,
 } from '../../../config/constants.js';
 import { createSlimeIdle } from '../../../animations/slime/slimeIdle.js';
 import { createDoorMetalSystem } from '../systems/BasementDoorMetalSystem.js';
+import { createCandleSystem } from '../systems/CandleSystem.js';
 import { registerWorldKey } from '../systems/KeySystem.js';
 import { registerWorldCookie } from '../systems/CookieSystem.js';
 
@@ -65,6 +68,7 @@ function collectNamedBasementData(root) {
       player: [],
       slime: [],
       table: [],
+      candle: [],
     },
     debugNames: [],
   };
@@ -105,6 +109,8 @@ function collectNamedBasementData(root) {
       data.anchors.slime.push(child);
     } else if (baseName.startsWith('table')) {
       data.anchors.table.push(child);
+    } else if (baseName.startsWith('v')) {
+      data.anchors.candle.push(child);
     }
   });
 
@@ -374,14 +380,16 @@ async function loadBasementMapping(options = {}) {
     keyGltf,
     cookieGltf,
     slimeGltf,
-    tableGltf
+    tableGltf,
+    candleGltf
   ] = await Promise.all([
     loadGLTF(modelPath),
     loadGLTF(DOOR_METAL_MODEL_PATH),
     loadGLTF(KEY_MODEL_PATH),
     loadGLTF(COOKIE_MODEL_PATH),
     loadGLTF(SLIME_MODEL_PATH),
-    loadGLTF(TABLE_MODEL_PATH)
+    loadGLTF(TABLE_MODEL_PATH),
+    loadGLTF(CANDLE_MODEL_PATH)
   ]);
 
   const gltfRoot = gltf.scene;
@@ -393,12 +401,14 @@ async function loadBasementMapping(options = {}) {
   const cookieNode = cookieGltf.scene || cookieGltf.scenes?.[0] || new THREE.Group();
   const slimeNode = slimeGltf.scene || slimeGltf.scenes?.[0] || new THREE.Group();
   const tableNode = tableGltf.scene || tableGltf.scenes?.[0] || new THREE.Group();
+  const candleNode = candleGltf.scene || candleGltf.scenes?.[0] || new THREE.Group();
 
   prepareBasementMaterials(doorMetalNode);
   prepareBasementMaterials(keyNode);
   prepareBasementMaterials(cookieNode);
   prepareBasementMaterials(slimeNode);
   prepareBasementMaterials(tableNode);
+  prepareBasementMaterials(candleNode);
 
   const namedData = collectNamedBasementData(gltfRoot);
   const debugHint = createMissingNodesDebugHint(namedData);
@@ -436,7 +446,7 @@ async function loadBasementMapping(options = {}) {
     const ceilClone = cloneNodeWithWorldTransform(ceilNode);
     ceilClone.name = 'CeilInstance';
     setShadowProfile(ceilClone, {
-      castShadow: true,
+      castShadow: false,
       receiveShadow: false,
     });
     basementRoot.add(ceilClone);
@@ -496,9 +506,17 @@ async function loadBasementMapping(options = {}) {
   const doorMetalGroup = buildStandardClonedGroup(basementRoot, doorMetalNode, namedData.anchors.md, registerCollider, 'DoorMetal', true, 1);
   const slimeGroup = buildStandardClonedGroup(basementRoot, slimeNode, namedData.anchors.slime, registerCollider, 'Slime', true, SLIME_SCALE);
   const tableGroup = buildStandardClonedGroup(basementRoot, tableNode, namedData.anchors.table, registerCollider, 'Table', true, TABLE_SCALE);
+  const candleGroup = buildStandardClonedGroup(basementRoot, candleNode, namedData.anchors.candle, registerCollider, 'Candle', false, CANDLE_SCALE);
 
   for (const slimeRoot of slimeGroup.instances) {
     createSlimeIdle(slimeRoot);
+  }
+ 
+  for (const candleRoot of candleGroup.instances) {
+    const candleClone = candleRoot.children[0];
+    if (candleClone) {
+      createCandleSystem(candleClone, candleGltf.animations);
+    }
   }
 
   for (const doorMetalRoot of doorMetalGroup.instances) {

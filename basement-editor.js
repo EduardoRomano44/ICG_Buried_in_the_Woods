@@ -22,7 +22,7 @@ import { loadBasementMapping } from './src/world/basement/loaders/BasementMappin
 import {
   grantInventoryFlashlight,
   toggleInventoryFlashlight,
-} from './src/world/FlashlightSystem.js';
+} from './src/world/systems/FlashlightSystem.js';
 import { registerWalkSurface, detectWalkSurfaceType } from './src/world/WalkSurfaceRegistry.js';
 import { updateSlimeIdle } from './src/animations/slime/slimeIdle.js';
 import { setTitleCardAudioActive, updateWalkSurfaceAudio } from './src/audio/GameAudio.js';
