@@ -5,9 +5,11 @@ import { createSettingsPanel } from './components/settings/SettingsPanel.js';
 import { createTitleCardPanel } from './components/titlecard/TitleCardPanel.js';
 import { createEyeCloseEffect } from './components/gameover/EyeCloseEffect.js';
 import { createGameOverPanel } from './components/gameover/GameOverPanel.js';
+import { createMobileControlsPanel } from './components/mobile/MobileControlsPanel.js';
 import { applyBarsSizePreset } from './presets/barSizePresets.js';
 import { loadGameUIStyles } from './styles/loadGameUIStyles.js';
 import { setTitleCardAudioActive } from '../../audio/GameAudio.js';
+import { isMobileDevice } from '../../utils/isMobile.js';
 
 function createGameUIController({ onResume, onReset, onSettingsChanged, onBackToMenu }) {
   loadGameUIStyles();
@@ -21,7 +23,13 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
   let settingsPanel = null;
   let titleCardPanel = null;
   let gameOverPanel = null;
+  let mobileControlsPanel = null;
   const eyeCloseEffect = createEyeCloseEffect();
+  const isMobile = isMobileDevice();
+
+  if (isMobile) {
+    mobileControlsPanel = createMobileControlsPanel();
+  }
 
   const syncSettingsControls = () => {
     if (titleCardPanel) titleCardPanel.syncControls();
@@ -65,6 +73,11 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
     eyeCloseEffect.element,
     gameOverPanel.element
   );
+
+  if (mobileControlsPanel) {
+    root.append(mobileControlsPanel.element);
+  }
+
   document.body.appendChild(root);
 
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
@@ -79,6 +92,9 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
       hud.setVisible(started);
       titleCardPanel.setVisible(!started);
       setTitleCardAudioActive(!started);
+      if (mobileControlsPanel) {
+        mobileControlsPanel.setVisible(started);
+      }
       if (!started) {
         gameOverPanel.setVisible(false);
         eyeCloseEffect.reset();
@@ -87,6 +103,9 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
     setPaused(paused) {
       settingsPanel.setVisible(paused);
       overlay.setVisible(paused);
+      if (mobileControlsPanel) {
+        mobileControlsPanel.setVisible(!paused);
+      }
     },
     setFlashlightState(state) {
       hud.setFlashlightState(state);
@@ -95,14 +114,34 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
       hud.setKeyState(state);
     },
     setStartLoading(visible, label = 'Loading...') {
-      titleCardPanel.setLoading(visible, label);
+      const isGameInProgress = hud.element.style.display === 'block';
+
+      if (visible) {
+        if (isGameInProgress) titleCardPanel.setPlainMode(true);
+        titleCardPanel.setLoading(true, label);
+        titleCardPanel.setVisible(true);
+      } else {
+        titleCardPanel.setLoading(false);
+        titleCardPanel.setPlainMode(false);
+        if (isGameInProgress) {
+          titleCardPanel.setVisible(false);
+        }
+      }
     },
     isSettingsBusy() {
       return settingsPanel.isBusy();
     },
+    showInteractButton(visible) {
+      if (mobileControlsPanel) {
+        mobileControlsPanel.showInteract(visible);
+      }
+    },
     async showGameOver() {
       settingsPanel.setVisible(false);
       overlay.setVisible(false);
+      if (mobileControlsPanel) {
+        mobileControlsPanel.setVisible(false);
+      }
       await eyeCloseEffect.play(980);
       gameOverPanel.setVisible(true);
     },

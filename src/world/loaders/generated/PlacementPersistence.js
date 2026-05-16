@@ -3,7 +3,7 @@ import {
   WORLD_POSITIONS_AUTO_IMPORT,
   WORLD_POSITIONS_AUTO_DOWNLOAD_ON_GENERATE,
   WORLD_POSITIONS_DOWNLOAD_FILENAME,
-} from '../config/constants.js';
+} from '../../../config/constants.js';
 
 // Persists randomly generated positions, to use later
 const POSITIONS_SCHEMA_VERSION = 1;

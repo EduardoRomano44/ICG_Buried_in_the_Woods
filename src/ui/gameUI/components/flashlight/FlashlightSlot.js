@@ -1,4 +1,5 @@
 import { createElementFromHTML } from '../../utils/dom.js';
+import { triggerFlashlight } from '../../../../player/modules/PlayerInput.js';
 
 const flashlightIconURL = new URL('../../../../../imgs/Flashlight.png', import.meta.url).href;
 const flashlightIconPreload = new Image();
@@ -11,11 +12,16 @@ if (typeof flashlightIconPreload.decode === 'function') {
 
 function createFlashlightSlot() {
   const element = createElementFromHTML(`
-    <div class="flashlight-slot" aria-hidden="true">
+    <div class="flashlight-slot" aria-hidden="true" style="pointer-events: auto; cursor: pointer;">
       <img class="flashlight-slot-icon" alt="Flashlight">
       <span class="flashlight-slot-key">T</span>
     </div>
   `);
+
+  element.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    triggerFlashlight();
+  });
 
   const icon = element.querySelector('.flashlight-slot-icon');
   let hasFlashlight = false;

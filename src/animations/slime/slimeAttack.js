@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, camera } from '../core/SceneManager.js';
+import { scene, camera } from '../../core/SceneManager.js';
 import {
   SLIME_ATTACK_DURATION,
   SLIME_ATTACK_BLINK_SPEED,
@@ -19,10 +19,10 @@ import {
   SLIME_EXPLODE_PARTICLE_LIFETIME,
   SLIME_EXPLODE_PARTICLE_GRAVITY,
   SLIME_EXPLODE_PARTICLE_DRAG,
-} from '../config/constants.js';
-import settings from '../config/settings.js';
-import { removeCollider, damagePlayer, intersectsPlayerHitboxSphere } from '../player/Player.js';
-import { playSlimeExplodeAudio } from '../audio/GameAudio.js';
+} from '../../config/constants.js';
+import settings from '../../config/settings.js';
+import { removeCollider, damagePlayer, intersectsPlayerHitboxSphere } from '../../player/Player.js';
+import { playSlimeExplodeAudio } from '../../audio/GameAudio.js';
 
 /* 
   Responsible for managing slime attack animation
@@ -281,7 +281,7 @@ function getSlimeFinalExpansionRadius(slimeMesh) {
 }
 
 function createAttackState(slimeMesh, onExplode) {
-  const eyes = createEyeState(slimeMesh); // Eyes are not reset, but because slimes don't respawn (only when debuging) this isn't an issue
+  const eyes = createEyeState(slimeMesh); // Eyes are not reset
   const hitboxMesh = createHitboxMesh();
   scene.add(hitboxMesh);
 

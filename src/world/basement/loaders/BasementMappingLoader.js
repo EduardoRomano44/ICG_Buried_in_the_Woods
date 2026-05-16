@@ -1,21 +1,27 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { enableShadows } from '../../utils/helpers.js';
+import { enableShadows } from '../../../utils/helpers.js';
 import {
   BASEMENT_MAPPING_MODEL_PATH,
   BASEMENT_MAPPING_SCALE,
   BASEMENT_WALL1_LOCAL_OFFSET,
   BASEMENT_WALL2_LOCAL_OFFSET,
   DOOR_METAL_MODEL_PATH,
+  COOKIE_MODEL_PATH,
   KEY_MODEL_PATH,
   SLIME_MODEL_PATH,
   TABLE_MODEL_PATH,
   SLIME_SCALE,
   TABLE_SCALE,
-} from '../../config/constants.js';
-import { createSlimeIdle } from '../../animations/slimeIdle.js';
-import { createDoorMetalSystem } from './BasementDoorMetalSystem.js';
-import { registerWorldKey } from './KeySystem.js';
+  COOKIE_SCALE,
+  CANDLE_MODEL_PATH,
+  CANDLE_SCALE,
+} from '../../../config/constants.js';
+import { createSlimeIdle } from '../../../animations/slime/slimeIdle.js';
+import { createDoorMetalSystem } from '../systems/BasementDoorMetalSystem.js';
+import { createCandleSystem } from '../systems/CandleSystem.js';
+import { registerWorldKey } from '../systems/KeySystem.js';
+import { registerWorldCookie } from '../systems/CookieSystem.js';
 
 const loader = new GLTFLoader();
 
@@ -62,6 +68,7 @@ function collectNamedBasementData(root) {
       player: [],
       slime: [],
       table: [],
+      candle: [],
     },
     debugNames: [],
   };
@@ -102,6 +109,8 @@ function collectNamedBasementData(root) {
       data.anchors.slime.push(child);
     } else if (baseName.startsWith('table')) {
       data.anchors.table.push(child);
+    } else if (baseName.startsWith('v')) {
+      data.anchors.candle.push(child);
     }
   });
 
@@ -369,14 +378,18 @@ async function loadBasementMapping(options = {}) {
     gltf,
     doorMetalGltf,
     keyGltf,
+    cookieGltf,
     slimeGltf,
-    tableGltf
+    tableGltf,
+    candleGltf
   ] = await Promise.all([
     loadGLTF(modelPath),
     loadGLTF(DOOR_METAL_MODEL_PATH),
     loadGLTF(KEY_MODEL_PATH),
+    loadGLTF(COOKIE_MODEL_PATH),
     loadGLTF(SLIME_MODEL_PATH),
-    loadGLTF(TABLE_MODEL_PATH)
+    loadGLTF(TABLE_MODEL_PATH),
+    loadGLTF(CANDLE_MODEL_PATH)
   ]);
 
   const gltfRoot = gltf.scene;
@@ -385,13 +398,17 @@ async function loadBasementMapping(options = {}) {
 
   const doorMetalNode = doorMetalGltf.scene || doorMetalGltf.scenes?.[0] || new THREE.Group();
   const keyNode = keyGltf.scene || keyGltf.scenes?.[0] || new THREE.Group();
+  const cookieNode = cookieGltf.scene || cookieGltf.scenes?.[0] || new THREE.Group();
   const slimeNode = slimeGltf.scene || slimeGltf.scenes?.[0] || new THREE.Group();
   const tableNode = tableGltf.scene || tableGltf.scenes?.[0] || new THREE.Group();
+  const candleNode = candleGltf.scene || candleGltf.scenes?.[0] || new THREE.Group();
 
   prepareBasementMaterials(doorMetalNode);
   prepareBasementMaterials(keyNode);
+  prepareBasementMaterials(cookieNode);
   prepareBasementMaterials(slimeNode);
   prepareBasementMaterials(tableNode);
+  prepareBasementMaterials(candleNode);
 
   const namedData = collectNamedBasementData(gltfRoot);
   const debugHint = createMissingNodesDebugHint(namedData);
@@ -429,7 +446,7 @@ async function loadBasementMapping(options = {}) {
     const ceilClone = cloneNodeWithWorldTransform(ceilNode);
     ceilClone.name = 'CeilInstance';
     setShadowProfile(ceilClone, {
-      castShadow: true,
+      castShadow: false,
       receiveShadow: false,
     });
     basementRoot.add(ceilClone);
@@ -489,9 +506,17 @@ async function loadBasementMapping(options = {}) {
   const doorMetalGroup = buildStandardClonedGroup(basementRoot, doorMetalNode, namedData.anchors.md, registerCollider, 'DoorMetal', true, 1);
   const slimeGroup = buildStandardClonedGroup(basementRoot, slimeNode, namedData.anchors.slime, registerCollider, 'Slime', true, SLIME_SCALE);
   const tableGroup = buildStandardClonedGroup(basementRoot, tableNode, namedData.anchors.table, registerCollider, 'Table', true, TABLE_SCALE);
+  const candleGroup = buildStandardClonedGroup(basementRoot, candleNode, namedData.anchors.candle, registerCollider, 'Candle', false, CANDLE_SCALE);
 
   for (const slimeRoot of slimeGroup.instances) {
     createSlimeIdle(slimeRoot);
+  }
+ 
+  for (const candleRoot of candleGroup.instances) {
+    const candleClone = candleRoot.children[0];
+    if (candleClone) {
+      createCandleSystem(candleClone, candleGltf.animations);
+    }
   }
 
   for (const doorMetalRoot of doorMetalGroup.instances) {
@@ -517,8 +542,12 @@ async function loadBasementMapping(options = {}) {
   }
 
   if (namedData.anchors.table.length > 0) {
-    const randomIdx = Math.floor(Math.random() * namedData.anchors.table.length);
-    const keyAnchor = namedData.anchors.table[randomIdx];
+    const tableAnchors = [...namedData.anchors.table];
+
+    // 1. Spawn Key
+    const keyIdx = Math.floor(Math.random() * tableAnchors.length);
+    const keyAnchor = tableAnchors.splice(keyIdx, 1)[0];
+
     const keyInstanceRoot = new THREE.Group();
     keyInstanceRoot.name = 'KeyAnchor';
     copyWorldTransform(keyInstanceRoot, keyAnchor);
@@ -539,8 +568,33 @@ async function loadBasementMapping(options = {}) {
     keyInstanceRoot.add(keyClone);
     keyInstanceRoot.updateMatrixWorld(true);
     basementRoot.add(keyInstanceRoot);
-    
     registerWorldKey(keyClone);
+
+    // 2. Spawn Cookies (up to 2)
+    const cookieCount = Math.min(2, tableAnchors.length);
+    for (let i = 0; i < cookieCount; i++) {
+      const cookieIdx = Math.floor(Math.random() * tableAnchors.length);
+      const cookieAnchor = tableAnchors.splice(cookieIdx, 1)[0];
+
+      const cookieInstanceRoot = new THREE.Group();
+      cookieInstanceRoot.name = `CookieAnchor_${i}`;
+      copyWorldTransform(cookieInstanceRoot, cookieAnchor);
+
+      const cookieClone = cookieNode.clone(true);
+      enableShadows(cookieClone);
+      cookieClone.name = `CookieInstance_${i}`;
+
+      // Place it on top of the table
+      cookieClone.position.set(0, tableTopY * TABLE_SCALE, 0);
+      cookieClone.quaternion.set(0, 0, 0, 1);
+      cookieClone.scale.setScalar(COOKIE_SCALE);
+      setShadowProfile(cookieClone, { castShadow: true, receiveShadow: true });
+
+      cookieInstanceRoot.add(cookieClone);
+      cookieInstanceRoot.updateMatrixWorld(true);
+      basementRoot.add(cookieInstanceRoot);
+      registerWorldCookie(cookieClone);
+    }
   }
 
   if (scene) {

@@ -33,8 +33,21 @@ export const BASEMENT_DOOR_ROTATION_Y = Math.PI * 0.5;
 
 export const DOOR_METAL_MODEL_PATH = './models/Door-metal.glb';
 export const KEY_MODEL_PATH = './models/Key.glb';
+export const COOKIE_MODEL_PATH = './models/Cookie.glb';
 export const SLIME_MODEL_PATH = './models/Slime.glb';
 export const TABLE_MODEL_PATH = './models/Table.glb';
+export const CANDLE_MODEL_PATH = './models/Candle.glb';
+
+// Candle
+export const CANDLE_SCALE = 2.0;
+export const CANDLE_LIGHT_COLOR = 0xffaa44;
+export const CANDLE_LIGHT_INTENSITY = 30;
+export const CANDLE_LIGHT_DISTANCE = 10;
+export const CANDLE_SHADOW_RADIUS = 0.5;
+export const CANDLE_SHADOW_NEAR = 0.1;
+
+// Cookie
+export const COOKIE_SCALE = 0.9;
 
 // Basement mapping
 export const BASEMENT_MAPPING_MODEL_PATH = './models/Basement_Mapping2.glb';
@@ -57,8 +70,11 @@ export const BASEMENT_PREVIEW_SUN_SHADOW_NORMAL_BIAS = 0.03;
 export const BASEMENT_PREVIEW_SUN_SHADOW_RADIUS = 2;
 
 // Basement environment (in-game)
-export const BASEMENT_AMBIENT_COLOR = 0x1a1a2e;
-export const BASEMENT_AMBIENT_INTENSITY = 0.08;
+export const BASEMENT_AMBIENT_COLOR = 0xf7d369;
+export const BASEMENT_AMBIENT_INTENSITY = 0.05;
+export const BASEMENT_SUN_COLOR = 0xf7d369;
+export const BASEMENT_SUN_INTENSITY = 0.2;
+export const BASEMENT_SUN_POSITION = { x: 0, y: 100, z: 0 };
 export const BASEMENT_FOG_COLOR = 0x020208;
 export const BASEMENT_FOG_NEAR = 5;
 export const BASEMENT_FOG_FAR = 45;
@@ -93,7 +109,7 @@ export const WORLD_EXTENDED_GROUND_SCALE = 1.35;
 export const WORLD_EXTENDED_GROUND_Y_OFFSET = -0.03;
 
 // Placement persistence (trees + grass)
-export const WORLD_POSITIONS_FILE_URL = './src/world/generated-positions.json';
+export const WORLD_POSITIONS_FILE_URL = './src/world/loaders/generated/generated-positions.json';
 export const WORLD_POSITIONS_AUTO_IMPORT = true;
 export const WORLD_POSITIONS_AUTO_DOWNLOAD_ON_GENERATE = true;
 export const WORLD_POSITIONS_DOWNLOAD_FILENAME = 'generated-positions.json';
@@ -101,10 +117,13 @@ export const WORLD_POSITIONS_DOWNLOAD_FILENAME = 'generated-positions.json';
 // Slime enemy
 export const SLIME_SCALE = 1.4;
 // Slime idle
-export const SLIME_IDLE_SPEED = 2;
-export const SLIME_IDLE_XZ_AMPLITUDE = 0.2;
-export const SLIME_IDLE_Y_AMPLITUDE = 0.2;
+export const SLIME_IDLE_SPEED = 3;
+export const SLIME_IDLE_XZ_AMPLITUDE = 0.3;
+export const SLIME_IDLE_Y_AMPLITUDE = 0.3;
 export const SLIME_IDLE_TRIGGER_DISTANCE = 4.5;
+export const SLIME_MOVE_SPEED = 3.0;
+export const SLIME_COLLISION_RADIUS = 0.8;
+export const SLIME_COLLISION_HEIGHT = 1.0;
 // Slime attack
 export const SLIME_ATTACK_DURATION = 1.5;
 export const SLIME_ATTACK_BLINK_SPEED = 10;
@@ -125,9 +144,9 @@ export const SLIME_EXPLODE_PARTICLE_SPEED_MAX = 15;
 export const SLIME_EXPLODE_PARTICLE_LIFETIME = 1.65;
 export const SLIME_EXPLODE_PARTICLE_GRAVITY = 10;
 export const SLIME_EXPLODE_PARTICLE_DRAG = 0.05;
-// Debug: Slime respawn
-export const DEBUG_SLIME_RESPAWN_ENABLED = true;
-export const DEBUG_SLIME_RESPAWN_DELAY = 5;
+// Slime respawn
+export const SLIME_RESPAWN_ENABLED = true;
+export const SLIME_RESPAWN_DELAY = 15;
 
 // Ambient Light
 export const AMBIENT_LIGHT_COLOR = 0x505050;

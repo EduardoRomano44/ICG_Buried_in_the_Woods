@@ -4,6 +4,8 @@ import {
   INTERACT_PROMPT_FONT_SIZE,
   INTERACT_PROMPT_COLOR,
 } from '../config/constants.js';
+import { isMobileDevice } from '../utils/isMobile.js';
+import { showInteractButton } from '../ui/GameUI.js';
 
 let element = null;
 let interactionElement = null;
@@ -83,7 +85,8 @@ function hideCrosshair() {
 function setInteractionPrompt(actionLabel) {
   if (!interactionElement) return;
 
-  const nextPromptText = actionLabel ? `Press E to ${actionLabel}` : '';
+  const isMobile = isMobileDevice();
+  const nextPromptText = actionLabel ? (isMobile ? `Tap ACT to ${actionLabel}` : `Press E to ${actionLabel}`) : '';
   if (nextPromptText === currentPromptText) return;
 
   currentPromptText = nextPromptText;
@@ -91,11 +94,13 @@ function setInteractionPrompt(actionLabel) {
   if (!actionLabel) {
     interactionElement.style.display = 'none';
     interactionElement.textContent = '';
+    showInteractButton(false);
     return;
   }
 
   interactionElement.textContent = nextPromptText;
   interactionElement.style.display = 'block';
+  showInteractButton(true);
 }
 
 function hideInteractionNotice() {

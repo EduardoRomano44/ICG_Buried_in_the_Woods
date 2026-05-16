@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { isMobileDevice } from './src/utils/isMobile.js';
 
 // Core
 import { scene, camera, renderer } from './src/core/SceneManager.js';
@@ -18,18 +19,19 @@ import {
   setToggleFlashlightHandler,
   resetPlayerState,
   getPlayerVitals,
+  syncCameraSensitivity,
 } from './src/player/Player.js';
 
 // Models
-import { loadAllModels } from './src/models/ModelLoader.js';
+import { loadAllModels } from './src/world/loaders/ModelLoader.js';
 
 // Grass (created after models register their occupied positions)
-import { createGrass, getGrassPatchPlacements, setGrassEnabled } from './src/world/Grass.js';
+import { createGrass, getGrassPatchPlacements, setGrassEnabled } from './src/world/loaders/generated/Grass.js';
 import {
   loadSavedWorldPositions,
   createWorldPositionsPayload,
   downloadGeneratedWorldPositions,
-} from './src/world/PlacementPersistence.js';
+} from './src/world/loaders/generated/PlacementPersistence.js';
 
 // UI
 import { createCrosshair, refreshCrosshair } from './src/ui/Crosshair.js';
@@ -45,10 +47,10 @@ import {
   isSettingsBusy,
   showGameOver,
 } from './src/ui/GameUI.js';
-import { animateFireflies, setFirefliesEnabled } from './src/animations/fireflies.js';
-import { updateSlimeIdle } from './src/animations/slimeIdle.js';
+import { animateFireflies, setFirefliesEnabled } from './src/animations/others/fireflies.js';
+import { updateSlimeIdle } from './src/animations/slime/slimeIdle.js';
 import settings from './src/config/settings.js';
-import { initSlimeRespawnDebug } from './src/debug/slimeRespawnDebug.js';
+import { initSlimeRespawn } from './src/world/basement/systems/slimeRespawnSystem.js';
 import {
   initShadowOptimizer,
   updateShadowOptimization,
@@ -61,29 +63,31 @@ import {
   updateWalkSurfaceAudio,
   unlockGameAudioPlayback,
 } from './src/audio/GameAudio.js';
-import { updateBasementDoorSystem } from './src/world/BasementDoorSystem.js';
+import { updateBasementDoorSystem } from './src/world/systems/BasementDoorSystem.js';
 import { detectWalkSurfaceType } from './src/world/WalkSurfaceRegistry.js';
 import {
   getFlashlightState,
   setFlashlightStateListener,
   toggleInventoryFlashlight,
-} from './src/world/FlashlightSystem.js';
+} from './src/world/systems/FlashlightSystem.js';
 
 // Basement transition
 import {
   transitionToBasement,
   isInBasement,
-} from './src/world/basement/BasementTransition.js';
+  isBasementTransitioning,
+} from './src/world/basement/loaders/BasementTransition.js';
 import {
   setKeyStateListener,
   getKeyState,
-} from './src/world/basement/KeySystem.js';
-import { updateDoorMetalSystem } from './src/world/basement/BasementDoorMetalSystem.js';
+} from './src/world/basement/systems/KeySystem.js';
+import { updateDoorMetalSystem } from './src/world/basement/systems/BasementDoorMetalSystem.js';
+import { updateCandleSystem } from './src/world/basement/systems/CandleSystem.js';
 
 // Bootstrap
 createCrosshair();
 initInput();
-initSlimeRespawnDebug();
+initSlimeRespawn();
 initShadowOptimizer(renderer);
 
 let hasStarted = false;
@@ -94,6 +98,7 @@ let isGameOver = false;
 let worldPreloadPromise = null;
 let ignorePointerUnlockUntil = 0;
 let ignoreEscapeUntil = 0;
+let pendingResume = false;
 renderer.domElement.style.display = 'none';
 setInputEnabled(false);
 
@@ -101,6 +106,7 @@ async function applyRuntimeSettings() {
   renderer.shadowMap.enabled = settings.shadowsEnabled;
   setGrassEnabled(!settings.lowQuality);
   setFirefliesEnabled(!settings.lowQuality);
+  syncCameraSensitivity();
   refreshCrosshair();
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
   setGlobalAudioVolume(settings.audioVolume ?? 0.8);
@@ -110,14 +116,10 @@ async function applyRuntimeSettings() {
   }
 }
 
-/**
- * Callback wired to the basement door's onEnterBasement.
- * Triggers the full level transition instead of reloading the page.
- */
 function handleEnterBasement() {
   transitionToBasement({
     onComplete: () => {
-      // Basement is now active — the game loop will use the basement branch
+      // Basement is now active - the game loop will use the basement branch
       forceShadowRefresh(true);
       renderer.render(scene, camera);
     },
@@ -282,16 +284,26 @@ document.addEventListener('keydown', (event) => {
   if (performance.now() < ignoreEscapeUntil) return;
 
   event.preventDefault();
-  ignoreEscapeUntil = performance.now() + 180;
+  
   if (isPaused) {
-    resumeGame();
+    // Wait for keyup to actually resume, ensuring a fresh user gesture for Pointer Lock
+    pendingResume = true;
   } else {
+    ignoreEscapeUntil = performance.now() + 180;
     pauseGame();
   }
 });
 
+document.addEventListener('keyup', (event) => {
+  if (event.code === 'Escape' && pendingResume) {
+    pendingResume = false;
+    ignoreEscapeUntil = performance.now() + 180;
+    resumeGame();
+  }
+});
+
 document.addEventListener('pointerlockchange', () => {
-  if (!hasStarted || isPaused || isGameOver) return;
+  if (!hasStarted || isPaused || isGameOver || isBasementTransitioning()) return;
   if (performance.now() < ignorePointerUnlockUntil) return;
   if (document.pointerLockElement !== document.body) {
     pauseGame();
@@ -300,18 +312,31 @@ document.addEventListener('pointerlockchange', () => {
 
 document.addEventListener('click', () => {
   if (hasStarted && !isPaused && !isGameOver && document.pointerLockElement !== document.body) {
-    resumeFirstPersonControls();
+    if (!isMobileDevice()) {
+      resumeFirstPersonControls();
+    }
+  }
+});
+
+document.addEventListener('pointerdown', (event) => {
+  if (isMobileDevice()) {
+    if (!hasStarted) {
+      beginStartFromTitle();
+    } else if (hasStarted && !isPaused && !isGameOver) {
+      // In mobile, we might not use pointerLock, but we want to ensure controls are active
+      resumeFirstPersonControls();
+    }
   }
 });
 
 window.addEventListener('blur', () => {
-  if (hasStarted && !isPaused && !isGameOver) {
+  if (hasStarted && !isPaused && !isGameOver && !isBasementTransitioning()) {
     pauseGame();
   }
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible' && hasStarted && !isPaused && !isGameOver) {
+  if (document.visibilityState !== 'visible' && hasStarted && !isPaused && !isGameOver && !isBasementTransitioning()) {
     pauseGame();
   }
 });
@@ -340,16 +365,17 @@ function animate(timestamp) {
     });
 
     if (isInBasement()) {
-      // ── Basement-specific updates ──────────────────────────────────
-      updateSlimeIdle(elapsed);
+      // Basement-specific updates
+      updateSlimeIdle(elapsed, delta);
       updateDoorMetalSystem(delta);
+      updateCandleSystem(delta);
     } else {
-      // ── Overworld-specific updates ─────────────────────────────────
+      // Overworld-specific updates
       if (!settings.lowQuality) {
         animateFireflies(elapsed);
         updateGrass(elapsed);
       }
-      updateSlimeIdle(elapsed);
+      updateSlimeIdle(elapsed, delta);
       updateWorld(camera);
       updateBasementDoorSystem(delta);
     }

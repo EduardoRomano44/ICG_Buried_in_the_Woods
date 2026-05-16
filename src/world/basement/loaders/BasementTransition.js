@@ -1,38 +1,40 @@
 import * as THREE from 'three';
-import { scene, clearScene } from '../../core/SceneManager.js';
+import { scene, clearScene } from '../../../core/SceneManager.js';
 import {
   setInputEnabled,
-  pauseFirstPersonControls,
-  resetPlayerState,
   clearAllColliders,
   setPlayerPosition,
   addCollider,
   enterFirstPerson,
-} from '../../player/Player.js';
+  setCameraRotationEnabled,
+  resetPlayerState,
+} from '../../../player/Player.js';
 import {
   setStartLoading,
   setFlashlightState,
-} from '../../ui/GameUI.js';
-import { resetKeyState } from './KeySystem.js';
+} from '../../../ui/GameUI.js';
+import { showCrosshair, hideCrosshair } from '../../../ui/Crosshair.js';
+import { resetKeyState } from '../systems/KeySystem.js';
 import {
   setForestAudioActive,
   updateWalkSurfaceAudio,
-} from '../../audio/GameAudio.js';
-import { disposeGrass } from '../Grass.js';
-import { disposeFireflies } from '../../animations/fireflies.js';
-import { clearSlimeIdleRegistry } from '../../animations/slimeIdle.js';
-import { disposeBasementDoorSystem } from '../BasementDoorSystem.js';
-import { disposeDoorMetalSystem } from './BasementDoorMetalSystem.js';
-import { forceShadowRefresh } from '../../core/ShadowOptimizer.js';
+} from '../../../audio/GameAudio.js';
+import { disposeGrass } from '../../loaders/generated/Grass.js';
+import { disposeFireflies } from '../../../animations/others/fireflies.js';
+import { clearSlimeIdleRegistry } from '../../../animations/slime/slimeIdle.js';
+import { disposeBasementDoorSystem } from '../../systems/BasementDoorSystem.js';
+import { disposeDoorMetalSystem } from '../systems/BasementDoorMetalSystem.js';
+import { disposeCandleSystem } from '../systems/CandleSystem.js';
+import { forceShadowRefresh } from '../../../core/ShadowOptimizer.js';
 import { loadBasementMapping } from './BasementMappingLoader.js';
-import { setupBasementEnvironment } from './BasementWorld.js';
+import { setupBasementEnvironment } from '../BasementWorld.js';
 import {
   grantInventoryFlashlight,
-} from '../FlashlightSystem.js';
+} from '../../systems/FlashlightSystem.js';
 import {
   PLAYER_HEIGHT,
   BASEMENT_PLAYER_SPAWN_FALLBACK,
-} from '../../config/constants.js';
+} from '../../../config/constants.js';
 
 let isTransitioning = false;
 let basementLoaded = false;
@@ -63,6 +65,10 @@ function isInBasement() {
   return basementLoaded;
 }
 
+function isBasementTransitioning() {
+  return isTransitioning;
+}
+
 /**
  * Full level-transition sequence: Overworld → Basement.
  *
@@ -84,10 +90,11 @@ async function transitionToBasement(options = {}) {
   try {
     // ── Phase 1: Freeze ──────────────────────────────────────────────
     setInputEnabled(false);
-    pauseFirstPersonControls();
+    setCameraRotationEnabled(false);
+    hideCrosshair();
     setForestAudioActive(false);
     updateWalkSurfaceAudio(null, false);
-    setStartLoading(true, 'Loading basement...');
+    setStartLoading(true, 'Loading...');
 
     // Small delay so the loading screen renders before heavy work
     await waitFrames(2);
@@ -98,6 +105,7 @@ async function transitionToBasement(options = {}) {
     clearSlimeIdleRegistry();
     disposeBasementDoorSystem();
     disposeDoorMetalSystem();
+    disposeCandleSystem();
     clearAllColliders();
     clearScene();
     resetKeyState();
@@ -128,15 +136,30 @@ async function transitionToBasement(options = {}) {
     forceShadowRefresh(true);
 
     setStartLoading(false);
+
+    // Yield to the event loop to ensure any queued blur/focus/pointerlockchange 
+    // events from the OS are processed before we make our final state decision.
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    setCameraRotationEnabled(true);
+    showCrosshair();
     enterFirstPerson();
     setInputEnabled(true);
+
+    if (typeof window.getAppFocusState === 'function' && window.getAppFocusState()) {
+    } else {
+      // User is away - pause
+      if (typeof window.pauseGameFromTransition === 'function') {
+        window.pauseGameFromTransition();
+      }
+    }
 
     if (typeof options.onComplete === 'function') {
       options.onComplete();
     }
   } catch (error) {
     console.error('Basement transition failed:', error);
-    setStartLoading(true, 'Loading failed — press ENTER to retry');
+    setStartLoading(true, 'Loading failed. Press ENTER to retry.');
 
     if (typeof options.onFail === 'function') {
       options.onFail(error);
@@ -191,6 +214,7 @@ function waitFrames(count = 1) {
 export {
   transitionToBasement,
   isInBasement,
+  isBasementTransitioning,
   updateBasement,
   setBasementUpdateCallback,
 };

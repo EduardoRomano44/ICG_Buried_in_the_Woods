@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { camera } from '../core/SceneManager.js';
-import { unregisterInteractable } from '../player/Player.js';
-import { playFlashlightToggleAudio } from '../audio/GameAudio.js';
+import { camera } from '../../core/SceneManager.js';
+import { unregisterInteractable } from '../../player/Player.js';
+import { playFlashlightToggleAudio } from '../../audio/GameAudio.js';
 import {
   FLASHLIGHT_COLOR,
   FLASHLIGHT_INTENSITY,
@@ -12,7 +12,7 @@ import {
   FLASHLIGHT_INTERNAL_COLOR,
   FLASHLIGHT_INTERNAL_INTENSITY,
   FLASHLIGHT_INTERNAL_DISTANCE,
-} from '../config/constants.js';
+} from '../../config/constants.js';
 
 // Responsible for managing flashlight interactions
 
