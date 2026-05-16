@@ -1,10 +1,12 @@
 import settings from '../../../../config/settings.js';
 import { createElementFromHTML } from '../../utils/dom.js';
+import { isMobileDevice } from '../../../../utils/isMobile.js';
 
 function createTitleCardPanel(onSettingsChanged, syncSettingsControls) {
+  const isMobile = isMobileDevice();
   const element = createElementFromHTML(`
     <section class="title-card" style="display:block;">
-      <p class="title-card-prompt">Press ENTER to Start</p>
+      <p class="title-card-prompt">${isMobile ? 'Tap to Start' : 'Press ENTER to Start'}</p>
       <p class="title-card-loading">Loading...</p>
       <div class="title-card-toggles">
         <label class="title-card-toggle">High Quality <input type="checkbox" data-ui="quality" /></label>

@@ -72,3 +72,17 @@ export function resetCameraEffects(camera) {
 export function getControls() {
   return fpControls;
 }
+
+const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+const PI_2 = Math.PI / 2;
+
+export function rotateCamera(camera, movementX, movementY, sensitivity = 1.0) {
+  euler.setFromQuaternion(camera.quaternion);
+
+  euler.y -= movementX * 0.002 * sensitivity;
+  euler.x -= movementY * 0.002 * sensitivity;
+
+  euler.x = Math.max(-PI_2 + 0.01, Math.min(PI_2 - 0.01, euler.x));
+
+  camera.quaternion.setFromEuler(euler);
+}

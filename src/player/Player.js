@@ -5,6 +5,8 @@ import {
   INITIAL_CAMERA_ROTATION_Y,
 } from '../config/constants.js';
 import { showCrosshair, hideCrosshair } from '../ui/Crosshair.js';
+import { isMobileDevice } from '../utils/isMobile.js';
+import settings from '../config/settings.js';
 
 // Modules
 import * as Stats from './modules/PlayerStats.js';
@@ -36,21 +38,22 @@ function setGameplayCursorHidden(hidden) {
   renderer.domElement.style.cursor = cursorValue;
 }
 export function initInput() {
-  document.addEventListener('keydown', (e) => Input.handleKeyDown(e, {
+  Input.setHandlers({
     onInteract: Interaction.tryInteractCurrentTarget,
     onFlashlight: () => {
       if (typeof toggleFlashlightHandler === 'function') toggleFlashlightHandler();
     }
-  }));
+  });
+  document.addEventListener('keydown', Input.handleKeyDown);
   document.addEventListener('keyup', Input.handleKeyUp);
 }
 
 export function enterFirstPerson() {
   if (isFPMode) {
-    fpControls.lock();
+    if (!isMobileDevice()) fpControls.lock();
     return;
   }
-  fpControls.lock();
+  if (!isMobileDevice()) fpControls.lock();
   camera.position.y = PLAYER_HEIGHT;
   showCrosshair();
   setGameplayCursorHidden(true);
@@ -61,14 +64,14 @@ export function enterFirstPerson() {
 export function pauseFirstPersonControls() {
   if (!isFPMode) return;
   Input.clearInput();
-  fpControls.unlock();
+  if (!isMobileDevice()) fpControls.unlock();
   hideCrosshair();
   setGameplayCursorHidden(false);
 }
 
 export function resumeFirstPersonControls() {
   if (!isFPMode) return;
-  fpControls.lock();
+  if (!isMobileDevice()) fpControls.lock();
   showCrosshair();
   setGameplayCursorHidden(true);
   Camera.syncCameraSensitivity();
@@ -169,4 +172,10 @@ export function setPlayerPosition(x, y, z) {
 
 export function syncCameraSensitivity() {
   Camera.syncCameraSensitivity();
+}
+
+export function rotateCamera(movementX, movementY) {
+  if (isFPMode) {
+    Camera.rotateCamera(camera, movementX, movementY, settings.cameraSensitivity || 1.0);
+  }
 }

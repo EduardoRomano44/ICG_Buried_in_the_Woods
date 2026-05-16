@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { isMobileDevice } from './src/utils/isMobile.js';
 
 // Core
 import { scene, camera, renderer } from './src/core/SceneManager.js';
@@ -311,7 +312,20 @@ document.addEventListener('pointerlockchange', () => {
 
 document.addEventListener('click', () => {
   if (hasStarted && !isPaused && !isGameOver && document.pointerLockElement !== document.body) {
-    resumeFirstPersonControls();
+    if (!isMobileDevice()) {
+      resumeFirstPersonControls();
+    }
+  }
+});
+
+document.addEventListener('pointerdown', (event) => {
+  if (isMobileDevice()) {
+    if (!hasStarted) {
+      beginStartFromTitle();
+    } else if (hasStarted && !isPaused && !isGameOver) {
+      // In mobile, we might not use pointerLock, but we want to ensure controls are active
+      resumeFirstPersonControls();
+    }
   }
 });
 

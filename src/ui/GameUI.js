@@ -46,6 +46,11 @@ async function showGameOver() {
   await controller.showGameOver();
 }
 
+function showInteractButton(visible) {
+  if (!controller) return;
+  controller.showInteractButton(visible);
+}
+
 export {
   createGameUI,
   updateHUD,
@@ -57,4 +62,5 @@ export {
   setStartLoading,
   isSettingsBusy,
   showGameOver,
+  showInteractButton,
 };
