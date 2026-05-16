@@ -524,6 +524,31 @@ textarea {
   z-index: 45;
 }
 
+.controls-hint {
+  position: fixed;
+  left: 32px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-align: left;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.controls-hint div {
+  opacity: 0.8;
+}
+
+.controls-hint b {
+  opacity: 1;
+}
+
 .panel.busy {
   pointer-events: none;
 }

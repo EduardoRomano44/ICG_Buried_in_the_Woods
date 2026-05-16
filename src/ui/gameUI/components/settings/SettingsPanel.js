@@ -45,15 +45,23 @@ function createSettingsPanel({
   applyBarsSizePreset,
 }) {
   const element = createElementFromHTML(`
-    <section class="panel">
-      <h1>SETTINGS</h1>
-      <div class="settings-busy">Loading...</div>
-      <div class="settings-grid"></div>
-      <div class="panel-actions">
-        <button type="button" class="ui-button primary" data-ui="resume">Continue</button>
-        <button type="button" class="ui-button danger" data-ui="reset">Back to Menu</button>
+    <div class="settings-container" style="display:none; position:absolute; inset:0; pointer-events:none; z-index:50;">
+      <section class="panel" style="display:block; pointer-events:auto;">
+        <h1>SETTINGS</h1>
+        <div class="settings-busy">Loading...</div>
+        <div class="settings-grid"></div>
+        <div class="panel-actions">
+          <button type="button" class="ui-button primary" data-ui="resume">Continue</button>
+          <button type="button" class="ui-button danger" data-ui="reset">Back to Menu</button>
+        </div>
+      </section>
+      <div class="controls-hint">
+        <div><b>WASD / ARROWS</b> - Move</div>
+        <div><b>SHIFT</b> - Sprint</div>
+        <div><b>T</b> - Flashlight</div>
+        <div><b>E</b> - Interact</div>
       </div>
-    </section>
+    </div>
   `);
 
   const busyText = element.querySelector('.settings-busy');
@@ -186,13 +194,15 @@ function createSettingsPanel({
 
   grid.append(sensitivityRow, crosshairRow, audioRow, shadowsRow, qualityRow, hudSizeRow);
 
+  const panelEl = element.querySelector('.panel');
+
   function setVisible(visible) {
     element.style.display = visible ? 'block' : 'none';
   }
 
   function setBusy(isBusy) {
     busy = isBusy;
-    element.classList.toggle('busy', isBusy);
+    panelEl.classList.toggle('busy', isBusy);
     busyText.style.display = isBusy ? 'block' : 'none';
   }
 
