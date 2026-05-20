@@ -71,7 +71,7 @@ function updateSlimeIdle(elapsed, delta = 0) {
       const prevX = slime.mesh.position.x;
       const prevZ = slime.mesh.position.z;
 
-      // Move in opposite direction (backwards)
+      // Move in opposite direction (backwards, slime model was reversed)
       slime.mesh.position.x -= tempVec.x * moveDistance;
       slime.mesh.position.z -= tempVec.z * moveDistance;
 

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { enableShadows } from '../../../utils/helpers.js';
+import { createInstancedGroup, createInvisibleCollider } from '../../../utils/InstancingUtils.js';
 import {
   BASEMENT_MAPPING_MODEL_PATH,
   BASEMENT_MAPPING_SCALE,
@@ -325,46 +326,46 @@ function getWallLocalOffset(prefix) {
   );
 }
 
-function createAnchorInstance(sourceNode, anchor, prefix) {
-  const instanceRoot = new THREE.Group();
-  instanceRoot.name = `${prefix}Anchor`;
-  copyWorldTransform(instanceRoot, anchor);
+function buildClonedGroup(root, sourceNode, anchors, registerCollider, prefix) {
+  if (!anchors || anchors.length === 0) return 0;
 
-  const clone = sourceNode.clone(true);
-  enableShadows(clone);
-
+  // Prepare template for InstancedMesh
+  const templateRoot = new THREE.Group();
+  templateRoot.name = `${prefix}_Template`;
+  
+  const templateNode = sourceNode.clone(true);
   const localOffset = getWallPivotOffset(sourceNode, prefix);
-  clone.position.set(
-    localOffset.x,
-    localOffset.y,
-    localOffset.z
-  );
-  clone.quaternion.copy(sourceNode.quaternion);
-  clone.scale.copy(sourceNode.scale);
-  clone.name = `${prefix}Instance`;
-  clone.updateMatrixWorld(true);
-  setShadowProfile(clone, {
+  templateNode.position.set(localOffset.x, localOffset.y, localOffset.z);
+  templateNode.quaternion.copy(sourceNode.quaternion);
+  templateNode.scale.copy(sourceNode.scale);
+  templateNode.name = `${prefix}Instance`;
+  
+  setShadowProfile(templateNode, {
     castShadow: true,
     receiveShadow: false,
   });
 
-  instanceRoot.add(clone);
-  instanceRoot.updateMatrixWorld(true);
+  templateRoot.add(templateNode);
+  templateRoot.updateMatrixWorld(true);
 
-  return instanceRoot;
-}
+  const transforms = anchors.map(anchor => {
+    return {
+      position: anchor.getWorldPosition(new THREE.Vector3()),
+      rotation: anchor.getWorldQuaternion(new THREE.Quaternion()),
+      scale: anchor.getWorldScale(new THREE.Vector3())
+    };
+  });
 
-function buildClonedGroup(root, sourceNode, anchors, registerCollider, prefix) {
-  let count = 0;
+  const instancedGroup = createInstancedGroup(templateRoot, transforms);
+  root.add(instancedGroup);
 
-  for (const anchor of anchors) {
-    const anchorInstance = createAnchorInstance(sourceNode, anchor, prefix);
-    root.add(anchorInstance);
-    addColliderForObject(root, anchorInstance, registerCollider);
-    count++;
-  }
+  transforms.forEach(transform => {
+    const collider = createInvisibleCollider(templateRoot, transform.position, transform.rotation, transform.scale);
+    root.add(collider);
+    addColliderForObject(root, collider, registerCollider);
+  });
 
-  return count;
+  return anchors.length;
 }
 
 async function loadBasementMapping(options = {}) {
