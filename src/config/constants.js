@@ -192,7 +192,7 @@ export const FLASHLIGHT_COLOR = 0xffffff;
 export const FLASHLIGHT_INTENSITY = 110;
 // Flashlight Spotlight
 export const FLASHLIGHT_SPOT_DISTANCE = 80;
-export const FLASHLIGHT_SPOT_POSITION = { x: 0, y: 1, z: -2.4 };
+export const FLASHLIGHT_SPOT_POSITION = { x: 0, y: 1.4, z: -2.4 };
 export const FLASHLIGHT_SPOT_ROTATION = { x: -0.18, y: 0, z: 0 };
 export const FLASHLIGHT_SPOT_SCALE_Z = 0.583;
 export const FLASHLIGHT_SPOT_RADIUS = 0.2;

@@ -10,6 +10,7 @@ import {
   tagShadowObject,
 } from '../../core/ShadowOptimizer.js';
 import { createFireflies } from '../../animations/others/fireflies.js';
+import { createInstancedGroup, createInvisibleCollider } from '../../utils/InstancingUtils.js';
 import { registerGrassBlocker, registerOccupied, isPlacementFreeWithRadius } from './generated/Grass.js';
 import {
   registerWorldFlashlight,
@@ -240,29 +241,62 @@ function loadRoad() {
   });
 }
 
-// Lamp
-function loadLamp(x, y, z, rotationY = 0) {
-  return cloneModelTemplate(LAMP_MODEL_PATH).then((model) => {
-    model.scale.set(LAMP_SCALE, LAMP_SCALE, LAMP_SCALE);
-    placeModelOnGround(model, x, z, y);
-    model.rotation.y = rotationY * (Math.PI / 180);
+// Lamps
+function loadLamps(list_positions = []) {
+  if (list_positions.length === 0) return Promise.resolve(null);
 
-    const light = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
-    light.position.set(LAMP_LIGHT_POSITION.x, LAMP_LIGHT_POSITION.y, LAMP_LIGHT_POSITION.z);
-    configureShadowCastingLight(light);
+  return loadModelTemplate(LAMP_MODEL_PATH).then((template) => {
+    const transforms = list_positions.map((pos) => {
+      // Temporarily use the template to find the correct Y offset via placeModelOnGround
+      const oldPos = template.position.clone();
+      const oldScale = template.scale.clone();
+      template.scale.set(LAMP_SCALE, LAMP_SCALE, LAMP_SCALE);
+      placeModelOnGround(template, 0, 0, 0);
+      const yOffset = template.position.y;
+      template.position.copy(oldPos);
+      template.scale.copy(oldScale);
 
-    tagShadowLight(light, true);
-    registerShadowLight(light, { staticLight: true });
+      return {
+        position: new THREE.Vector3(pos[0], pos[1] + yOffset, pos[2]),
+        rotation: (pos[3] || 0) * (Math.PI / 180),
+        scale: LAMP_SCALE
+      };
+    });
 
-    createFireflies(model);
-    model.add(light);
+    const instancedGroup = createInstancedGroup(template, transforms);
+    setupModelShadows(instancedGroup, true);
+    scene.add(instancedGroup);
 
-    setupModelShadows(model, true);
+    // Add logical components (Lights, Fireflies, Colliders)
+    transforms.forEach((transform, idx) => {
+      const pos = list_positions[idx];
+      
+      const logicGroup = new THREE.Group();
+      logicGroup.position.copy(transform.position);
+      logicGroup.rotation.y = transform.rotation;
+      logicGroup.scale.set(transform.scale, transform.scale, transform.scale);
 
-    scene.add(model);
-    addCollider(model, { boundsScale: 0.72 });
-    registerOccupied(x, z);
-    return model;
+      const light = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
+      light.position.set(LAMP_LIGHT_POSITION.x, LAMP_LIGHT_POSITION.y, LAMP_LIGHT_POSITION.z);
+      configureShadowCastingLight(light);
+
+      tagShadowLight(light, true);
+      registerShadowLight(light, { staticLight: true });
+
+      createFireflies(logicGroup);
+      logicGroup.add(light);
+      scene.add(logicGroup);
+
+      // Create collider using boundsScale logic previously used: { boundsScale: 0.72 }
+      // Wait, createInvisibleCollider uses the template's bounding box. We can just scale the invisible collider
+      const collider = createInvisibleCollider(template, transform.position, transform.rotation, transform.scale);
+      scene.add(collider);
+      addCollider(collider, { boundsScale: 0.72 });
+      
+      registerOccupied(pos[0], pos[2]);
+    });
+
+    return instancedGroup;
   });
 }
 
@@ -271,38 +305,40 @@ function loadTreeTemplate() {
   return loadModelTemplate(TREE_MODEL_PATH);
 }
 
-function loadTree(x, y, z, rotationY = 0) {
-  return loadTreeTemplate().then((template) => {
-    const model = template.clone(true);
-    placeModelOnGround(model, x, z, y);
-    model.rotation.y = rotationY * (Math.PI / 180);
+// Benches
+function loadBenches(list_positions = []) {
+  if (list_positions.length === 0) return Promise.resolve(null);
 
-    setupModelShadows(model, true);
+  return loadModelTemplate(BENCH_MODEL_PATH).then((template) => {
+    const transforms = list_positions.map((pos) => {
+      const oldPos = template.position.clone();
+      const oldScale = template.scale.clone();
+      template.scale.set(BENCH_SCALE, BENCH_SCALE, BENCH_SCALE);
+      placeModelOnGround(template, 0, 0, 0);
+      const yOffset = template.position.y;
+      template.position.copy(oldPos);
+      template.scale.copy(oldScale);
 
-    model.traverse((obj) => {
-      if (obj.isMesh && obj.name === 'Cylinder') {
-        addCollider(obj);
-      }
+      return {
+        position: new THREE.Vector3(pos[0], pos[1] + yOffset, pos[2]),
+        rotation: (pos[3] || 0) * (Math.PI / 180),
+        scale: BENCH_SCALE
+      };
     });
 
-    scene.add(model);
-    return model;
-  });
-}
+    const instancedGroup = createInstancedGroup(template, transforms);
+    setupModelShadows(instancedGroup, true);
+    scene.add(instancedGroup);
 
-// Bench
-function loadBench(x, y, z, rotationY = 0) {
-  return cloneModelTemplate(BENCH_MODEL_PATH).then((model) => {
-    model.scale.set(BENCH_SCALE, BENCH_SCALE, BENCH_SCALE);
-    placeModelOnGround(model, x, z, y);
-    model.rotation.y = rotationY * (Math.PI / 180);
+    transforms.forEach((transform, idx) => {
+      const pos = list_positions[idx];
+      const collider = createInvisibleCollider(template, transform.position, transform.rotation, transform.scale);
+      scene.add(collider);
+      addCollider(collider);
+      registerOccupied(pos[0], pos[2]);
+    });
 
-    setupModelShadows(model, true);
-
-    scene.add(model);
-    addCollider(model);
-    registerOccupied(x, z);
-    return model;
+    return instancedGroup;
   });
 }
 
@@ -428,11 +464,7 @@ function loadFlashlight(x, y, z, rotationY = 0) {
 // Loader Helpers
 // Position format: [x, y, z] or [x, y, z, rotationY(degrees)]
 
-function loadLamps(list_positions = []) {
-  return Promise.all(
-    list_positions.map((position) => loadLamp(position[0], position[1], position[2], position[3] || 0))
-  );
-}
+// Position format: [x, y, z] or [x, y, z, rotationY(degrees)]
 
 function loadTrees(list_positions = []) {
   const normalizedList = normalizeTreePlacementList(list_positions);
@@ -452,9 +484,35 @@ function loadTrees(list_positions = []) {
     position[3] || 0,
   ]);
 
-  return Promise.all(
-    positions.map((position) => loadTree(position[0], position[1], position[2], position[3] || 0))
-  );
+  if (positions.length === 0) return Promise.resolve(null);
+
+  return loadTreeTemplate().then((template) => {
+    const transforms = positions.map((pos) => {
+      const oldPos = template.position.clone();
+      placeModelOnGround(template, 0, 0, 0);
+      const yOffset = template.position.y;
+      template.position.copy(oldPos);
+
+      return {
+        position: new THREE.Vector3(pos[0], pos[1] + yOffset, pos[2]),
+        rotation: (pos[3] || 0) * (Math.PI / 180),
+        scale: 1
+      };
+    });
+
+    const instancedGroup = createInstancedGroup(template, transforms);
+    setupModelShadows(instancedGroup, true);
+    scene.add(instancedGroup);
+
+    transforms.forEach((transform) => {
+      // Original code extracted 'Cylinder' mesh to build the collider
+      const collider = createInvisibleCollider(template, transform.position, transform.rotation, transform.scale, 'Cylinder');
+      scene.add(collider);
+      addCollider(collider);
+    });
+
+    return instancedGroup;
+  });
 }
 
 function getTreePlacements() {
@@ -501,11 +559,6 @@ function generateTreePlacements(count, groundY = 0) {
   return placements;
 }
 
-function loadBenches(list_positions = []) {
-  return Promise.all(
-    list_positions.map((position) => loadBench(position[0], position[1], position[2], position[3] || 0))
-  );
-}
 
 function loadFlashlights(list_positions = []) {
   return Promise.all(
