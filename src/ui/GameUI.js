@@ -46,6 +46,11 @@ async function showGameOver() {
   await controller.showGameOver();
 }
 
+async function showEscapeScreen() {
+  if (!controller) return;
+  await controller.showEscapeScreen();
+}
+
 function showInteractButton(visible) {
   if (!controller) return;
   controller.showInteractButton(visible);
@@ -62,5 +67,6 @@ export {
   setStartLoading,
   isSettingsBusy,
   showGameOver,
+  showEscapeScreen,
   showInteractButton,
 };

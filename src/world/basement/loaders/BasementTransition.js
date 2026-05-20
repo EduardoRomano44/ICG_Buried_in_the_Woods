@@ -82,6 +82,7 @@ function isBasementTransitioning() {
  * @param {object} options
  * @param {function} options.onComplete — called after transition finishes
  * @param {function} options.onFail — called if loading fails
+ * @param {function} options.onExitBasement — called when exiting the basement via the metal door
  */
 async function transitionToBasement(options = {}) {
   if (isTransitioning || basementLoaded) return;
@@ -117,6 +118,7 @@ async function transitionToBasement(options = {}) {
     const basementData = await loadBasementMapping({
       scene,
       registerCollider: (obj, opts) => addCollider(obj, opts || {}),
+      onExitBasement: options.onExitBasement,
     });
 
     // ── Phase 4: Environment ─────────────────────────────────────────

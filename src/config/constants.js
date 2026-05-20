@@ -28,8 +28,8 @@ export const GROUND_COLOR = 0x008018;
 
 // Basement door
 export const BASEMENT_DOOR_MODEL_PATH = './models/Basement_door.glb';
-export const BASEMENT_DOOR_POSITION = { x: -28, y: 0, z: 24 };
-export const BASEMENT_DOOR_ROTATION_Y = Math.PI * 0.5;
+export const BASEMENT_DOOR_POSITION = { x: -30, y: 0, z: -45 };
+export const BASEMENT_DOOR_ROTATION_Y = 0;
 
 export const DOOR_METAL_MODEL_PATH = './models/Door-metal.glb';
 export const KEY_MODEL_PATH = './models/Key.glb';
