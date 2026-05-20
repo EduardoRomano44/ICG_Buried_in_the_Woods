@@ -192,7 +192,19 @@ function createSettingsPanel({
   hudSizeCards.push(hudSmall, hudMedium, hudLarge);
   hudSizeGrid.append(hudSmall, hudMedium, hudLarge);
 
-  grid.append(sensitivityRow, crosshairRow, audioRow, shadowsRow, qualityRow, hudSizeRow);
+  const brightnessRow = createRangeSettingRow({
+    label: 'Brightness',
+    min: '0.5',
+    max: '10.0',
+    step: '0.5',
+    value: String(settings.brightness ?? 1.0),
+    apply: (value) => {
+      settings.brightness = Number(value);
+    },
+    format: (value) => `${Math.round(Number(value) * 100)}%`,
+  }, onSettingsChanged);
+
+  grid.append(sensitivityRow, crosshairRow, audioRow, brightnessRow, shadowsRow, qualityRow, hudSizeRow);
 
   const panelEl = element.querySelector('.panel');
 

@@ -1,11 +1,17 @@
 import * as THREE from 'three';
 import { isMobileDevice } from './src/utils/isMobile.js';
+import { 
+  AMBIENT_LIGHT_INTENSITY, 
+  BASEMENT_AMBIENT_INTENSITY,
+  MOONLIGHT_INTENSITY,
+  BASEMENT_SUN_INTENSITY
+} from './src/config/constants.js';
 
 // Core
 import { scene, camera, renderer } from './src/core/SceneManager.js';
 
 // World
-import { updateWorld, updateGrass } from './src/world/World.js';
+import { updateWorld, updateGrass, ambientLight as worldAmbientLight, moonLight as worldMoonLight } from './src/world/World.js';
 
 // Player
 import {
@@ -77,6 +83,7 @@ import {
   isInBasement,
   isBasementTransitioning,
 } from './src/world/basement/loaders/BasementTransition.js';
+import { getBasementAmbientLight, getBasementSunLight } from './src/world/basement/BasementWorld.js';
 import {
   setKeyStateListener,
   getKeyState,
@@ -110,6 +117,24 @@ async function applyRuntimeSettings() {
   refreshCrosshair();
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
   setGlobalAudioVolume(settings.audioVolume ?? 0.8);
+  
+  const brightness = settings.brightness ?? 1.0;
+
+  if (worldAmbientLight) {
+    worldAmbientLight.intensity = AMBIENT_LIGHT_INTENSITY * brightness;
+  }
+  if (worldMoonLight) {
+    worldMoonLight.intensity = MOONLIGHT_INTENSITY * brightness;
+  }
+  
+  const basementLight = getBasementAmbientLight();
+  if (basementLight) {
+    basementLight.intensity = BASEMENT_AMBIENT_INTENSITY * brightness;
+  }
+  const basementSun = getBasementSunLight();
+  if (basementSun) {
+    basementSun.intensity = BASEMENT_SUN_INTENSITY * brightness;
+  }
 
   if (settings.shadowsEnabled) {
     forceShadowRefresh();
@@ -120,6 +145,7 @@ function handleEnterBasement() {
   transitionToBasement({
     onComplete: () => {
       // Basement is now active - the game loop will use the basement branch
+      applyRuntimeSettings(); // Apply brightness and other settings to newly created basement lights
       forceShadowRefresh(true);
       renderer.render(scene, camera);
     },

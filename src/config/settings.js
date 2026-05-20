@@ -9,6 +9,7 @@ const settings = {
   antialias: true,
   shadowsEnabled: true,
   lowQuality: false,
+  brightness: 1.0,
 
   // UI
   crosshairColor: "white",

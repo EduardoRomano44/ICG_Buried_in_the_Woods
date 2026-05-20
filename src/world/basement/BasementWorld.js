@@ -16,6 +16,9 @@ import {
   BASEMENT_FOG_FAR,
 } from '../../config/constants.js';
 
+let basementAmbientLight = null;
+let basementSunLight = null;
+
 /**
  * Configure the scene for the basement environment.
  * Replaces the overworld sky, moon, and outdoor fog with a dark, claustrophobic interior.
@@ -29,6 +32,8 @@ function setupBasementEnvironment(basementData) {
   tagShadowLight(ambientLight, true);
   registerShadowLight(ambientLight, { staticLight: true });
   scene.add(ambientLight);
+  
+  basementAmbientLight = ambientLight;
 
   // Overhead light from above (passes through the non-shadow-casting ceiling)
   const sunLight = new THREE.DirectionalLight(BASEMENT_SUN_COLOR, BASEMENT_SUN_INTENSITY);
@@ -53,6 +58,8 @@ function setupBasementEnvironment(basementData) {
   
   scene.add(sunLight);
   scene.add(sunLight.target);
+  
+  basementSunLight = sunLight;
 
   // Tight fog to hide far geometry and enhance claustrophobia
   scene.fog = new THREE.Fog(BASEMENT_FOG_COLOR, BASEMENT_FOG_NEAR, BASEMENT_FOG_FAR);
@@ -67,4 +74,12 @@ function setupBasementEnvironment(basementData) {
   return { ambientLight, sunLight };
 }
 
-export { setupBasementEnvironment };
+function getBasementAmbientLight() {
+  return basementAmbientLight;
+}
+
+function getBasementSunLight() {
+  return basementSunLight;
+}
+
+export { setupBasementEnvironment, getBasementAmbientLight, getBasementSunLight };
