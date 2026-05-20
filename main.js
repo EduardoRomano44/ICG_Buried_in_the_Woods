@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { isMobileDevice } from './src/utils/isMobile.js';
-import { 
-  AMBIENT_LIGHT_INTENSITY, 
+import {
+  AMBIENT_LIGHT_INTENSITY,
   BASEMENT_AMBIENT_INTENSITY,
   MOONLIGHT_INTENSITY,
   BASEMENT_SUN_INTENSITY
@@ -52,6 +52,7 @@ import {
   setStartLoading,
   isSettingsBusy,
   showGameOver,
+  showEscapeScreen,
 } from './src/ui/GameUI.js';
 import { animateFireflies, setFirefliesEnabled } from './src/animations/others/fireflies.js';
 import { updateSlimeIdle } from './src/animations/slime/slimeIdle.js';
@@ -117,7 +118,7 @@ async function applyRuntimeSettings() {
   refreshCrosshair();
   applyBarsSizePreset(settings.uiBarsSize || 'medium');
   setGlobalAudioVolume(settings.audioVolume ?? 0.8);
-  
+
   const brightness = settings.brightness ?? 1.0;
 
   if (worldAmbientLight) {
@@ -126,7 +127,7 @@ async function applyRuntimeSettings() {
   if (worldMoonLight) {
     worldMoonLight.intensity = MOONLIGHT_INTENSITY * brightness;
   }
-  
+
   const basementLight = getBasementAmbientLight();
   if (basementLight) {
     basementLight.intensity = BASEMENT_AMBIENT_INTENSITY * brightness;
@@ -152,6 +153,7 @@ function handleEnterBasement() {
     onFail: (error) => {
       console.error('Basement transition failed:', error);
     },
+    onExitBasement: triggerEscape,
   });
 }
 
@@ -278,6 +280,19 @@ async function triggerGameOver() {
   await showGameOver();
 }
 
+async function triggerEscape() {
+  if (isGameOver) return;
+
+  isGameOver = true;
+  isPaused = true;
+  setInputEnabled(false);
+  pauseFirstPersonControls();
+  setForestAudioActive(false);
+  setPaused(false);
+  updateWalkSurfaceAudio(null, false);
+  await showEscapeScreen();
+}
+
 createGameUI({
   onResume: resumeGame,
   onReset: resetGame,
@@ -310,7 +325,7 @@ document.addEventListener('keydown', (event) => {
   if (performance.now() < ignoreEscapeUntil) return;
 
   event.preventDefault();
-  
+
   if (isPaused) {
     // Wait for keyup to actually resume, ensuring a fresh user gesture for Pointer Lock
     pendingResume = true;

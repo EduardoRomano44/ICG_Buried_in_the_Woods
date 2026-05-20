@@ -1,13 +1,13 @@
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { scene, camera, renderer } from './src/core/SceneManager.js';
 import { updateWorld } from './src/world/World.js';
-import { loadAllModels } from './src/models/ModelLoader.js';
-import { createGrass, getGrassPatchPlacements, setGrassEnabled } from './src/world/Grass.js';
+import { loadAllModels } from './src/world/loaders/ModelLoader.js';
+import { createGrass, getGrassPatchPlacements, setGrassEnabled } from './src/world/loaders/generated/Grass.js';
 import {
   loadSavedWorldPositions,
   createWorldPositionsPayload,
   downloadGeneratedWorldPositions,
-} from './src/world/PlacementPersistence.js';
+} from './src/world/loaders/generated/PlacementPersistence.js';
 import { setTitleCardAudioActive } from './src/audio/GameAudio.js';
 
 let controls = null;

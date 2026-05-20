@@ -270,7 +270,7 @@ function loadLamps(list_positions = []) {
     // Add logical components (Lights, Fireflies, Colliders)
     transforms.forEach((transform, idx) => {
       const pos = list_positions[idx];
-      
+
       const logicGroup = new THREE.Group();
       logicGroup.position.copy(transform.position);
       logicGroup.rotation.y = transform.rotation;
@@ -292,7 +292,7 @@ function loadLamps(list_positions = []) {
       const collider = createInvisibleCollider(template, transform.position, transform.rotation, transform.scale);
       scene.add(collider);
       addCollider(collider, { boundsScale: 0.72 });
-      
+
       registerOccupied(pos[0], pos[2]);
     });
 
@@ -596,9 +596,9 @@ async function loadAllModels(options = {}) {
 
   const [lamps, benches, flashlights] = await Promise.all([
     loadLamps([[60, 0, 0], [62, 0, 80], [65, 0, -80], [-50, 0, -40], [-10, 0, 0]]),
-    loadBenches([[58, 0, 10, -97], [-22, 0, 12, 45]]),
-    loadFlashlights([[-13, 3.3, 11, -80]]),
-    loadTables([[-10, 0, 10, -90]])
+    loadBenches([[58, 0, 10, -97], [-43, 0, 25, -97]]),
+    loadFlashlights([[-33, 3.3, 21, -80]]),
+    loadTables([[-30, 0, 20, -90]])
   ]);
 
   const trees = await loadTrees(importedTreePlacements);

@@ -10,11 +10,11 @@ export function createMobileControlsPanel() {
         <div class="joystick-stick" style="position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; background: rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
       </div>
       <!-- Sprint Toggle Button -->
-      <div class="sprint-button" style="position: absolute; bottom: 180px; left: 60px; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; pointer-events: auto; display: flex; align-items: center; justify-content: center; font-family: sans-serif; font-weight: bold; font-size: 12px; color: white; transition: background 0.2s;">
+      <div class="sprint-button" style="position: absolute; bottom: 40px; right: 60px; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; pointer-events: auto; display: flex; align-items: center; justify-content: center; font-family: sans-serif; font-weight: bold; font-size: 12px; color: white; transition: background 0.2s;">
         RUN
       </div>
       <!-- Interact Button -->
-      <div class="interact-button" style="position: absolute; bottom: 40px; right: 40px; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; pointer-events: auto; display: flex; align-items: center; justify-content: center; font-family: sans-serif; font-weight: bold; color: white; display: none;">
+      <div class="interact-button" style="position: absolute; bottom: 140px; right: 100px; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; pointer-events: auto; display: flex; align-items: center; justify-content: center; font-family: sans-serif; font-weight: bold; color: white; display: none;">
         ACT
       </div>
     </div>
@@ -27,26 +27,26 @@ export function createMobileControlsPanel() {
 
   let activeJoystickTouchId = null;
   const baseRadius = 60;
-  
+
   let lookTouchId = null;
   let lastLookX = 0;
   let lastLookY = 0;
-  
+
   let sprintActive = false;
 
   function handleJoystickMove(x, y) {
-    const dist = Math.sqrt(x*x + y*y);
+    const dist = Math.sqrt(x * x + y * y);
     const maxDist = baseRadius;
     let stickX = x;
     let stickY = y;
-    
+
     if (dist > maxDist) {
       stickX = (x / dist) * maxDist;
       stickY = (y / dist) * maxDist;
     }
-    
+
     joystickStick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
-    
+
     const normX = stickX / maxDist;
     const normY = stickY / maxDist;
     setVirtualAxes(normX, normY);
@@ -121,7 +121,7 @@ export function createMobileControlsPanel() {
     sprintBtn.style.background = sprintActive ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)';
     sprintBtn.style.color = sprintActive ? 'black' : 'white';
   });
-  
+
   // Screen touch for looking around
   document.addEventListener('touchstart', (e) => {
     if (element.style.display === 'none') return;
@@ -136,7 +136,7 @@ export function createMobileControlsPanel() {
 
   document.addEventListener('touchmove', (e) => {
     if (element.style.display === 'none') return;
-    
+
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
       if (touch.identifier === lookTouchId) {

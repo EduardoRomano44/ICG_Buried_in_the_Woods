@@ -5,6 +5,8 @@ import { createSettingsPanel } from './components/settings/SettingsPanel.js';
 import { createTitleCardPanel } from './components/titlecard/TitleCardPanel.js';
 import { createEyeCloseEffect } from './components/gameover/EyeCloseEffect.js';
 import { createGameOverPanel } from './components/gameover/GameOverPanel.js';
+import { createEscapeEffect } from './components/gameover/EscapeEffect.js';
+import { createEscapePanel } from './components/gameover/EscapePanel.js';
 import { createMobileControlsPanel } from './components/mobile/MobileControlsPanel.js';
 import { applyBarsSizePreset } from './presets/barSizePresets.js';
 import { loadGameUIStyles } from './styles/loadGameUIStyles.js';
@@ -25,6 +27,7 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
   let gameOverPanel = null;
   let mobileControlsPanel = null;
   const eyeCloseEffect = createEyeCloseEffect();
+  const escapeEffect = createEscapeEffect();
   const isMobile = isMobileDevice();
 
   if (isMobile) {
@@ -63,6 +66,7 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
   });
 
   gameOverPanel = createGameOverPanel(onBackToMenu || onReset);
+  const escapePanel = createEscapePanel(onBackToMenu || onReset);
   setTitleCardAudioActive(true);
 
   root.append(
@@ -71,7 +75,9 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
     titleCardPanel.element,
     settingsPanel.element,
     eyeCloseEffect.element,
-    gameOverPanel.element
+    gameOverPanel.element,
+    escapeEffect.element,
+    escapePanel.element
   );
 
   if (mobileControlsPanel) {
@@ -98,6 +104,8 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
       if (!started) {
         gameOverPanel.setVisible(false);
         eyeCloseEffect.reset();
+        escapePanel.setVisible(false);
+        escapeEffect.reset();
       }
     },
     setPaused(paused) {
@@ -144,6 +152,16 @@ function createGameUIController({ onResume, onReset, onSettingsChanged, onBackTo
       }
       await eyeCloseEffect.play(980);
       gameOverPanel.setVisible(true);
+    },
+    async showEscapeScreen() {
+      settingsPanel.setVisible(false);
+      overlay.setVisible(false);
+      hud.setVisible(false);
+      if (mobileControlsPanel) {
+        mobileControlsPanel.setVisible(false);
+      }
+      await escapeEffect.play(1500);
+      escapePanel.setVisible(true);
     },
   };
 }

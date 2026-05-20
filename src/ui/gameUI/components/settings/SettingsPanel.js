@@ -194,7 +194,7 @@ function createSettingsPanel({
 
   const brightnessRow = createRangeSettingRow({
     label: 'Brightness',
-    min: '0.5',
+    min: '0.0x',
     max: '10.0',
     step: '0.5',
     value: String(settings.brightness ?? 1.0),
