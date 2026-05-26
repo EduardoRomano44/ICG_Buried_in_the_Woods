@@ -50,7 +50,7 @@ export const CANDLE_SHADOW_NEAR = 0.1;
 export const COOKIE_SCALE = 0.9;
 
 // Basement mapping
-export const BASEMENT_MAPPING_MODEL_PATH = './models/Basement_Mapping2.glb';
+export const BASEMENT_MAPPING_MODEL_PATH = './models/Basement_Mapping.glb';
 export const BASEMENT_MAPPING_SCALE = 1;
 export const BASEMENT_WALL1_LOCAL_OFFSET = { x: 0, y: 0, z: 0 };
 export const BASEMENT_WALL2_LOCAL_OFFSET = { x: 0, y: 0, z: 0 };

@@ -65,7 +65,7 @@ const modelTemplatePromises = new Map();
 let lastTreePlacements = [];
 
 const LAMP_MODEL_PATH = './models/Lamp.glb';
-const TREE_MODEL_PATH = './models/Tree2.glb';
+const TREE_MODEL_PATH = './models/Tree.glb';
 const BENCH_MODEL_PATH = './models/Bench.glb';
 const FLASHLIGHT_MODEL_PATH = './models/Flashlight.glb';
 const TABLE_MODEL_PATH = './models/Table.glb';
