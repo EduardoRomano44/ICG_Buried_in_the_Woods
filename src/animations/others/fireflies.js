@@ -6,6 +6,8 @@ import {
   FIREFLY_OPACITY,
 } from '../../config/constants.js';
 
+// File made with assistance of copilot (OpenAI Codex Model)
+
 const fireflies = [];
 let firefliesEnabled = true;
 
@@ -102,8 +104,8 @@ function setFirefliesEnabled(enabled) {
 }
 
 /**
- * Remove all firefly meshes from the scene and clear internal state.
- * Called during level transitions since fireflies belong to overworld lamps.
+ Remove all firefly meshes from the scene and clear internal state.
+ Called during level transitions since fireflies belong to overworld lamps.
  */
 function disposeFireflies() {
   for (const firefly of fireflies) {

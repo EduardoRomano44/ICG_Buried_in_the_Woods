@@ -13,6 +13,8 @@ let fpControls = null;
 let damageShakeTimer = 0;
 const previousShakeOffset = new THREE.Vector3();
 
+// Responsible for controlling player's camera movement, including zoom on sprint and damage shake
+
 export function initCameraControls(camera, element) {
   fpControls = new PointerLockControls(camera, element);
   syncCameraSensitivity();

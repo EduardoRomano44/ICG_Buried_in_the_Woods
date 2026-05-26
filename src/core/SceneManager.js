@@ -52,8 +52,8 @@ window.addEventListener('resize', () => {
 });
 
 /**
- * Recursively dispose geometry, material and textures from an Object3D tree.
- * Used during level transitions to release GPU resources before loading a new level.
+  Recursively dispose geometry, material and textures from an Object3D tree.
+  Used during level transitions to release GPU resources before loading a new level.
  */
 function disposeObject3D(obj) {
   if (!obj) return;
@@ -78,8 +78,8 @@ function disposeObject3D(obj) {
 }
 
 /**
- * Remove every child from the scene (except the camera) and dispose their GPU resources.
- * After this call the scene is empty and ready for a new level.
+  Remove every child from the scene (except the camera) and dispose their GPU resources.
+  After this call the scene is empty and ready for a new level.
  */
 function clearScene() {
   const keep = new Set([camera]);

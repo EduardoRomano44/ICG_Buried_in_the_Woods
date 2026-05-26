@@ -8,6 +8,8 @@ const KEY_BINDINGS = {
   flashlight: ['KeyT'],
 };
 
+// Responsible for managing user keybind press
+
 const pressedKeys = new Set();
 let inputEnabled = true;
 

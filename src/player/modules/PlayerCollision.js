@@ -5,6 +5,8 @@ const tempBox = new THREE.Box3();
 const tempVector = new THREE.Vector3();
 const tempSize = new THREE.Vector3();
 
+// Responsible for adding colisions with the player, by using Bounding Boxes.
+
 export function addCollider(obj, options = {}) {
   colliders.push({
     obj,
