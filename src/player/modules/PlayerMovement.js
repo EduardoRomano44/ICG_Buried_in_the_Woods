@@ -10,6 +10,8 @@ import {
   HEAD_BOB_AMOUNT_SPRINT,
 } from '../../config/constants.js';
 
+// Updates player movement
+
 let velocityY = 0;
 let bobTime = 0;
 let lastHorizontalMovementDistance = 0;

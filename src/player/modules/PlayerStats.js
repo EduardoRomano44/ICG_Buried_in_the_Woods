@@ -7,6 +7,8 @@ import {
 } from '../../config/constants.js';
 import { triggerPlayerDamageFlash } from '../../ui/gameUI/effects/PlayerDamageFeedback.js';
 
+// Controls health and stamina bar
+
 let health = PLAYER_MAX_HEALTH;
 let stamina = PLAYER_MAX_STAMINA;
 let staminaRecoveryTimer = PLAYER_STAMINA_RECOVERY_DELAY;

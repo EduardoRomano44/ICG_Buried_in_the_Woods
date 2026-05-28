@@ -1,5 +1,7 @@
 import { applyBarsSizePreset, createGameUIController } from './gameUI/GameUIController.js';
 
+// Game UI made with HTML and CSS (Made with a lot of help of Codex Copilot)
+
 let controller = null;
 
 function createGameUI(options) {
