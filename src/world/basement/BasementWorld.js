@@ -21,10 +21,7 @@ let basementSunLight = null;
 
 /**
  * Configure the scene for the basement environment.
- * Replaces the overworld sky, moon, and outdoor fog with a dark, claustrophobic interior.
- *
- * @param {object} basementData — The result from loadBasementMapping()
- * @returns {{ ambientLight: THREE.AmbientLight, sunLight: THREE.DirectionalLight }} references to created objects
+ * Replaces the overworld sky, moon, and outdoor fog.
  */
 function setupBasementEnvironment(basementData) {
   // Low ambient light
@@ -32,19 +29,18 @@ function setupBasementEnvironment(basementData) {
   tagShadowLight(ambientLight, true);
   registerShadowLight(ambientLight, { staticLight: true });
   scene.add(ambientLight);
-  
+
   basementAmbientLight = ambientLight;
 
-  // Overhead light from above (passes through the non-shadow-casting ceiling)
+  // Overhead light from above (passes through the non-shadow-casting ceiling, to replicate candle light)
   const sunLight = new THREE.DirectionalLight(BASEMENT_SUN_COLOR, BASEMENT_SUN_INTENSITY);
   sunLight.position.set(BASEMENT_SUN_POSITION.x, BASEMENT_SUN_POSITION.y, BASEMENT_SUN_POSITION.z);
   sunLight.target.position.set(0, 0, 0);
-  
+
   sunLight.castShadow = true;
   sunLight.shadow.bias = -0.0005;
   sunLight.shadow.mapSize.set(2048, 2048);
-  
-  // Large enough orthographic camera to cover the basement area
+
   const d = 150;
   sunLight.shadow.camera.left = -d;
   sunLight.shadow.camera.right = d;
@@ -55,10 +51,10 @@ function setupBasementEnvironment(basementData) {
 
   tagShadowLight(sunLight, false);
   registerShadowLight(sunLight, { staticLight: true });
-  
+
   scene.add(sunLight);
   scene.add(sunLight.target);
-  
+
   basementSunLight = sunLight;
 
   // Tight fog to hide far geometry and enhance claustrophobia

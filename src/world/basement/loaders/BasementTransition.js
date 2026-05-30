@@ -41,6 +41,11 @@ let basementLoaded = false;
 let basementUpdateCallback = null;
 
 /**
+ * When the player enters the basement, the overworld will be unloaded and the basement will be loaded.
+ * File made with the help of AI.
+*/
+
+/**
  * Register a callback that main.js will call on every frame when the basement level is active.
  */
 function setBasementUpdateCallback(cb) {

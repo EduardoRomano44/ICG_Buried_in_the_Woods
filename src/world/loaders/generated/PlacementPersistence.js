@@ -5,6 +5,18 @@ import {
   WORLD_POSITIONS_DOWNLOAD_FILENAME,
 } from '../../../config/constants.js';
 
+/**
+ * Due to the amound of grass and trees, they originally were placed
+ * randomly, but this increased the game's loading time, and the models
+ * could have been placed awkwardly. This file is used to persist
+ * the positions of the trees and grass, so that they are placed
+ * in the same positions every time the game is loaded, and to allow
+ * the user to download the positions to a file that is generated on
+ * map-editor.html.
+ *
+ * File made by copilot.
+ */
+
 // Persists randomly generated positions, to use later
 const POSITIONS_SCHEMA_VERSION = 1;
 const DOWNLOAD_SESSION_KEY = 'awitw.positions.downloaded';

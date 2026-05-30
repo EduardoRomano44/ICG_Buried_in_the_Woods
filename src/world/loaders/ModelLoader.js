@@ -60,6 +60,10 @@ import {
   TREE_EXCLUSION_RADIUS,
 } from '../../config/constants.js';
 
+/**
+ * Places non basement objects on the scene, along with their respective lights
+ */
+
 const loader = new GLTFLoader();
 const modelTemplatePromises = new Map();
 let lastTreePlacements = [];

@@ -14,6 +14,11 @@ import {
   BASEMENT_PREVIEW_SUN_SHADOW_RADIUS,
 } from '../../config/constants.js';
 
+/**
+ * Basement Preview for debuging, observable on basement-editor.html.
+ * File made with the help of AI.
+ */
+
 function createBasementPreviewWorld(scene) {
   const sunLight = new THREE.DirectionalLight(
     BASEMENT_PREVIEW_SUN_COLOR,

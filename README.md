@@ -2,4 +2,5 @@
 
 ## Author: Eduardo Romano
 
-Project link: https://icg-buried-in-the-woods.netlify.app/
+- [Project Live](https://icg-buried-in-the-woods.netlify.app/)
+- [Demo Video](https://youtu.be/j_GHxrLq3qE)
