@@ -21,6 +21,11 @@ import {
   AMBIENT_LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY,
 } from '../config/constants.js';
 
+/**
+ * Creates and places main objects of the worlds, like ground, moon,
+ * sky, barriers, fog and ambient light.
+ */
+
 // Ground
 const planeGeometry = new THREE.PlaneGeometry(
   GROUND_SIZE * WORLD_EXTENDED_GROUND_SCALE,

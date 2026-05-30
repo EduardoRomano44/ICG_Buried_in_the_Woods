@@ -31,6 +31,15 @@ const INVISIBLE_COLLIDER_MATERIAL = new THREE.MeshBasicMaterial({
   depthWrite: false,
 });
 
+/**
+ * Loads basement mapping onto the scene. Mapping was made on blender, with empties for each object
+ * t1 - Wall1
+ * t2 - Wall2
+ * md - Metal Door
+ * player - Player's Spawn
+ * table - Table (were interactibles can spawn)
+ * v - Candle
+ */
 const BLENDER_DUPLICATE_SUFFIX_REGEX = /\.\d{3}$/;
 const NON_COLOR_TEXTURE_COLOR_SPACE = 'NoColorSpace' in THREE ? THREE.NoColorSpace : null;
 const tempPosition = new THREE.Vector3();

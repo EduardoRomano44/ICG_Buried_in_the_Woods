@@ -6,7 +6,11 @@ import {
   SLIME_RESPAWN_DELAY,
 } from '../../../config/constants.js';
 
-// For testing purpuses, slime will respawwn after attacking
+/**
+ * File initially made for testing purpuses,
+ * To increase difficulty, as slimes are the only hostile mobs,
+ * they will respawn after a delay..
+*/
 
 function scheduleSlimeRespawn(slimeMesh, baseScale) {
   if (!SLIME_RESPAWN_ENABLED || !slimeMesh) return;

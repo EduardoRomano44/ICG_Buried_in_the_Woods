@@ -27,6 +27,16 @@ import { registerWalkSurface, detectWalkSurfaceType } from './src/world/WalkSurf
 import { updateSlimeIdle } from './src/animations/slime/slimeIdle.js';
 import { setTitleCardAudioActive, updateWalkSurfaceAudio } from './src/audio/GameAudio.js';
 
+/**
+ * Basement preview for easiers testing, inclues:
+ * - Fly mode
+ * - First person mode
+ * - Toggle ceiling on/off
+ * - Teleport to spawn
+ * 
+ * File created by AI
+ */
+
 let controls = null;
 let statusLabel = null;
 let isPlayerPreviewMode = false;

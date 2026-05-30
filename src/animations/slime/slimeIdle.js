@@ -94,8 +94,8 @@ function updateSlimeIdle(elapsed, delta = 0) {
 }
 
 /**
- * Clear the idle slime registry. Called during level transitions so that
- * the new level starts with a fresh slime set.
+  Clear the idle slime registry. Called during level transitions so that
+  the new level starts with a fresh slime set.
  */
 function clearSlimeIdleRegistry() {
   slimes.length = 0;

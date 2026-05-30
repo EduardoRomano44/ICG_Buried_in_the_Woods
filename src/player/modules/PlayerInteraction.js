@@ -7,6 +7,8 @@ let currentInteractable = null;
 const interactionRaycaster = new THREE.Raycaster();
 const interactionCenter = new THREE.Vector2(0, 0);
 
+// Some models can be interacted with when the player looks at them
+
 export function registerInteractable(obj, options = {}) {
   if (!obj) return;
 

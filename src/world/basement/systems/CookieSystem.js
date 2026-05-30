@@ -1,6 +1,10 @@
 import { unregisterInteractable, registerInteractable, getPlayerVitals, healPlayer } from '../../../player/Player.js';
 import { showInteractionNotice } from '../../../ui/Crosshair.js';
 
+/**
+ * Register cookie interactions.
+ */
+
 function registerWorldCookie(model) {
   model.userData.blockedUntil = 0;
 

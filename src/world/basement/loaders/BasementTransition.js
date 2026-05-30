@@ -41,9 +41,12 @@ let basementLoaded = false;
 let basementUpdateCallback = null;
 
 /**
- * Register a callback that main.js will call on every frame
- * when the basement level is active. This lets the transition
- * module drive basement-specific per-frame logic.
+ * When the player enters the basement, the overworld will be unloaded and the basement will be loaded.
+ * File made with the help of AI.
+*/
+
+/**
+ * Register a callback that main.js will call on every frame when the basement level is active.
  */
 function setBasementUpdateCallback(cb) {
   basementUpdateCallback = typeof cb === 'function' ? cb : null;
@@ -58,9 +61,6 @@ function updateBasement(delta, elapsed) {
   }
 }
 
-/**
- * Is the player currently in the basement level?
- */
 function isInBasement() {
   return basementLoaded;
 }
@@ -70,7 +70,7 @@ function isBasementTransitioning() {
 }
 
 /**
- * Full level-transition sequence: Overworld → Basement.
+ * Full level-transition sequence: Overworld -> Basement.
  *
  * 1. Show loading screen and freeze gameplay
  * 2. Tear down all overworld objects & systems
@@ -78,18 +78,13 @@ function isBasementTransitioning() {
  * 4. Set up basement environment (lights, fog, walk surfaces)
  * 5. Spawn player at the designated position with flashlight
  * 6. Resume gameplay
- *
- * @param {object} options
- * @param {function} options.onComplete — called after transition finishes
- * @param {function} options.onFail — called if loading fails
- * @param {function} options.onExitBasement — called when exiting the basement via the metal door
  */
 async function transitionToBasement(options = {}) {
   if (isTransitioning || basementLoaded) return;
   isTransitioning = true;
 
   try {
-    // ── Phase 1: Freeze ──────────────────────────────────────────────
+    // 1. Freeze
     setInputEnabled(false);
     setCameraRotationEnabled(false);
     hideCrosshair();
@@ -100,7 +95,7 @@ async function transitionToBasement(options = {}) {
     // Small delay so the loading screen renders before heavy work
     await waitFrames(2);
 
-    // ── Phase 2: Cleanup overworld ───────────────────────────────────
+    // Phase 2. Cleanup overworld
     disposeGrass();
     disposeFireflies();
     clearSlimeIdleRegistry();
@@ -114,17 +109,17 @@ async function transitionToBasement(options = {}) {
     // Allow GC to reclaim overworld memory
     await waitFrames(1);
 
-    // ── Phase 3: Load basement ───────────────────────────────────────
+    // 3. Load basement
     const basementData = await loadBasementMapping({
       scene,
       registerCollider: (obj, opts) => addCollider(obj, opts || {}),
       onExitBasement: options.onExitBasement,
     });
 
-    // ── Phase 4: Environment ─────────────────────────────────────────
+    // 4. Environment
     setupBasementEnvironment(basementData);
 
-    // ── Phase 5: Player spawn ────────────────────────────────────────
+    // 5. Player spawn
     const spawn = resolvePlayerSpawn(basementData);
     resetPlayerState();
     setPlayerPosition(spawn.x, spawn.y, spawn.z);
@@ -133,14 +128,13 @@ async function transitionToBasement(options = {}) {
     const flashlightState = grantInventoryFlashlight({ isOn: true });
     setFlashlightState(flashlightState);
 
-    // ── Phase 6: Finalise ────────────────────────────────────────────
+    // 6. Finalise
     basementLoaded = true;
     forceShadowRefresh(true);
 
     setStartLoading(false);
 
-    // Yield to the event loop to ensure any queued blur/focus/pointerlockchange 
-    // events from the OS are processed before we make our final state decision.
+    // Yield to the event loop to ensure any queued events from the OS are processed before we make our final state decision.
     await new Promise(resolve => setTimeout(resolve, 50));
 
     setCameraRotationEnabled(true);
@@ -150,7 +144,7 @@ async function transitionToBasement(options = {}) {
 
     if (typeof window.getAppFocusState === 'function' && window.getAppFocusState()) {
     } else {
-      // User is away - pause
+      // User is away: pause
       if (typeof window.pauseGameFromTransition === 'function') {
         window.pauseGameFromTransition();
       }
@@ -171,16 +165,12 @@ async function transitionToBasement(options = {}) {
   }
 }
 
-/**
- * Derive the player spawn position from the basement data.
- * Falls back to a constant if the GLB has no PlayerSpawn empty.
- */
+// Derive the player spawn position from the basement data.
 function resolvePlayerSpawn(basementData) {
   if (basementData.playerSpawn) {
     const pos = new THREE.Vector3();
     basementData.playerSpawn.getWorldPosition(pos);
 
-    // Ensure we keep PLAYER_HEIGHT for the Y component
     return {
       x: pos.x,
       y: PLAYER_HEIGHT,
@@ -195,9 +185,7 @@ function resolvePlayerSpawn(basementData) {
   };
 }
 
-/**
- * Wait N animation frames to let the browser render/GC.
- */
+// Wait N animation frames to let the browser render/GC.
 function waitFrames(count = 1) {
   let remaining = Math.max(1, count);
   return new Promise((resolve) => {

@@ -7,9 +7,9 @@ import { showInteractionNotice } from '../../../ui/Crosshair.js';
  * Metal door system for the basement.
  *
  * States:
- * - Locked (no key) → "It's locked"
- * - Has key, door closed → "OPEN"
- * - Door open → "EXIT"
+ * - No key -> "It's locked"
+ * - Has key, door closed -> "OPEN"
+ * - Door open -> "EXIT"
  *
  * Uses the GLB animation clips for the opening sequence.
  */
@@ -110,11 +110,11 @@ function createDoorMetalSystem(model, animations = [], options = {}) {
         showInteractionNotice("It's locked", 3000);
         return false;
       }
-      // Has key → open the door
+      // Has key -> open the door
       return state.startOpening();
     }
 
-    // Door is open → exit
+    // Door is open -> exit
     state.exitCallback();
     return true;
   };

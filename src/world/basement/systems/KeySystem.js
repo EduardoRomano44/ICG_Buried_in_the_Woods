@@ -2,7 +2,7 @@ import { unregisterInteractable, registerInteractable } from '../../../player/Pl
 
 /**
  * Manages the basement key item state.
- * Similar to FlashlightSystem — tracks pickup, notifies UI listener.
+ * Similar to FlashlightSystem, tracks pickup, notifies UI.
  */
 
 const state = {

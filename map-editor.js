@@ -12,7 +12,7 @@ import { setTitleCardAudioActive } from './src/audio/GameAudio.js';
 
 let controls = null;
 
-// For debuging -> Trees are given randomly generated position, save position to use later (Feature made by copilot)
+// Trees are given randomly generated position, save position to use later (Feature made by copilot)
 let treePlacements = [];
 let worldReady = false;
 let saveButton = null;

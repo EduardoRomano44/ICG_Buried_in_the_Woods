@@ -2,12 +2,7 @@ import * as THREE from 'three';
 
 const invisibleMaterial = new THREE.MeshBasicMaterial({ visible: false, wireframe: false });
 
-/**
- * Creates a Group of InstancedMeshes from a loaded template and a list of transforms.
- * @param {THREE.Object3D} template - The original GLTF model or Object3D.
- * @param {Array<{position: THREE.Vector3, rotation: THREE.Euler|THREE.Quaternion|number, scale: THREE.Vector3|number}>} transforms - The instances.
- * @returns {THREE.Group} Group containing the instanced meshes.
- */
+// Creates a Group of InstancedMeshes from a loaded template and a list of transforms.
 export function createInstancedGroup(template, transforms) {
   const count = transforms.length;
   const instancedGroup = new THREE.Group();
@@ -40,8 +35,7 @@ export function createInstancedGroup(template, transforms) {
     const instancedGeometry = mesh.geometry.clone();
     instancedGeometry.applyMatrix4(localMatrix);
 
-    // FIX: If the local transform has a negative scale, the geometry is flipped inside out.
-    // Three.js normally handles this with gl.frontFace, but for InstancedMesh with baked matrices, we MUST manually fix the geometry.
+    // If the local transform has a negative scale, the geometry is flipped inside out.
     if (localMatrix.determinant() < 0) {
       // 1. Reverse winding order to fix Face Culling
       if (instancedGeometry.index) {
@@ -146,16 +140,8 @@ export function createInstancedGroup(template, transforms) {
   return instancedGroup;
 }
 
-/**
- * Creates an invisible collision box for a specific model instance.
- * @param {THREE.Object3D} template - The template model to derive bounds from.
- * @param {THREE.Vector3} position - World position.
- * @param {THREE.Euler|THREE.Quaternion|number} rotation - World rotation.
- * @param {THREE.Vector3|number} scale - World scale.
- * @param {string} [targetMeshName] - If provided, computes bounds from this specific child mesh instead of the whole template.
- * @returns {THREE.Mesh} The invisible collision mesh.
- */
 export function createInvisibleCollider(template, position, rotation, scale = 1, targetMeshName = null) {
+// Creates an invisible collision box for a specific model instance.
   const oldPos = template.position.clone();
   const oldQuat = template.quaternion.clone();
   const oldScale = template.scale.clone();

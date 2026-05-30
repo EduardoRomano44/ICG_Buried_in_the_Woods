@@ -110,6 +110,7 @@ let pendingResume = false;
 renderer.domElement.style.display = 'none';
 setInputEnabled(false);
 
+// Apply settings
 async function applyRuntimeSettings() {
   renderer.shadowMap.enabled = settings.shadowsEnabled;
   setGrassEnabled(!settings.lowQuality);
@@ -145,8 +146,8 @@ async function applyRuntimeSettings() {
 function handleEnterBasement() {
   transitionToBasement({
     onComplete: () => {
-      // Basement is now active - the game loop will use the basement branch
-      applyRuntimeSettings(); // Apply brightness and other settings to newly created basement lights
+      // Basement is active
+      applyRuntimeSettings(); // Apply brightness and other settings to newly created lights
       forceShadowRefresh(true);
       renderer.render(scene, camera);
     },
@@ -157,6 +158,7 @@ function handleEnterBasement() {
   });
 }
 
+// Load assets before playing, for smoother experience
 async function preloadWorldAssets() {
   if (modelsReady) return true;
   if (isLoadingWorld && worldPreloadPromise) return worldPreloadPromise;
@@ -201,6 +203,7 @@ async function preloadWorldAssets() {
   return worldPreloadPromise;
 }
 
+// Title screen
 function beginStartFromTitle() {
   if (hasStarted || isLoadingWorld) return;
 

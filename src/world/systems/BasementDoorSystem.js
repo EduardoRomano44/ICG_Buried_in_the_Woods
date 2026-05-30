@@ -3,6 +3,10 @@ import { registerInteractable } from '../../player/Player.js';
 import { getFlashlightState } from './FlashlightSystem.js';
 import { showInteractionNotice } from '../../ui/Crosshair.js';
 
+/**
+ * Responsible for managins interaction with basement door.
+ */
+
 const basementDoorStates = new Set();
 const BASEMENT_DOOR_ANIMATION_FALLBACK_MS = 900;
 

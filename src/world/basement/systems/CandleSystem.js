@@ -2,18 +2,12 @@ import * as THREE from 'three';
 
 /**
  * System to manage candle models and their animations.
- * Lights have been removed in favor of a global ambient light.
+ * Due to performance issues, lights were not implemented, in favor of a global ambient light.
  */
 
 const candles = [];
 
-/**
- * Creates a candle instance with a looping animation.
- * 
- * @param {THREE.Object3D} model - The candle model instance.
- * @param {THREE.AnimationClip[]} animations - The animation clips for the model.
- * @returns {object} The state of the candle instance.
- */
+// Creates a candle instance with a looping animation.
 function createCandleSystem(model, animations = []) {
   if (!model) return null;
 
@@ -35,7 +29,7 @@ function createCandleSystem(model, animations = []) {
     worldPosition: new THREE.Vector3(),
   };
 
-  // Configure shadows for the candle parts (receiving shadows from flashlight/etc)
+  // Configure shadows for the candle parts
   model.traverse((child) => {
     if (child.isMesh) {
       child.castShadow = true;
@@ -51,11 +45,6 @@ function createCandleSystem(model, animations = []) {
   return state;
 }
 
-/**
- * Updates all active candles animations.
- * 
- * @param {number} delta - The time delta in seconds.
- */
 function updateCandleSystem(delta) {
   const safeDelta = Number.isFinite(delta) ? Math.max(0, delta) : 0;
 
@@ -67,9 +56,6 @@ function updateCandleSystem(delta) {
   }
 }
 
-/**
- * Disposes all candle instances.
- */
 function disposeCandleSystem() {
   for (const state of candles) {
     if (state.mixer) {
